@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTK" Version="4.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HaroohiePals.Graphics3d\HaroohiePals.Graphics3d.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Graphics\HaroohiePals.Graphics.csproj" />
+  </ItemGroup>
+
+</Project>

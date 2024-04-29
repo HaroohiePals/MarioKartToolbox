@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HaroohiePals.MarioKart.Actions\HaroohiePals.MarioKart.Actions.csproj" />
+    <ProjectReference Include="..\HaroohiePals.MarioKart\HaroohiePals.MarioKart.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Validation\HaroohiePals.Validation.csproj" />
+  </ItemGroup>
+
+</Project>

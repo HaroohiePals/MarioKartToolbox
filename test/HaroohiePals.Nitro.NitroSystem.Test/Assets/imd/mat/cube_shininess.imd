@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<imd version="1.6.0">
+    <head>
+        <title>Model Data for NINTENDO NITRO-System</title>
+        <generator name="Nitro plugin for Blender 2.8"
+                   version="0.1.1" />
+    </head>
+    <body>
+        <model_info pos_scale="0"
+                    scaling_rule="standard"
+                    vertex_style="direct"
+                    magnify="1.0"
+                    tool_start_frame="1"
+                    tex_matrix_mode="maya"
+                    compress_node="unite_combine"
+                    node_size="1 1"
+                    compress_material="off"
+                    material_size="1 1"
+                    output_texture="used"
+                    force_full_weight="on"
+                    use_primitive_strip="on" />
+        <box_test pos_scale="0"
+                  xyz="-1.0 -1.0 -1.0"
+                  whd="2.0 2.0 2.0" />
+        <material_array size="1">
+            <material index="0"
+                      name="Material.002"
+                      light0="off"
+                      light1="off"
+                      light2="off"
+                      light3="off"
+                      face="front"
+                      alpha="31"
+                      wire_mode="off"
+                      polygon_mode="modulate"
+                      polygon_id="0"
+                      fog_flag="off"
+                      depth_test_decal="off"
+                      translucent_update_depth="off"
+                      render_1_pixel="off"
+                      far_clipping="off"
+                      diffuse="31 31 31"
+                      ambient="31 31 31"
+                      specular="0 0 0"
+                      emission="0 0 0"
+                      shininess_table_flag="on"
+                      tex_image_idx="-1"
+                      tex_palette_idx="-1" />
+        </material_array>
+        <matrix_array size="1">
+            <matrix index="0"
+                    mtx_weight="1"
+                    node_idx="0" />
+        </matrix_array>
+        <polygon_array size="1">
+            <polygon index="0"
+                     name="polygon0"
+                     mtx_prim_size="1"
+                     nrm_flag="off"
+                     clr_flag="off"
+                     tex_flag="off"
+                     vertex_size="24"
+                     polygon_size="6"
+                     triangle_size="0"
+                     quad_size="6">
+                <mtx_prim index="0">
+                    <mtx_list size="1">0</mtx_list>
+                    <primitive_array size="1">
+                        <primitive index="0"
+                                   type="quads"
+                                   vertex_size="24">
+                            <mtx idx="0" />
+                            <pos_s xyz="-1.0 -1.0 1.0" />
+                            <pos_yz yz="1.0 1.0" />
+                            <pos_yz yz="1.0 -1.0" />
+                            <pos_yz yz="-1.0 -1.0" />
+                            <pos_yz yz="-1.0 -1.0" />
+                            <pos_yz yz="1.0 -1.0" />
+                            <pos_xz xz="1.0 -1.0" />
+                            <pos_yz yz="-1.0 -1.0" />
+                            <pos_yz yz="-1.0 -1.0" />
+                            <pos_yz yz="1.0 -1.0" />
+                            <pos_yz yz="1.0 1.0" />
+                            <pos_yz yz="-1.0 1.0" />
+                            <pos_yz yz="-1.0 1.0" />
+                            <pos_yz yz="1.0 1.0" />
+                            <pos_xz xz="-1.0 1.0" />
+                            <pos_yz yz="-1.0 1.0" />
+                            <pos_yz yz="-1.0 -1.0" />
+                            <pos_xz xz="1.0 -1.0" />
+                            <pos_yz yz="-1.0 1.0" />
+                            <pos_xz xz="-1.0 1.0" />
+                            <pos_s xyz="1.0 1.0 -1.0" />
+                            <pos_xz xz="-1.0 -1.0" />
+                            <pos_yz yz="1.0 1.0" />
+                            <pos_xz xz="1.0 1.0" />
+                        </primitive>
+                    </primitive_array>
+                </mtx_prim>
+            </polygon>
+        </polygon_array>
+        <node_array size="1">
+            <node index="0"
+                  name="root_scene"
+                  kind="null"
+                  parent="-1"
+                  child="-1"
+                  brother_next="-1"
+                  brother_prev="-1"
+                  draw_mtx="on"
+                  billboard="off"
+                  scale="1 1 1"
+                  rotate="0 0 0"
+                  translate="0 0 0"
+                  visibility="on"
+                  display_size="1"
+                  vertex_size="24"
+                  polygon_size="6"
+                  quad_size="6">
+                <display index="0"
+                         material="0"
+                         polygon="0"
+                         priority="0" />
+            </node>
+        </node_array>
+        <output_info vertex_size="24"
+                     polygon_size="6"
+                     triangle_size="0"
+                     quad_size="6" />
+    </body>
+</imd>

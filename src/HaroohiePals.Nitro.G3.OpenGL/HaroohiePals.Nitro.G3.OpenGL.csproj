@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTK" Version="4.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HaroohiePals.Graphics3d.OpenGL\HaroohiePals.Graphics3d.OpenGL.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Nitro\HaroohiePals.Nitro.csproj" />
+  </ItemGroup>
+
+</Project>

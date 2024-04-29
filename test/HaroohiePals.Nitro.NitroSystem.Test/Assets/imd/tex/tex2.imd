@@ -1,0 +1,1070 @@
+<?xml version="1.0" encoding="Shift_JIS"?>
+
+<imd version="1.6.0">
+
+<head>
+	<title>Model Data for NINTENDO NITRO-System</title>
+	<generator name="Maya 2011 NNS_Export" version="1.6.0.20110413"/>
+</head>
+
+<body>
+
+<model_info
+	pos_scale="0"
+	scaling_rule="standard"
+	vertex_style="direct"
+	magnify="1.000000"
+	tool_start_frame="1"
+	tex_matrix_mode="maya"
+	compress_node="merge" node_size="1 1"
+	compress_material="off" material_size="4 4"
+	output_texture="used"
+	force_full_weight="off"
+	use_primitive_strip="on"
+/>
+
+<box_test pos_scale="5" xyz="-3.125000 -3.125000 -3.125000" whd="6.250000 6.250000 6.250000"/>
+
+<tex_image_array size="4">
+	<tex_image index="0" name="d64_water2"
+		width="64" height="64" original_width="64" original_height="64"
+		format="tex4x4"
+		palette_name="d64_water_pl"
+		path="d64_water2.tga"
+	>
+		<bitmap size="256">
+			78b0fca9 f8910707 fffef400 5555f580
+			350de057 f4feffff ffffffff ffffffff
+			ffffffff ffffffff ffffffff ffffffff
+			ffffffff 5a69a9a9 aaaaaaa0 bfbfbf3f
+			40c0a8d6 bf7f7e5c f0f0f0f8 ffffffff
+			ffffff3f 0d09c360 fcffffff ffffffff
+			ffffffff ffffffff ffffffff ffffffff
+			0f2fbfff fffefcf8 ffffffff 1595d555
+			e0e0e0d0 2a2a2a2a aaea6a7a a8aaaaaa
+			ffffffff af2f1f1f 5ad0f4fc ffffffff
+			022fffff aaaaffff aafe5555 e0002fff
+			b5abaaab fcfeffff ffffffff 0f2f3f7f
+			8bc0d0e0 2f3f3fbf fefeb800 abab7a5e
+			a0feffff a9217575 452f7f7f eaa8ac94
+			fffffce0 ffffffff ffbf2f02 f0f8f8f8
+			2a2a2a2a a8a8a8a8 35d55555 f8000207
+			bfbf7f1f 80f4fdff feeb00fc 5555feaa
+			09359555 e0800001 fffef9a4 797b7a6a
+			ffffffff ffffffff ffffffff 09ada979
+			3e5f7ff5 011bbfff d0d0814b fffffffc
+			1b7fbfff e4400001 ffaa00a4 bf06006a
+			a05cd800 f4f4f4e0 ff3f0f82 ea6a6a7a
+			ffffffff 3fffffff f4f6975f 0b0b0255
+			e4000000 ffa90000 6f80c0d0 e4feffff
+			ffffea41 fffffffc ffffffff ffffffff
+			bf3f1f07 80d0e0f0 ffffffff b5a5ada9
+			1abafefe 57580325 0b0290f4 575c6289
+			fffffffe ffffffff ffffffbf 5555f503
+			ffffffff ffffffff ffffffff ffffffff
+			ffffffbf 03030241 4040e4fe fe2ad5d5
+			0100010b a4f9fefe 919b9f4f ffffffff
+			f8fcfeff ffffffff ffffffff ffffffff
+			ffffffff ffffffff ffffffff ffffffff
+			ffffffff f1c20303 fffffee4 ffffffff
+			55d5fd2f 3f060100 f4f4f4a0 ffffbf00
+			3f0b80e0 a0a8aaaa ffffffff ffffffff
+			ffffffff ffffffff ffffffff ffffffff
+			0b2f7fbf fefdfcf4 ffffffff 3f3fffff
+			6aeabad6 ffffbf3d e2f1f4f4 ffffffff
+			ffffffff ada9ab6a c0f8feff ffffffff
+			abb15555 5500aaff 00a9ffff e0416fff
+			6f464042 fcfcfcfc ffffffff 0a0a2a2a
+			70706060 ffffffff 024282d2 f8fdffff
+			ffffffff 0a0a0a0a b5aaaaaa 00a0a8aa
+			eaf9f890 ffffffaa 551585ac f5f8f8f8
+			2f7f7f7f 54545657 2fbfffff 5eaaaba9
+			ed6a7a7a 3fbfffff fdfd6501 0242e0f8
+			e0575555 02ed6565 1abfffff 80010b6f
+			bf3f0f02 0080f8ff a0aaaaaa f7f7e3d2
+			db8b070b abb55754 c0c0800b ffffffff
+			ffffbf2f e25a5695 ffff51bc ffffaa01
+			ffbf1a00 6b010000 70600000 e3e2d0c0
+			ffffffff abababaa 5e5afaaa 42030383
+			575e7c72 55aaaaaa b5ea6a7a a8aaaaaa
+			0a2aaaaa 5aaaaaa8 ffaa00a0 950a002f
+			ba5edeaa a0a0a0a0 d5150d83 80c0d0e1
+			4a525755 575eaaab 2f6baafa f4f0d081
+			ffffffff ffffffff ffffffff ffff0f02
+			ffffc000 aaaaaaa8 ffffffff ffffffff
+			bf3f0f03 ea7a5a5a ffffffff 1f0f0702
+			fdf80040 01a5fdff 00061f2f e0f4f8f8
+			ffffffff ffffffff ffffffff ffffffff
+			ffffffff ffffffff ffffffff ffffffff
+			ffffffff abababaa aaaa5e57 bf7f3f2f
+		</bitmap>
+		<tex4x4_palette_idx size="256">
+			8000 8002 8004 c006 c007 8008 c00a c00a
+			c00a c00a c00a c00a c00a 400b 400c c00d
+			c00e 800f c011 c00a c012 c013 c014 c00a
+			c00a c00a c00a c00a c015 c015 c00a c016
+			8017 4019 c01a c01b c00a 801c 801e c00a
+			c020 c021 c022 c023 c024 c019 c00a 8025
+			8027 c015 c023 c022 c015 8028 802b c02d
+			c020 c00a c023 c02e 400c 400c c02f 8030
+			8032 8034 c011 c022 c036 8037 8039 c022
+			c00a c00a c00a c03b c03c 803d 803f c015
+			8041 8043 8045 8047 c049 804a c011 c03b
+			c00a c014 804c 804e 8050 8052 8054 8056
+			8058 c014 c00a c00a 805a 805c c00a c022
+			805e c060 8061 c049 c012 c00a c063 c064
+			c00a c00a c00a c00a c012 8065 8067 c069
+			806a 806c 806e c070 c023 c00a c00a c00a
+			c00a c00a c00a c00a c00a 8071 8073 c00a
+			c075 8076 8078 c015 c011 c07a c00a c00a
+			c00a c00a c00a c00a 807b 807d c00a c019
+			c022 807f 8081 c00a c00a c022 c015 c00a
+			8046 8083 8085 8087 8089 c019 c00a 400c
+			c08b c00a 808c 808e c00a 400c c03b 400c
+			8090 c092 8046 8093 806c c095 c015 c022
+			c022 c096 8097 8099 c02f c09b 809c 809e
+			c02e c02e c01b 80a0 80a2 c022 c02e c00a
+			c015 c022 80a4 80a6 80a8 80aa c0ac 80ad
+			c00a c0af c022 80b0 c0b2 c022 c03b 40b3
+			400c c0b4 c023 c0b5 c022 400c c0b6 80b7
+			80b8 c022 80bb 80bd c00a c00a c00a c011
+			c011 c01b c00a c00a c011 c022 c00a 80bf
+			80c1 80c3 8045 80c5 c00a c00a c00a c00a
+			c00a c00a c00a c00a c00a c0c7 c022 80c8
+		</tex4x4_palette_idx>
+	</tex_image>
+	<tex_image index="1" name="ol6_road1"
+		width="128" height="16" original_width="128" original_height="16"
+		format="tex4x4"
+		palette_name="ol6_road1"
+		path="ol6_road1.tga"
+	>
+		<bitmap size="128">
+			0a9a999a 69828260 a8a6aaaa 561aa96a
+			29aa6a6a 01104005 54000004 2aa6aa5a
+			5496698a 826a6aa9 8800a428 ad2bea89
+			00540000 6a65a818 8a2695a8 aaaa9a89
+			00000405 a8a96a82 04050501 95aa9a89
+			55952a95 40404004 55040404 50454155
+			55515555 a9a208aa 55554515 00000050
+			a2a2aa9a 10100015 209a9aaa 45014151
+			69606865 a86aaa80 a0aaaa98 05554455
+			00015515 05060a10 40400514 20908020
+			aa865696 656a568a 00011001 a96988a6
+			5a625a66 2058aa82 96a595a2 8269aaa8
+			01414554 a8880608 aaaa5a64 5aaa826b
+			10100041 05500545 14410501 04541410
+			54555554 55451555 9a96aa8a 54455441
+			00100000 9696aaa8 6962aa69 aa625a8a
+			02979f2a 6a8a8269 269aa0a0 44555415
+			96982860 59a56a89 855695aa 28400080
+			40051505 a9aa8285 9aaa8aa8 00504000
+			6a4a89a5 45415040 2a566aa2 8a6a99a9
+			9a92aaa9 692aaaaa a15a6a59 89aaaa5a
+			aaa89596 00054500 15141014 88a496a0
+			10105114 09989a51 aaa0281a 55151551
+			05044445 00001410 2a2a9e2a a9aaa2a5
+			59aa8866 aa26a680 a9855686 45551505
+			54505454 51115050 5a9899a9 99a9aaa0
+			41010510 60a8a6a4 05100054 a6a89aa5
+			45000010 aa8aaeb7 96696aa8 a56a52a9
+			2a2babb6 968aaa66 522aa8a9 59269655
+			56a6a609 01155050 264048a5 14150144
+			55454505 45515505 55455555 2aaa9a98
+			00004040 9aaa1aaa 69a2aa69 a8a666a8
+		</bitmap>
+		<tex4x4_palette_idx size="128">
+			c000 c001 c000 c002 c003 c004 c004 c003
+			c002 c003 c005 c006 c007 c003 c003 c003
+			c004 c008 c004 c003 c009 c00a c004 c004
+			c004 c000 c004 c00b c000 c00b c000 c00c
+			c00d c00e c000 c00f c004 c010 c004 c010
+			c003 c003 c004 c011 c003 c012 c003 c003
+			c013 c005 c003 c006 c004 c004 c014 c004
+			c014 c015 c000 c015 c00b c000 c001 c000
+			c016 c001 c017 c004 c018 c003 c003 c010
+			c004 c003 c008 c004 c003 c00a c002 c011
+			c008 c003 c003 c011 c003 c004 c004 c005
+			c019 c005 c000 c014 c019 c00b c016 c00d
+			c00d c017 c005 c00f c00f c00f c008 c018
+			c00a c008 c004 c003 c004 c006 c003 c003
+			c006 c011 c003 c003 c003 c004 c005 c004
+			c014 c004 c014 c000 c00b c000 c001 c000
+		</tex4x4_palette_idx>
+	</tex_image>
+	<tex_image index="2" name="tower"
+		width="128" height="128" original_width="128" original_height="128"
+		format="tex4x4"
+		palette_name="tower_pl"
+		path="tower.tga"
+	>
+		<bitmap size="1024">
+			bf5681b8 82dbe00e 2ff77dab b4edf0af
+			00089700 b5abe03e 6df7dfba 99e4eb5f
+			e8ae69b9 e8e575fa ef55a0ee a036b802
+			0b7d9fea adfb7cab eaeb358a 6daaf80f
+			bf5681b8 82dbe00e 2ff77dab b4edf0af
+			00089700 b5abe03e 6df7dfba 99e4eb5f
+			e8ae69b9 e8e575fa ef55a0ee a036b802
+			0b7d9fea adfb7cab eaeb358a 6daaf80f
+			e500fead ac825f28 a2fe7eb3 908fd589
+			7adfee69 c025f0aa 0da75ddf 05aaeaaf
+			00ffbffb f0aefafd d57f55d5 bfa097cb
+			e8fd5f6c 00aaafea 007fbffa a0fd57d7
+			e500fead ac825f28 a2fe7eb3 908fd589
+			7adfee69 c025f0aa 0da75ddf 05aaeaaf
+			00ffbffb f0aefafd d57f55d5 bfa097cb
+			e8fd5f6c 00aaafea 007fbffa a0fd57d7
+			00abd7fb 00affeeb 14efabaf ec5562ad
+			da88af0b aaa28ad7 b7b7b725 555d71aa
+			426355aa a1b1a1e0 2be0b57a 2fc2f7ea
+			675dfe41 ab6b2b02 253557aa 969695bf
+			00abd7fb 00affeeb 14efabaf ec5562ad
+			da88af0b aaa28ad7 b7b7b725 555d71aa
+			426355aa a1b1a1e0 2be0b57a 2fc2f7ea
+			675dfe41 ab6b2b02 253557aa 969695bf
+			57571702 151754aa d8dcd5aa 54bc545c
+			5500faaa 5500eafe 5540fe6f aaaaaa00
+			ffffffaa 5dfd5952 a50d5555 5500bffa
+			5500aefb 58d855ab ff55552a aaab7e15
+			57571702 151754aa d8dcd5aa 54bc545c
+			5500faaa 5500eafe 5540fe6f aaaaaa00
+			ffffffaa 5dfd5952 a50d5555 5500bffa
+			5500aefb 58d855ab ff55552a aaab7e15
+			efffff03 baffff00 5555d528 eaebe9dc
+			ffaaaa2a 550f0faf f5eeeeef 7bdbc29f
+			08edd5e2 e0d76f37 5e0e0e0e ffaaaaa2
+			55e0e0fa a5f4b4e0 beffeabd af7ae02e
+			efffff03 baffff00 5555d528 eaebe9dc
+			ffaaaa2a 550f0faf f5eeeeef 7bdbc29f
+			08edd5e2 e0d76f37 5e0e0e0e ffaaaaa2
+			55e0e0fa a5f4b4e0 beffeabd af7ae02e
+			eefaca9f 8dbad64f b662ed89 ebef2f5d
+			de492ef5 77a39e7f 4d1472d7 f7baeaae
+			a59c69fa bfaaafff 7abeb277 a1ae755b
+			edd8fbf9 ba7b8b56 f7d28b75 5d2ae7a2
+			eefaca9f 8dbad64f b662ed89 ebef2f5d
+			de492ef5 77a39e7f 4d1472d7 f7baeaae
+			a59c69fa bfaaafff 7abeb277 a1ae755b
+			edd8fbf9 ba7b8b56 f7d28b75 5d2ae7a2
+			0357abff 0055aaff 0055aaff 0055aaff
+			0055aaff 0055aaff 0055aaff c0d5eaff
+			025656ab 0055aaff 0055aaff 0055aaff
+			0055aaff 0055aaff 0055aaff 6a7f4055
+			0357abff 0055aaff 0055aaff 0055aaff
+			0055aaff 0055aaff 0055aaff c0d5eaff
+			025656ab 0055aaff 0055aaff 0055aaff
+			0055aaff 0055aaff 0055aaff 6a7f4055
+			a9a9a9a9 5555ffaa 5555ffaa 5555ffaa
+			5555ffaa 5555ffaa 5555ffaa 6a6a6a6a
+			ababa703 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 eaeadac0
+			a9a9a9a9 5555ffaa 5555ffaa 5555ffaa
+			5555ffaa 5555ffaa 5555ffaa 6a6a6a6a
+			ababa703 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 eaeadac0
+			a9a9a9a9 55aa0000 55aa0000 55aa0000
+			55aa0000 55aa0000 55aa0000 6a6a6a6a
+			a7a7a753 55aa0000 55aa0000 55aa0000
+			55aa0000 55aa0000 55aa0000 dadadac5
+			a9a9a9a9 55aa0000 55aa0000 55aa0000
+			55aa0000 55aa0000 55aa0000 6a6a6a6a
+			a7a7a753 55aa0000 55aa0000 55aa0000
+			55aa0000 55aa0000 55aa0000 dadadac5
+			52520202 5555aaaa 5555aaaa 5555aaaa
+			5555aaaa 5555aaaa 5555aaaa 85858080
+			a7a35353 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 dacac5c5
+			52520202 5555aaaa 5555aaaa 5555aaaa
+			5555aaaa 5555aaaa 5555aaaa 85858080
+			a7a35353 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 dacac5c5
+			52525252 55ffaaaa 55ffaaaa 55ffaaaa
+			55ffaaaa 7fffaaaa 55ffaaaa 85858585
+			a3a35353 55ffffaa 55ffffaa 55ffffaa
+			55ffffaa 7fffaaaa 55ffaaaa cacac5c5
+			52525252 55ffaaaa 55ffaaaa 55ffaaaa
+			55ffaaaa 7fffaaaa 55ffaaaa 85858585
+			a3a35353 55ffffaa 55ffffaa 55ffffaa
+			55ffffaa 7fffaaaa 55ffaaaa cacac5c5
+			a3535353 9595153f 7fea0000 ffaa0000
+			55aaaa00 7feac080 555555ff cac5c5c5
+			a3a3a353 bf3f3f2a 7fea0000 55ff0000
+			55ffaa00 7f6ac0c0 ffaa0000 cacacac5
+			a3535353 9595153f 7fea0000 ffaa0000
+			55aaaa00 7feac080 555555ff cac5c5c5
+			a3a3a353 bf3f3f2a 7fea0000 55ff0000
+			55ffaa00 7f6ac0c0 ffaa0000 cacacac5
+			a3a3a353 d595bf3f 7f6aea80 5555ffaa
+			5555ffaa 5555ff80 5555ffaa cacac5c5
+			a3a3a353 d5953f3f 557feac0 55ffaa00
+			55ffaa00 5555ff80 55ffaa00 cacac5c5
+			a3a3a353 d595bf3f 7f6aea80 5555ffaa
+			5555ffaa 5555ff80 5555ffaa cacac5c5
+			a3a3a353 d5953f3f 557feac0 55ffaa00
+			55ffaa00 5555ff80 55ffaa00 cacac5c5
+			a1a1a1a1 55ffaaaa 55ffaaaa 55ffaaaa
+			5555aaaa 55ffaaaa 55ffaaaa 4a4a4a4a
+			52525252 55ffffaa 55ffffaa 55ffffaa
+			aa55ff00 55ffffaa 55ffffaa 85858585
+			a1a1a1a1 55ffaaaa 55ffaaaa 55ffaaaa
+			5555aaaa 55ffaaaa 55ffaaaa 4a4a4a4a
+			52525252 55ffffaa 55ffffaa 55ffffaa
+			aa55ff00 55ffffaa 55ffffaa 85858585
+			a1a1a1a1 ffffaaaa ffffaaaa ffffaaaa
+			ffffaaaa ffffaaaa ffffaaaa 4a4a4a4a
+			a3a3a353 5555ffaa 5555ffaa 5555ffaa
+			5555ffaa 5555ffaa 5555ffaa cacacac5
+			a1a1a1a1 ffffaaaa ffffaaaa ffffaaaa
+			ffffaaaa ffffaaaa ffffaaaa 4a4a4a4a
+			a3a3a353 5555ffaa 5555ffaa 5555ffaa
+			5555ffaa 5555ffaa 5555ffaa cacacac5
+			5501a1a1 5500ffff 5500ffff 5500ffff
+			5500ffff 5500ffff 5500ffff 55404a4a
+			ab025252 aa005555 aa005555 aa005555
+			aa005555 aa005555 aa005555 ff808585
+			5501a1a1 5500ffff 5500ffff 5500ffff
+			5500ffff 5500ffff 5500ffff 55404a4a
+			ab025252 aa005555 aa005555 aa005555
+			aa005555 aa005555 aa005555 ff808585
+			bf5681b8 82dbe00e 2ff77dab b4edf0af
+			00089700 b5abe03e 6df7dfba 99e4eb5f
+			e8ae69b9 e8e575fa ef55a0ee a036b802
+			0b7d9fea adfb7cab eaeb358a 6daaf80f
+			bf5681b8 82dbe00e 2ff77dab b4edf0af
+			00089700 b5abe03e 6df7dfba 99e4eb5f
+			e8ae69b9 e8e575fa ef55a0ee a036b802
+			0b7d9fea adfb7cab eaeb358a 6daaf80f
+			e500fead ac825f28 a2fe7eb3 908fd589
+			7adfee69 c025f0aa 0da75ddf 05aaeaaf
+			00ffbffb f0aefafd d57f55d5 bfa097cb
+			e8fd5f6c 00aaafea 007fbffa a0fd57d7
+			e500fead ac825f28 a2fe7eb3 908fd589
+			7adfee69 c025f0aa 0da75ddf 05aaeaaf
+			00ffbffb f0aefafd d57f55d5 bfa097cb
+			e8fd5f6c 00aaafea 007fbffa a0fd57d7
+			00abd7fb 00affeeb 14efabaf ec5562ad
+			da88af0b aaa28ad7 b7b7b725 555d71aa
+			426355aa a1b1a1e0 2be0b57a 2fc2f7ea
+			675dfe41 ab6b2b02 253557aa 969695bf
+			00abd7fb 00affeeb 14efabaf ec5562ad
+			da88af0b aaa28ad7 b7b7b725 555d71aa
+			426355aa a1b1a1e0 2be0b57a 2fc2f7ea
+			675dfe41 ab6b2b02 253557aa 969695bf
+			57571702 151754aa d8dcd5aa 54bc545c
+			5500faaa 5500eafe 5540fe6f aaaaaa00
+			ffffffaa 5dfd5952 a50d5555 5500bffa
+			5500aefb 58d855ab ff55552a aaab7e15
+			57571702 151754aa d8dcd5aa 54bc545c
+			5500faaa 5500eafe 5540fe6f aaaaaa00
+			ffffffaa 5dfd5952 a50d5555 5500bffa
+			5500aefb 58d855ab ff55552a aaab7e15
+			efffff03 baffff00 5555d528 eaebe9dc
+			ffaaaa2a 550f0faf f5eeeeef 7bdbc29f
+			08edd5e2 e0d76f37 5e0e0e0e ffaaaaa2
+			55e0e0fa a5f4b4e0 beffeabd af7ae02e
+			efffff03 baffff00 5555d528 eaebe9dc
+			ffaaaa2a 550f0faf f5eeeeef 7bdbc29f
+			08edd5e2 e0d76f37 5e0e0e0e ffaaaaa2
+			55e0e0fa a5f4b4e0 beffeabd af7ae02e
+			eefaca9f 8dbad64f b662ed89 ebef2f5d
+			de492ef5 77a39e7f 4d1472d7 f7baeaae
+			a59c69fa bfaaafff 7abeb277 a1ae755b
+			edd8fbf9 ba7b8b56 f7d28b75 5d2ae7a2
+			eefaca9f 8dbad64f b662ed89 ebef2f5d
+			de492ef5 77a39e7f 4d1472d7 f7baeaae
+			a59c69fa bfaaafff 7abeb277 a1ae755b
+			edd8fbf9 ba7b8b56 f7d28b75 5d2ae7a2
+			025656ab 0055aaff 0055aaff 0055aaff
+			0055aaff 0055aaff 0055aaff 809595ea
+			025656ab 0055aaff 0055aaff 0055aaff
+			0055aaff 0055aaff 0055aaff 6a7f4055
+			025656ab 0055aaff 0055aaff 0055aaff
+			0055aaff 0055aaff 0055aaff 6a7f4055
+			0357abff 0055aaff 0055aaff 0055aaff
+			0055aaff 0055aaff 0055aaff c0d5eaff
+			ababa703 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 eaeadac0
+			ababa703 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 eaeadac0
+			ababa703 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 eaeadac0
+			a9a9a9a9 5555ffaa 5555ffaa 5555ffaa
+			5555ffaa 5555ffaa 5555ffaa 6a6a6a6a
+			a7a7a753 55aa0000 55aa0000 55aa0000
+			55aa0000 55aa0000 55aa0000 dadadac5
+			a7a7a753 55aa0000 55aa0000 55aa0000
+			55aa0000 55aa0000 55aa0000 dadadac5
+			a7a7a753 55aa0000 55aa0000 55aa0000
+			55aa0000 55aa0000 55aa0000 dadadac5
+			a9a9a9a9 55aa0000 55aa0000 55aa0000
+			55aa0000 55aa0000 55aa0000 6a6a6a6a
+			a7a35353 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 dacac5c5
+			a7a35353 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 dacac5c5
+			a7a35353 55ffaa00 55ffaa00 55ffaa00
+			55ffaa00 55ffaa00 55ffaa00 dacac5c5
+			52520202 5555aaaa 5555aaaa 5555aaaa
+			5555aaaa 5555aaaa 5555aaaa 85858080
+			a3a35353 55ffffaa 55ffffaa 55ffffaa
+			55ffffaa 7fffaaaa 55ffaaaa cacac5c5
+			a3a35353 55ffffaa 55ffffaa 55ffffaa
+			55ffffaa 7fffaaaa 55ffaaaa cacac5c5
+			a3a35353 55ffffaa 55ffffaa 55ffffaa
+			55ffffaa 7fffaaaa 55ffaaaa cacac5c5
+			52525252 55ffaaaa 55ffaaaa 55ffaaaa
+			55ffaaaa 7fffaaaa 55ffaaaa 85858585
+			a3a3a353 bf3f3f2a 7fea0000 55ff0000
+			55ffaa00 7f6ac0c0 ffaa0000 cacacac5
+			a3a3a353 bf3f3f2a 7fea0000 55ff0000
+			55ffaa00 7f6ac0c0 ffaa0000 cacacac5
+			a3a3a353 bf3f3f2a 7fea0000 55ff0000
+			55ffaa00 7f6ac0c0 ffaa0000 cacacac5
+			a3535353 9595153f 7fea0000 ffaa0000
+			55aaaa00 7feac080 555555ff cac5c5c5
+			a3a3a353 d5953f3f 557feac0 55ffaa00
+			55ffaa00 5555ff80 55ffaa00 cacac5c5
+			a3a3a353 d5953f3f 557feac0 55ffaa00
+			55ffaa00 5555ff80 55ffaa00 cacac5c5
+			a3a3a353 d5953f3f 557feac0 55ffaa00
+			55ffaa00 5555ff80 55ffaa00 cacac5c5
+			a3a3a353 d595bf3f 7f6aea80 5555ffaa
+			5555ffaa 5555ff80 5555ffaa cacac5c5
+			52525252 55ffffaa 55ffffaa 55ffffaa
+			aa55ff00 55ffffaa 55ffffaa 85858585
+			52525252 55ffffaa 55ffffaa 55ffffaa
+			aa55ff00 55ffffaa 55ffffaa 85858585
+			52525252 55ffffaa 55ffffaa 55ffffaa
+			aa55ff00 55ffffaa 55ffffaa 85858585
+			a1a1a1a1 55ffaaaa 55ffaaaa 55ffaaaa
+			5555aaaa 55ffaaaa 55ffaaaa 4a4a4a4a
+			a3a3a353 5555ffaa 5555ffaa 5555ffaa
+			5555ffaa 5555ffaa 5555ffaa cacacac5
+			a3a3a353 5555ffaa 5555ffaa 5555ffaa
+			5555ffaa 5555ffaa 5555ffaa cacacac5
+			a3a3a353 5555ffaa 5555ffaa 5555ffaa
+			5555ffaa 5555ffaa 5555ffaa cacacac5
+			a1a1a1a1 ffffaaaa ffffaaaa ffffaaaa
+			ffffaaaa ffffaaaa ffffaaaa 4a4a4a4a
+			ab025252 aa005555 aa005555 aa005555
+			aa005555 aa005555 aa005555 ea808585
+			ab025252 aa005555 aa005555 aa005555
+			aa005555 aa005555 aa005555 ff808585
+			ab025252 aa005555 aa005555 aa005555
+			aa005555 aa005555 aa005555 ff808585
+			5501a1a1 5500ffff 5500ffff 5500ffff
+			5500ffff 5500ffff 5500ffff 55404a4a
+		</bitmap>
+		<tex4x4_palette_idx size="1024">
+			c000 c001 c002 c003 c001 c004 c005 c003
+			c003 c006 c007 c008 c002 c003 c009 c004
+			c000 c001 c002 c003 c001 c004 c005 c003
+			c003 c006 c007 c008 c002 c003 c009 c004
+			c00a c00b c004 c00b c002 c00c c00d 800e
+			c010 c011 c012 c007 c007 800e c013 c014
+			c00a c00b c004 c00b c002 c00c c00d 800e
+			c010 c011 c012 c007 c007 800e c013 c014
+			c015 c016 800e c017 c018 c00c c019 c01a
+			c01b 801c c01e c00c c007 801f c021 c022
+			c015 c016 800e c017 c018 c00c c019 c01a
+			c01b 801c c01e c00c c007 801f c021 c022
+			8023 c021 c01b c025 8026 8026 8028 c02a
+			c02b c02c c02d 8026 8026 c02e c019 801c
+			8023 c021 c01b c025 8026 8026 8028 c02a
+			c02b c02c c02d 8026 8026 c02e c019 801c
+			c02f c016 c030 8031 c033 c034 c035 c00a
+			c036 c003 8037 c033 c034 8023 c039 c00c
+			c02f c016 c030 8031 c033 c034 c035 c00a
+			c036 c003 8037 c033 c034 8023 c039 c00c
+			c03a c004 c007 c036 c007 c007 c036 c03b
+			c002 c03c c007 c003 c007 c003 c007 c002
+			c03a c004 c007 c036 c007 c007 c036 c03b
+			c002 c03c c007 c003 c007 c003 c007 c002
+			803d 803d 803d 803d 803d 803d 803d 803d
+			803f 8041 8041 8041 8041 8041 8041 8042
+			803d 803d 803d 803d 803d 803d 803d 803d
+			803f 8041 8041 8041 8041 8041 8041 8042
+			c045 c046 c046 c046 c046 c046 c046 c045
+			8047 c049 c049 c049 c049 c049 c049 804a
+			c045 c046 c046 c046 c046 c046 c046 c045
+			8047 c049 c049 c049 c049 c049 c049 804a
+			c04c 404d 404d 404d 404d 404d 404d c04c
+			804e 4050 4050 4050 4050 4050 4050 8051
+			c04c 404d 404d 404d 404d 404d 404d c04c
+			804e 4050 4050 4050 4050 4050 4050 8051
+			0053 c053 c053 c053 c053 c053 c053 0053
+			8055 c057 c057 c057 c057 c057 c057 8058
+			0053 c053 c053 c053 c053 c053 c053 0053
+			8055 c057 c057 c057 c057 c057 c057 8058
+			005a c05c c05c c05c c05c c01c c05d 005a
+			805e c060 c060 c060 c060 c061 c062 8063
+			005a c05c c05c c05c c05c c01c c05d 005a
+			805e c060 c060 c060 c060 c061 c062 8063
+			8065 c067 c068 c040 c00e c069 c031 8065
+			806a c06c c06d c06e c06f c06d c070 8071
+			8065 c067 c068 c040 c00e c069 c031 8065
+			806a c06c c06d c06e c06f c06d c070 8071
+			8073 c012 c075 c076 c031 c012 c076 8077
+			8079 c07b c07c c07d c07e c07b c07d 807f
+			8073 c012 c075 c076 c031 c012 c076 8077
+			8079 c07b c07c c07d c07e c07b c07d 807f
+			c081 c00f c00f c00f c017 c00f c00f c081
+			0082 c084 c084 c084 8085 c084 c084 0087
+			c081 c00f c00f c00f c017 c00f c00f c081
+			0082 c084 c084 c084 8085 c084 c084 0087
+			4089 c08a c08a c08a c08a c08a c08a 4089
+			808b c08d c08d c08d c08d c08d c08d 808e
+			4089 c08a c08a c08a c08a c08a c08a 4089
+			808b c08d c08d c08d c08d c08d c08d 808e
+			4090 c091 c091 c091 c091 c091 c091 4090
+			8092 0092 0092 0092 0092 0092 0092 8094
+			4090 c091 c091 c091 c091 c091 c091 4090
+			8092 0092 0092 0092 0092 0092 0092 8094
+			c000 c001 c002 c003 c001 c004 c005 c003
+			c003 c006 c007 c008 c002 c003 c009 c004
+			c000 c001 c002 c003 c001 c004 c005 c003
+			c003 c006 c007 c008 c002 c003 c009 c004
+			c00a c00b c004 c00b c002 c00c c00d 800e
+			c010 c011 c012 c007 c007 800e c013 c014
+			c00a c00b c004 c00b c002 c00c c00d 800e
+			c010 c011 c012 c007 c007 800e c013 c014
+			c015 c016 800e c017 c018 c00c c019 c01a
+			c01b 801c c01e c00c c007 801f c021 c022
+			c015 c016 800e c017 c018 c00c c019 c01a
+			c01b 801c c01e c00c c007 801f c021 c022
+			8023 c021 c01b c025 8026 8026 8028 c02a
+			c02b c02c c02d 8026 8026 c02e c019 801c
+			8023 c021 c01b c025 8026 8026 8028 c02a
+			c02b c02c c02d 8026 8026 c02e c019 801c
+			c02f c016 c030 8031 c033 c034 c035 c00a
+			c036 c003 8037 c033 c034 8023 c039 c00c
+			c02f c016 c030 8031 c033 c034 c035 c00a
+			c036 c003 8037 c033 c034 8023 c039 c00c
+			c03a c004 c007 c036 c007 c007 c036 c03b
+			c002 c03c c007 c003 c007 c003 c007 c002
+			c03a c004 c007 c036 c007 c007 c036 c03b
+			c002 c03c c007 c003 c007 c003 c007 c002
+			803f 8041 8041 8041 8041 8041 8041 803f
+			803f 8041 8041 8041 8041 8041 8041 8042
+			803f 8041 8041 8041 8041 8041 8041 8042
+			803d 803d 803d 803d 803d 803d 803d 803d
+			8047 c049 c049 c049 c049 c049 c049 8047
+			8047 c049 c049 c049 c049 c049 c049 804a
+			8047 c049 c049 c049 c049 c049 c049 804a
+			c045 c046 c046 c046 c046 c046 c046 c045
+			804e 4050 4050 4050 4050 4050 4050 804e
+			804e 4050 4050 4050 4050 4050 4050 8051
+			804e 4050 4050 4050 4050 4050 4050 8051
+			c04c 404d 404d 404d 404d 404d 404d c04c
+			8055 c057 c057 c057 c057 c057 c057 8055
+			8055 c057 c057 c057 c057 c057 c057 8058
+			8055 c057 c057 c057 c057 c057 c057 8058
+			0053 c053 c053 c053 c053 c053 c053 0053
+			805e c060 c060 c060 c060 c061 c062 805e
+			805e c060 c060 c060 c060 c061 c062 8063
+			805e c060 c060 c060 c060 c061 c062 8063
+			005a c05c c05c c05c c05c c01c c05d 005a
+			806a c06c c06d c06e c06f c06d c070 806a
+			806a c06c c06d c06e c06f c06d c070 8071
+			806a c06c c06d c06e c06f c06d c070 8071
+			8065 c067 c068 c040 c00e c069 c031 8065
+			8079 c07b c07c c07d c07e c07b c07d 8096
+			8079 c07b c07c c07d c07e c07b c07d 807f
+			8079 c07b c07c c07d c07e c07b c07d 807f
+			8073 c012 c075 c076 c031 c012 c076 8077
+			0082 c084 c084 c084 8085 c084 c084 0082
+			0082 c084 c084 c084 8085 c084 c084 0087
+			0082 c084 c084 c084 8085 c084 c084 0087
+			c081 c00f c00f c00f c017 c00f c00f c081
+			808b c08d c08d c08d c08d c08d c08d 808b
+			808b c08d c08d c08d c08d c08d c08d 808e
+			808b c08d c08d c08d c08d c08d c08d 808e
+			4089 c08a c08a c08a c08a c08a c08a 4089
+			8092 0092 0092 0092 0092 0092 0092 8092
+			8092 0092 0092 0092 0092 0092 0092 8094
+			8092 0092 0092 0092 0092 0092 0092 8094
+			4090 c091 c091 c091 c091 c091 c091 4090
+		</tex4x4_palette_idx>
+	</tex_image>
+	<tex_image index="3" name="ws_mud"
+		width="64" height="64" original_width="64" original_height="64"
+		format="tex4x4"
+		palette_name="ws_mud_pl"
+		path="ws_mud.tga"
+	>
+		<bitmap size="256">
+			9cb05cf7 5e62890d 5f5f7a00 ffffaa00
+			2f0b80f8 f8feffff aaaaaaaa aaaaaaaa
+			aaaaaaaa aaaaaaaa aaaaaaaa aaaaaaaa
+			aaaaaaaa 7aebabab fffffeea 2a2a2a2a
+			6062fad7 bfbfaea8 eaeafafa aaaaaaaa
+			ffffffbf 0909c360 feffffff aaaaaaaa
+			aaaaaaaa aaaaaaaa aaaaaaaa aaaaaaaa
+			abafbfbf fefefefa aaaaaaaa bfbfffff
+			e0e0e0e0 bfbfbfbf aaaaeaea aaaaaaaa
+			aaaaaaaa e5252525 0a80e0f8 aaaaaaaa
+			aaabbfff aaaaaaff aaaafeff eaaaabbf
+			afaaaaaa fefeffff aaaaaaaa 0b0f2f3f
+			6d627070 afafbfbf fefeaaaa aaaaea5e
+			aafaffff 0b89eded 002a2f2f eaaaacb6
+			fffefaaa aaaaaaaa ffbfafaa eafafafa
+			afbfbfbf fefafefe 2fbfffff 56a80309
+			bfbf3f2f 80e0b8ae feaaaaba bfffaaaa
+			0b2dbfff 7a6aeaab 7f7ffef8 6b6b6aea
+			aaaaaaaa aaaaaaaa aaaaaaaa aba9abeb
+			2a7aeaaf 022bbffe 7060628d aaaaaaaa
+			0a2fbfbf 5eeaaaaa ffaa0000 552f02bd
+			ba5c5ca0 fafafafa bfafabaa aaeaea6a
+			aaaaaaaa bfffffff 585ae9ad 250d0baa
+			5ea0002a 55fe0000 95ca6060 a8feffff
+			ffffea00 fffffffe aaaaaaaa aaaaaaaa
+			95b52d0b c0607078 aaaaaaaa afababaa
+			2aaafafe 575ea925 a5ad7a5e ff7c6289
+			aaaaaaaa aaaaaaaa aaaaaaaa ffffaf02
+			aaaaaaaa aaaaaaaa aaaaaaaa aaaaaaaa
+			aaaaaaaa a9a9a9eb 8080f857 aa00d5d5
+			2b808ba5 a0a8fefe e3ede585 aaaaaaaa
+			fafefeff aaaaaaaa aaaaaaaa aaaaaaaa
+			aaaaaaaa aaaaaaaa aaaaaaaa aaaaaaaa
+			aaaaaaaa 5b638909 fffffee0 aaaaaaaa
+			dfffffbf 952509aa f8f8f8a0 ffffafaa
+			afabaaea eafaffff aaaaaaaa aaaaaaaa
+			aaaaaaaa aaaaaaaa aaaaaaaa aaaaaaaa
+			0b2f3fbf fefef8f8 aaaaaaaa bfbfbfff
+			eaaaaaba ffffbf3e e2e0e0f0 aaaaaaaa
+			aaaaaaaa ababaaaa aaeafeff aaaaaaaa
+			000abfff aa00fb55 00a8ffff 58ea9555
+			95af8081 fefefefe aaaaaaaa abafafbf
+			eaeaeaea aaaaaaaa a9e9697d a8aaaaaa
+			aaaaaaaa afafafab afaaaaaa aaeafafe
+			7f5f5ce0 ffffffaa ffbf2f0a e0f8f8f0
+			2fbfbfbf fefefefe afbfffff feaaaba9
+			aaeaeaea 3fbfbfff fefeaa00 0383725c
+			a0feffff aaefefef 00afbfbf c0820db5
+			bfafabaa aaaaeafe aafeffff e2f2e282
+			e9cd890d aaabbefe eaaaaaab aaaaaaaa
+			bfbfbfaf aaeafabe ffffaabe ffffa800
+			abaf2a00 d52b00aa 5070a000 79797260
+			aaaaaaaa aaaaaaaa fafaaaaa c38909e9
+			5ffffcf2 55ffffff afaaeaea eafeffff
+			abafbfbf faaaaaaa ffaaaaaa f5abaaaf
+			aababaaa fafafaea bf2f0b02 c2607072
+			e0d85657 feaaaaaa b5bfff5f 5c585263
+			aaaaaaaa aaaaaaaa aaaaaaaa ffbfabaa
+			ffffeaaa fffffffe aaaaaaaa aaaaaaaa
+			bfafabaa aaeaeaea aaaaaaaa 250d0b82
+			fefea880 0aaafeff 000a2f2f e0f8f8f8
+			aaaaaaaa aaaaaaaa aaaaaaaa aaaaaaaa
+			aaaaaaaa aaaaaaaa aaaaaaaa aaaaaaaa
+			aaaaaaaa ababaaaa aaaaaafe ffbfb525
+		</bitmap>
+		<tex4x4_palette_idx size="256">
+			c000 c001 c002 c003 c003 c004 c005 c005
+			c005 c005 c005 c005 c006 c007 c008 c009
+			c001 c003 c003 c005 c008 c002 c00a c005
+			c005 c005 c005 c00b c003 c003 c005 c004
+			c004 c008 c00c c006 c005 c001 c003 c005
+			c003 c00d c003 c003 c00e c008 c005 c003
+			c001 c003 c003 c00f c003 c010 c003 c00f
+			c003 c005 c003 c003 c003 c003 c004 c001
+			c003 c003 c003 c003 c010 c011 c002 c00f
+			c00b c005 c005 c00f c00f c004 c001 c005
+			c003 c011 c003 c001 c001 c012 c003 c00f
+			c005 c013 c002 c001 c001 c001 c001 c003
+			c003 c003 c005 c00b c010 c010 c005 c003
+			c003 c001 c011 c000 c005 c00b c005 c003
+			c005 c005 c005 c005 c005 c011 c010 c000
+			c001 c003 c000 c00c c003 c005 c005 c005
+			c005 c005 c005 c005 c005 c001 c003 c005
+			c002 c001 c004 c003 c003 c003 c005 c005
+			c005 c005 c005 c00b c003 c003 c005 c008
+			c003 c003 c003 c005 c005 c00e c003 c005
+			c003 c010 c004 c001 c001 c008 c005 c003
+			c00d c00b c011 c014 c005 c003 c00c c003
+			c002 c008 c004 c003 c004 c015 c003 c00f
+			c003 c008 c003 c001 c004 c016 c003 c001
+			c003 c003 c003 c003 c002 c003 c003 c005
+			c003 c003 c004 c003 c004 c001 c001 c001
+			c005 c017 c003 c001 c000 c002 c018 c003
+			c003 c00c c00d c00f c003 c003 c003 c001
+			c002 c00d c002 c001 c005 c005 c005 c003
+			c004 c008 c005 c00b c003 c003 c00b c010
+			c010 c004 c004 c004 c005 c005 c005 c005
+			c005 c005 c005 c005 c005 c00c c003 c010
+		</tex4x4_palette_idx>
+	</tex_image>
+</tex_image_array>
+
+<tex_palette_array size="4">
+	<tex_palette index="0" name="d64_water_pl" color_size="408">
+		22fe 1adc 127a 0637 339f 2b3f 1adc 127a
+		2f5f 1abc 127a 0617 2b3f 0216 2f3f 0616
+		339f 22fe 1abc 01f6 05b4 0237 127a 0616
+		0a38 01d4 0638 01f4 337f 0617 1adc 0a38
+		0637 01f6 0a38 01f5 0659 01d4 337f 0216
+		0e99 01b4 0a57 01d5 169a 05f6 379f 1adc
+		127a 01f6 0616 01f6 1279 01f7 0637 01b4
+		379f 2f5f 271f 0216 2f5f 1adc 0a58 0216
+		0a58 01d5 0e9a 01b4 0e79 05f6 0a38 01d5
+		1279 01f6 337f 271f 1adc 0216 337f 22fe
+		16bb 0617 337f 271f 16bb 0617 273f 22fe
+		0e59 01f6 1279 05f6 0a38 01f4 2f5f 05f6
+		337f 22fe 169b 0637 271f 169b 0a38 01f6
+		2f5f 231e 169b 0617 337f 0a37 339f 231e
+		1adc 0a58 2f7f 1edd 127a 0a38 1259 0216
+		169a 0616 337f 1edd 0a38 01f6 339f 231e
+		129a 0216 339f 271f 127a 0216 339f 231e
+		0e59 0216 337f 1edd 127a 01f6 337f 22fe
+		129a 0216 2f5f 0a37 337f 231e 0a58 01f6
+		2f5f 1efd 127a 0216 339f 273f 1abc 0216
+		337f 1efd 127a 0a38 379f 2b3f 271f 0617
+		337f 271f 1adc 0637 1abc 0a38 0216 01f6
+		2f5f 231e 0a58 01f6 337f 271f 169b 0617
+		337f 1adc 0e59 0216 273f 169b 0a58 0216
+		2f5f 0617 337f 22fe 127a 0216 0619 01f4
+		1ebc 05f6 379f 2b3f 1edd 0e79 337f 22fe
+		0e59 01f6 2b5f 05f6 337f 22fe 1abc 0e79
+		2f5f 1adc 0e59 01f6 231e 16bb 0a58 0216
+		15fd 0675 337f 22fe 169b 0a38 2f7f 1adc
+		0a58 01f6 26fe 0a37 2f5f 1abc 129a 0a58
+		337f 1edd 0e59 01f6 0638 01b2 2f5f 1edd
+		0e59 01f6 273f 169b 0a38 01f6 169b 0637
+		0617 01f6 2b5f 1edd 0e59 0216 337f 2b3f
+		0a58 01f6 339f 2b3f 1edd 01f6 2f5f 22fe
+		0e79 0216 337f 271f 16bb 0216 0e38 01f6
+		337f 22fe 0a38 0216 1abc 0617 0216 01f6
+		2f7f 1adc 0e59 01f6 0657 01d5 2f7f 1efd
+		127a 01f6 1edc 05f6 0e79 01b4 2f7f 127a
+		0a38 01f6 337f 273f 1abc 0216 127a 05f6
+		337f 273f 169b 0216 337f 273f 1adc 0e59
+		2b3f 1abc 0e59 0216 2f5f 1abc 0e79 0216
+		1adc 129a 0a38 0216 339f 271f 169b 01f6
+		339f 271f 1abc 0637 337f 22fe 127a 0e59
+		377f 0617 337f 1edd 169b 0617 0e7a 05f5
+		337f 1efd 169b 0a58 2b1f 0a37 0638 01d4
+		0e59 0616 0e38 05f6 2f3f 05f6 339f 231e
+		1abc 0617 339f 22fe 1abc 0617 271f 1edd
+		0a38 0216 337f 1abc 0a58 0216 339f 271f
+		1abc 0617 337f 22fe 1abc 129a 2b5f 169b
+		0a38 0216 337f 1adc 127a 01f6 127a 01f5
+		337f 231e 169b 0617 0000 0000 0000 0000
+	</tex_palette>
+	<tex_palette index="1" name="ol6_road1" color_size="56">
+		2129 1ce8 3a10 35ce 254a 1d08 254a 2109
+		2129 2109 212a 1d08 254b 1d08 212a 1d09
+		254a 1d09 254b 2129 212a 2109 1d08 1ce8
+		39f0 35ef 3a10 35cf 252a 1ce8 2129 1d09
+		212a 2108 254b 2109 252a 1d09 212a 2129
+		2129 1d08 1d09 1d08 212a 1ce7 212a 1ce8
+		252a 1d08 2109 1d08 7fff 7fff 7fff 7fff
+	</tex_palette>
+	<tex_palette index="2" name="tower_pl" color_size="304">
+		2107 14c6 1ce7 18a6 2109 18c6 2108 18c6
+		2108 18c5 2528 18c6 2509 18c6 2107 18c6
+		1ce7 14a5 2108 14c5 2107 18c7 1d07 18c6
+		2108 14a5 292a 18c6 294a 2529 1ce7 18c6
+		294a 10a4 252a 14a5 2529 1ce7 292a 14a5
+		2d6b 18c6 2549 18a6 294a 1084 2108 18c7
+		1d07 18a6 2d8c 18c6 358d 294a 35ad 294a
+		318c 294a 1ce7 18c6 2109 18c5 318c 2d6b
+		294a 2108 35ac 294a 39cf 294a 2d6b 294a
+		1ce7 18c6 294a 18c7 35ad 294a 1ce7 18c6
+		35ad 294a 2108 18c6 294a 0421 4631 0000
+		318d 18c6 35ad 18c7 318c 18e6 294a 14a4
+		2d8b 1cc7 2529 2108 1ce7 18c6 358d 18e6
+		35ad 2509 35ad 2108 1d08 18c6 294a 2108
+		1ce7 18c6 2509 14c5 1d08 1cc6 2529 1485
+		2128 18a6 4210 35ad 2d6b 0421 7fff 6b7b
+		294a 1ce7 7fff 6f9c 675a 294a 7fff 739c
+		675a 294a 5ef7 0842 4210 3def 7fff 7bff
+		7bde 294a 7fff 77dd 7fff 7bff 7bde 318c
+		56b5 0842 39ce 35ad 77de 73dd 6fbc 294a
+		73bd 6f9c 77de 73dd 6fbc 318c 35ad 318c
+		0421 0421 6fbc 6b9b 637a 294a 6b9b 637a
+		6fbc 6b9b 637a 318c 318c 2d6b 0421 0421
+		318c 296a 358d 2549 679b 5f59 5b58 294a
+		677a 5757 637a 5737 639a 5717 679b 5f59
+		5b58 318c 318c 294a 2529 0421 254a 2108
+		294a 2528 294a 2128 637a 5737 5337 294a
+		5337 46b3 5337 4ef6 5337 4ad5 5737 4f16
+		4af5 4ad4 637a 5737 5337 318c 294a 2529
+		1ce7 0421 2529 20e8 2108 1ce7 294a 2108
+		1ce7 0421 5b38 4b16 46b4 294a 4b15 46b3
+		4b15 46d4 4ad4 46b3 4b15 42f4 5b38 4af5
+		46b4 318c 292a 0441 5717 4293 294a 294a
+		46b4 4292 42d4 4293 4292 3ed3 5717 4293
+		318c 318c 2529 0842 1cc7 10a4 56f6 4292
+		3e71 294a 4292 3e71 56f6 4292 3e71 318c
+		2509 0441 2528 0842 52f6 3e51 294a 1ce7
+		52f6 3e51 318c 294a 5b38 4af5 46b4 294a
+	</tex_palette>
+	<tex_palette index="3" name="ws_mud_pl" color_size="56">
+		152b 1109 154c 110a 154b 10e9 152b 0cc7
+		154c 0cc7 154c 0863 1549 0868 112b 10e8
+		150b 0ce7 1109 0cc8 154d 0cc6 154a 0866
+		152a 0ce9 154b 0ca7 152c 0ce6 112a 10e9
+		154c 10e8 196d 110a 1d8f 08a5 1d6d 08a6
+		152b 08a5 156d 0ca6 114b 10c8 1d2a 00e9
+		152b 0ce8 0000 0000 0000 0000 0000 0000
+	</tex_palette>
+</tex_palette_array>
+
+<material_array size="4">
+	<material index="0" name="mat11"
+		light0="off" light1="off" light2="off" light3="off"
+		face="front"
+		alpha="31"
+		wire_mode="off"
+		polygon_mode="modulate"
+		polygon_id="0"
+		fog_flag="off"
+		depth_test_decal="off"
+		translucent_update_depth="off"
+		render_1_pixel="off"
+		far_clipping="off"
+		diffuse="25 25 25"
+		ambient="0 0 0"
+		specular="8 8 8"
+		emission="0 0 0"
+		shininess_table_flag="off"
+		tex_image_idx="2" tex_palette_idx="2"
+		tex_tiling="repeat repeat"
+		tex_scale="1.000000 1.000000"
+		tex_rotate="0.000000"
+		tex_translate="0.000000 0.000000"
+		tex_gen_mode="none"
+	/>
+	<material index="1" name="mat12"
+		light0="off" light1="off" light2="off" light3="off"
+		face="front"
+		alpha="31"
+		wire_mode="off"
+		polygon_mode="modulate"
+		polygon_id="0"
+		fog_flag="off"
+		depth_test_decal="off"
+		translucent_update_depth="off"
+		render_1_pixel="off"
+		far_clipping="off"
+		diffuse="25 25 25"
+		ambient="0 0 0"
+		specular="8 8 8"
+		emission="0 0 0"
+		shininess_table_flag="off"
+		tex_image_idx="0" tex_palette_idx="0"
+		tex_tiling="repeat repeat"
+		tex_scale="1.000000 1.000000"
+		tex_rotate="0.000000"
+		tex_translate="0.000000 0.000000"
+		tex_gen_mode="none"
+	/>
+	<material index="2" name="mat64"
+		light0="off" light1="off" light2="off" light3="off"
+		face="front"
+		alpha="31"
+		wire_mode="off"
+		polygon_mode="modulate"
+		polygon_id="0"
+		fog_flag="off"
+		depth_test_decal="off"
+		translucent_update_depth="off"
+		render_1_pixel="off"
+		far_clipping="off"
+		diffuse="25 25 25"
+		ambient="0 0 0"
+		specular="8 8 8"
+		emission="0 0 0"
+		shininess_table_flag="off"
+		tex_image_idx="1" tex_palette_idx="1"
+		tex_tiling="repeat repeat"
+		tex_scale="1.000000 1.000000"
+		tex_rotate="0.000000"
+		tex_translate="0.000000 0.000000"
+		tex_gen_mode="none"
+	/>
+	<material index="3" name="mat9"
+		light0="off" light1="off" light2="off" light3="off"
+		face="front"
+		alpha="31"
+		wire_mode="off"
+		polygon_mode="modulate"
+		polygon_id="0"
+		fog_flag="off"
+		depth_test_decal="off"
+		translucent_update_depth="off"
+		render_1_pixel="off"
+		far_clipping="off"
+		diffuse="25 25 25"
+		ambient="0 0 0"
+		specular="8 8 8"
+		emission="0 0 0"
+		shininess_table_flag="off"
+		tex_image_idx="3" tex_palette_idx="3"
+		tex_tiling="repeat repeat"
+		tex_scale="1.000000 1.000000"
+		tex_rotate="0.000000"
+		tex_translate="0.000000 0.000000"
+		tex_gen_mode="none"
+	/>
+</material_array>
+
+<matrix_array size="1">
+	<matrix index="0" mtx_weight="1" node_idx="0"/>
+</matrix_array>
+
+<polygon_array size="4">
+	<polygon index="0" name="polygon0"
+		vertex_size="12" polygon_size="3"
+		triangle_size="0" quad_size="3"
+		volume_min="-1.000000 -1.000000 -1.000000"
+		volume_max="1.000000 1.000000 1.000000"
+		volume_r="1.731934"
+		mtx_prim_size="1"
+		nrm_flag="off" clr_flag="off" tex_flag="on"
+	>
+		<mtx_prim index="0">
+			<mtx_list size="1">0</mtx_list>
+			<primitive_array size="1">
+				<primitive index="0" type="quads" vertex_size="12">
+					<mtx idx="0"/>
+					<tex st="0.000000 64.000000"/>
+					<pos_s xyz="1.000000 1.000000 1.000000"/>
+					<tex st="0.000000 0.000000"/>
+					<pos_xz xz="1.000000 -1.000000"/>
+					<tex st="64.000000 0.000000"/>
+					<pos_xy xy="-1.000000 1.000000"/>
+					<tex st="64.000000 64.000000"/>
+					<pos_xz xz="-1.000000 1.000000"/>
+					<tex st="0.000000 64.000000"/>
+					<pos_xz xz="1.000000 -1.000000"/>
+					<tex st="0.000000 0.000000"/>
+					<pos_xz xz="1.000000 1.000000"/>
+					<tex st="64.000000 0.000000"/>
+					<pos_xy xy="1.000000 -1.000000"/>
+					<tex st="64.000000 64.000000"/>
+					<pos_xz xz="1.000000 -1.000000"/>
+					<tex st="0.000000 64.000000"/>
+					<pos_yz yz="1.000000 1.000000"/>
+					<tex st="0.000000 0.000000"/>
+					<pos_xy xy="-1.000000 1.000000"/>
+					<tex st="64.000000 0.000000"/>
+					<pos_xy xy="-1.000000 -1.000000"/>
+					<tex st="64.000000 64.000000"/>
+					<pos_xy xy="1.000000 -1.000000"/>
+				</primitive>
+			</primitive_array>
+		</mtx_prim>
+	</polygon>
+	<polygon index="1" name="polygon1"
+		vertex_size="4" polygon_size="1"
+		triangle_size="0" quad_size="1"
+		volume_min="-1.000000 -1.000000 -1.000000"
+		volume_max="-1.000000 1.000000 1.000000"
+		volume_r="1.731934"
+		mtx_prim_size="1"
+		nrm_flag="off" clr_flag="off" tex_flag="on"
+	>
+		<mtx_prim index="0">
+			<mtx_list size="1">0</mtx_list>
+			<primitive_array size="1">
+				<primitive index="0" type="quads" vertex_size="4">
+					<mtx idx="0"/>
+					<tex st="0.000000 16.000000"/>
+					<pos_s xyz="-1.000000 -1.000000 -1.000000"/>
+					<tex st="0.000000 0.000000"/>
+					<pos_xz xz="-1.000000 1.000000"/>
+					<tex st="128.000000 0.000000"/>
+					<pos_xy xy="-1.000000 1.000000"/>
+					<tex st="128.000000 16.000000"/>
+					<pos_xz xz="-1.000000 -1.000000"/>
+				</primitive>
+			</primitive_array>
+		</mtx_prim>
+	</polygon>
+	<polygon index="2" name="polygon2"
+		vertex_size="4" polygon_size="1"
+		triangle_size="0" quad_size="1"
+		volume_min="-1.000000 -1.000000 -1.000000"
+		volume_max="1.000000 -1.000000 1.000000"
+		volume_r="1.731934"
+		mtx_prim_size="1"
+		nrm_flag="off" clr_flag="off" tex_flag="on"
+	>
+		<mtx_prim index="0">
+			<mtx_list size="1">0</mtx_list>
+			<primitive_array size="1">
+				<primitive index="0" type="quads" vertex_size="4">
+					<mtx idx="0"/>
+					<tex st="0.000000 0.000000"/>
+					<pos_s xyz="1.000000 -1.000000 -1.000000"/>
+					<tex st="0.000000 128.000000"/>
+					<pos_xz xz="1.000000 1.000000"/>
+					<tex st="128.000000 128.000000"/>
+					<pos_xy xy="-1.000000 -1.000000"/>
+					<tex st="128.000000 0.000000"/>
+					<pos_xz xz="-1.000000 -1.000000"/>
+				</primitive>
+			</primitive_array>
+		</mtx_prim>
+	</polygon>
+	<polygon index="3" name="polygon3"
+		vertex_size="4" polygon_size="1"
+		triangle_size="0" quad_size="1"
+		volume_min="-1.000000 -1.000000 -1.000000"
+		volume_max="1.000000 1.000000 -1.000000"
+		volume_r="1.731934"
+		mtx_prim_size="1"
+		nrm_flag="off" clr_flag="off" tex_flag="on"
+	>
+		<mtx_prim index="0">
+			<mtx_list size="1">0</mtx_list>
+			<primitive_array size="1">
+				<primitive index="0" type="quads" vertex_size="4">
+					<mtx idx="0"/>
+					<tex st="0.000000 64.000000"/>
+					<pos_s xyz="1.000000 1.000000 -1.000000"/>
+					<tex st="0.000000 0.000000"/>
+					<pos_xy xy="1.000000 -1.000000"/>
+					<tex st="64.000000 0.000000"/>
+					<pos_xy xy="-1.000000 -1.000000"/>
+					<tex st="64.000000 64.000000"/>
+					<pos_xy xy="-1.000000 1.000000"/>
+				</primitive>
+			</primitive_array>
+		</mtx_prim>
+	</polygon>
+</polygon_array>
+
+<node_array size="1">
+	<node index="0" name="Cube4" kind="mesh"
+		parent="-1"
+		child="-1"
+		brother_next="-1"
+		brother_prev="-1"
+		draw_mtx="on"
+		billboard="off"
+		scale="100.000000 100.000000 100.000000"
+		rotate="-90.000000 0.000000 0.000000"
+		translate="0.000000 0.000000 0.000000"
+		visibility="on"
+		display_size="4"
+		vertex_size="24" polygon_size="6"
+		triangle_size="0" quad_size="6"
+		volume_min="-1.000000 -1.000000 -1.000000"
+		volume_max="1.000000 1.000000 1.000000"
+		volume_r="1.731934"
+	>
+		<display index="0" material="0" polygon="2" priority="0"/>
+		<display index="1" material="1" polygon="3" priority="0"/>
+		<display index="2" material="2" polygon="1" priority="0"/>
+		<display index="3" material="3" polygon="0" priority="0"/>
+	</node>
+</node_array>
+
+<output_info vertex_size="24" polygon_size="6"
+	triangle_size="0" quad_size="6"/>
+
+</body>
+
+</imd>

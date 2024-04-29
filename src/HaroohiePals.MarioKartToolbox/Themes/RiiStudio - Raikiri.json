@@ -1,0 +1,136 @@
+{
+  "Name": "RiiStudio - Raikiri",
+  "Alpha": 1.0,
+  "DisabledAlpha": 0.6,
+  "WindowPadding": {
+    "X": 8.0,
+    "Y": 8.0
+  },
+  "WindowRounding": 3.0,
+  "WindowBorderSize": 1.0,
+  "WindowMinSize": {
+    "X": 32.0,
+    "Y": 32.0
+  },
+  "WindowTitleAlign": {
+    "X": 0.0,
+    "Y": 0.5
+  },
+  "WindowMenuButtonPosition": 0,
+  "ChildRounding": 0.0,
+  "ChildBorderSize": 1.0,
+  "PopupRounding": 0.0,
+  "PopupBorderSize": 1.0,
+  "FramePadding": {
+    "X": 4.0,
+    "Y": 3.0
+  },
+  "FrameRounding": 2.0,
+  "FrameBorderSize": 0.0,
+  "ItemSpacing": {
+    "X": 8.0,
+    "Y": 4.0
+  },
+  "ItemInnerSpacing": {
+    "X": 4.0,
+    "Y": 4.0
+  },
+  "CellPadding": {
+    "X": 4.0,
+    "Y": 2.0
+  },
+  "TouchExtraPadding": {
+    "X": 0.0,
+    "Y": 0.0
+  },
+  "IndentSpacing": 21.0,
+  "ColumnsMinSpacing": 6.0,
+  "ScrollbarSize": 14.0,
+  "ScrollbarRounding": 2.0,
+  "GrabMinSize": 10.0,
+  "GrabRounding": 0.0,
+  "LogSliderDeadzone": 4.0,
+  "TabRounding": 2.0,
+  "TabBorderSize": 0.0,
+  "TabMinWidthForCloseButton": 0.0,
+  "ColorButtonPosition": 1,
+  "ButtonTextAlign": {
+    "X": 0.5,
+    "Y": 0.5
+  },
+  "SelectableTextAlign": {
+    "X": 0.0,
+    "Y": 0.0
+  },
+  "DisplayWindowPadding": {
+    "X": 19.0,
+    "Y": 19.0
+  },
+  "DisplaySafeAreaPadding": {
+    "X": 3.0,
+    "Y": 3.0
+  },
+  "MouseCursorScale": 1.0,
+  "AntiAliasedLines": true,
+  "AntiAliasedLinesUseTex": true,
+  "AntiAliasedFill": true,
+  "CurveTessellationTol": 1.25,
+  "CircleTessellationMaxError": 0.3,
+  "Colors": {
+    "Text": "242, 244, 249",
+    "TextDisabled": "91, 107, 119",
+    "TextSelectedBg": "89, 66, 150, 249",
+    "WindowBg": "28, 38, 43",
+    "ChildBg": "38, 45, 56",
+    "PopupBg": "239, 20, 20, 20",
+    "Border": "20, 25, 30",
+    "BorderShadow": "0, 0, 0, 0",
+    "FrameBg": "51, 63, 73",
+    "FrameBgHovered": "30, 51, 71",
+    "FrameBgActive": "22, 30, 35",
+    "TitleBg": "165, 22, 30, 35",
+    "TitleBgActive": "20, 25, 30",
+    "TitleBgCollapsed": "130, 0, 0, 0",
+    "MenuBarBg": "38, 45, 56",
+    "ScrollbarBg": "99, 5, 5, 5",
+    "ScrollbarGrab": "51, 63, 73",
+    "ScrollbarGrabHovered": "45, 56, 63",
+    "ScrollbarGrabActive": "22, 53, 79",
+    "CheckMark": "71, 142, 255",
+    "SliderGrab": "71, 142, 255",
+    "SliderGrabActive": "94, 155, 255",
+    "Button": "51, 63, 73",
+    "ButtonHovered": "71, 142, 255",
+    "ButtonActive": "15, 135, 249",
+    "Header": "140, 51, 63, 73",
+    "HeaderHovered": "204, 66, 150, 249",
+    "HeaderActive": "66, 150, 249",
+    "Separator": "51, 63, 73",
+    "SeparatorHovered": "198, 25, 102, 191",
+    "SeparatorActive": "25, 102, 191",
+    "ResizeGrip": "63, 66, 150, 249",
+    "ResizeGripHovered": "170, 66, 150, 249",
+    "ResizeGripActive": "242, 66, 150, 249",
+    "PlotLines": "155, 155, 155",
+    "PlotLinesHovered": "255, 109, 89",
+    "PlotHistogram": "229, 178, 0",
+    "PlotHistogramHovered": "255, 153, 0",
+    "ModalWindowDimBg": "89, 204, 204, 204",
+    "DragDropTarget": "229, 255, 255, 0",
+    "NavHighlight": "66, 150, 249",
+    "DockingPreview": "0, 119, 200",
+    "DockingEmptyBg": "51, 51, 51",
+    "Tab": "28, 38, 43",
+    "TabActive": "51, 63, 73",
+    "TabUnfocused": "28, 38, 43",
+    "TabUnfocusedActive": "28, 38, 43",
+    "TabHovered": "204, 66, 150, 249",
+    "TableHeaderBg": "48, 48, 51",
+    "TableBorderStrong": "79, 79, 89",
+    "TableBorderLight": "58, 58, 63",
+    "TableRowBg": "0, 0, 0, 0",
+    "TableRowBgAlt": "15, 255, 255, 255",
+    "NavWindowingHighlight": "178, 255, 255, 255",
+    "NavWindowingDimBg": "51, 204, 204, 204"
+  }
+}

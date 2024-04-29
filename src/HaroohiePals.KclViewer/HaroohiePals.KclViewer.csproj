@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>HaroohiePals.KclViewer</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NativeFileDialogs.Net" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HaroohiePals.Gui.Viewport\HaroohiePals.Gui.Viewport.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Gui\HaroohiePals.Gui.csproj" />
+    <ProjectReference Include="..\HaroohiePals.KCollision\HaroohiePals.KCollision.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Math\HaroohiePals.Mathematics.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Nitro.G3.OpenGL\HaroohiePals.Nitro.G3.OpenGL.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Nitro\HaroohiePals.Nitro.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Files\kclOctreeCube.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\kclOctreeCube.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\kclPrism.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\kclPrism.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

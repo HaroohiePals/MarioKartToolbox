@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="Shift_JIS"?>
+
+<ita version="1.6.0">
+
+<head>
+	<create user="SGC" host="DESKTOP-9JNKEQ5" date="2022-11-07T14:02:32" source="desert_gc.mb"/>
+	<title>Texture SRT Animation Data for NINTENDO NITRO-System</title>
+	<generator name="Maya 2011 NNS_Export" version="1.6.0.20110413"/>
+</head>
+
+<body>
+
+<tex_srt_info
+	frame_size="256"
+	tool_start_frame="1"
+	tool_end_frame="256"
+	interpolation="frame"
+	tex_matrix_mode="maya"
+	compress_material="off" material_size="18 18"
+	frame_step_mode="4"
+	tolerance_tex_scale="0.100000"
+	tolerance_tex_rotate="0.100000"
+	tolerance_tex_translate="0.010000"
+/>
+
+<tex_scale_data size="1">
+	1.000000
+</tex_scale_data>
+
+<tex_rotate_data size="1">
+	0.000000
+</tex_rotate_data>
+
+<tex_translate_data size="68">
+	0.000000 0.000000 -0.015625 -0.031494 -0.047119 -0.062744 -0.078369 -0.094238 -0.109863 -0.125488
+	-0.141113 -0.156982 -0.172607 -0.188232 -0.203857 -0.219727 -0.235352 -0.250977 -0.266602 -0.282471
+	-0.298096 -0.313721 -0.329346 -0.345215 -0.360840 -0.376465 -0.392090 -0.407959 -0.423584 -0.439209
+	-0.454834 -0.470703 -0.486328 -0.501953 -0.517578 -0.533447 -0.549072 -0.564697 -0.580322 -0.596191
+	-0.611816 -0.627441 -0.643066 -0.658936 -0.674561 -0.690186 -0.705811 -0.721680 -0.737305 -0.752930
+	-0.768555 -0.784424 -0.800049 -0.815674 -0.831299 -0.847168 -0.862793 -0.878418 -0.894043 -0.909912
+	-0.925537 -0.941162 -0.956787 -0.972656 -0.988281 -0.992188 -0.996094 -1.000000
+</tex_translate_data>
+
+<tex_srt_anm_array size="1">
+	<tex_srt_anm index="0" material_name="dgc_pit">
+		<tex_scale_s frame_step="1" data_size="1" data_head="0"/>
+		<tex_scale_t frame_step="1" data_size="1" data_head="0"/>
+		<tex_rotate frame_step="1" data_size="1" data_head="0"/>
+		<tex_translate_s frame_step="1" data_size="1" data_head="0"/>
+		<tex_translate_t frame_step="4" data_size="67" data_head="1"/>
+	</tex_srt_anm>
+</tex_srt_anm_array>
+
+</body>
+
+</ita>

@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HaroohiePals.IO\HaroohiePals.IO.csproj" />
+    <ProjectReference Include="..\HaroohiePals.KCollision\HaroohiePals.KCollision.csproj" />
+    <ProjectReference Include="..\HaroohiePals.MarioKart\HaroohiePals.MarioKart.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Math\HaroohiePals.Mathematics.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Nitro.NitroSystem\HaroohiePals.Nitro.NitroSystem.csproj" />
+    <ProjectReference Include="..\HaroohiePals.Nitro\HaroohiePals.Nitro.csproj" />
+  </ItemGroup>
+
+</Project>
