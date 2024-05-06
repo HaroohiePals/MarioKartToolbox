@@ -3,16 +3,6 @@ using OpenTK.Mathematics;
 
 namespace HaroohiePals.Gui.Viewport;
 
-public record struct PickingResult(int GroupId, int Index, int SubIndex)
-{
-    public static readonly PickingResult Invalid = new(0xFF, 0x7FFFF, 0x1E);
-
-    public PickingResult(uint pickingId)
-        : this((int)(pickingId >> 24 & 0xFF), (int)(pickingId & 0x7FFFF), (int)(pickingId >> 19 & 0x1F) - 1) { }
-
-    public readonly bool IsInvalid => this == Invalid;
-}
-
 public class ViewportContext
 {
     public const uint InvalidPickingId = ~0u;
@@ -39,6 +29,7 @@ public class ViewportContext
     public bool IsHovered(object obj, int subIndex = -1)
         => HoverObject != null && HoverObject.Object == obj && (subIndex == -1 || HoverObject.SubIndex == subIndex);
 
+    //Add 1 to the Group ID to fix an issue where Alpha = 0 pixels would be discarded on some GPUs
     public static uint GetPickingId(int groupId, int index, int subIndex = -1)
-        => ((uint)groupId & 0xFF) << 24 | ((uint)(subIndex + 1) & 0x1F) << 19 | (uint)index & 0x7FFFF;
+        => ((uint)(groupId + 1) & 0xFF) << 24 | ((uint)(subIndex + 1) & 0x1F) << 19 | (uint)index & 0x7FFFF;
 }
