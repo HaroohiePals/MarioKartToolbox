@@ -1,4 +1,5 @@
-﻿using HaroohiePals.NitroKart.MapData.Intermediate;
+﻿using HaroohiePals.NitroKart.MapData;
+using HaroohiePals.NitroKart.MapData.Intermediate;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections.MobjSettings;
 using HaroohiePals.NitroKart.MapObj;
@@ -36,6 +37,12 @@ internal class MkdsMapObjectValidationRule : MkdsMapDataEntryValidationRule<Mkds
 
         if (entry.TTVisible != isTimeTrialVisible)
             errors.Add(new MkdsMapObjectTimeTrialVisibleValidationError(this, entry, isTimeTrialVisible));
+
+        if (entry.ObjectId == MkdsMapObjectId.Itembox || entry.ObjectId ==  MkdsMapObjectId.MoveItembox)
+        {
+            var wifiCoordRule = new MkdsPointWifiCoordOutOfRangeValidationRule(Name);
+            errors.AddRange(wifiCoordRule.Validate(entry));
+        }
 
         switch (entry.Settings)
         {
