@@ -6,6 +6,7 @@ using HaroohiePals.NitroKart.MapData.Intermediate.ComponentModel;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections.MobjSettings;
 using OpenTK.Mathematics;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Xml.Serialization;
 
 namespace HaroohiePals.NitroKart.MapData.Intermediate.Sections;
@@ -50,17 +51,17 @@ public sealed class MkdsMapObject : IMapDataEntry, IRotatedPoint
     public Reference<MkdsPath> Path { get; set; }
 
 
-    private MobjSettings.MkdsMobjSettings _settings = new MobjSettings.MkdsMobjSettings();
+    private MkdsMobjSettings _settings = new MkdsMobjSettings();
 
     [Nested(NestType.Category),
      ListViewColumn(5, "Setting 0", "Setting 1", "Setting 2", "Setting 3", "Setting 4", "Setting 5", "Setting 6")]
-    public MobjSettings.MkdsMobjSettings Settings
+    public MkdsMobjSettings Settings
     {
         get => _settings;
         set
         {
             _settings = value;
-            if (_settings is MobjSettings.MkdsMobjSettings)
+            if (_settings is MkdsMobjSettings)
                 _settings = MkdsMobjSettingsFactory.Construct(_objectId, _settings);
         }
     }
@@ -69,7 +70,7 @@ public sealed class MkdsMapObject : IMapDataEntry, IRotatedPoint
     [ListViewColumn(6, "Inactive Period ON")]
     public bool EnableInactivePeriod { get; set; }
 
-    [Category("Object"), DisplayName("Clip Area ID")]
+    [Category("Object"), DisplayName("Clip Area ID"), Range(0, 9)]
     [ListViewColumn(7, "Clip Area 0", "Clip Area 1", "Clip Area 2", "Clip Area 3")]
     public ushort[] ClipAreaIds { get; set; } = new ushort[4];
 
@@ -149,7 +150,7 @@ public sealed class MkdsMapObject : IMapDataEntry, IRotatedPoint
             ClipAreaIds = (ushort[])ClipAreaIds.Clone(),
             TTVisible = TTVisible,
             ObjectId = ObjectId,
-            Settings = new MobjSettings.MkdsMobjSettings(Settings)
+            Settings = new MkdsMobjSettings(Settings)
         };
 
         if (Path?.IsResolved is true)
