@@ -27,31 +27,24 @@ public static class ImGuiEx
 
     public static bool IsScalarType(Type type) => IsScalarType(Type.GetTypeCode(type));
 
-    public static ImGuiDataType ToImGuiDataType(TypeCode type) => type switch
+    public static unsafe bool DragScalar<T>(string label, T value, out T output, string format = null, T? min = null, T? max = null, float speed = 1) 
+        where T : unmanaged, INumber<T>
     {
-        TypeCode.Byte => ImGuiDataType.U8,
-        TypeCode.SByte => ImGuiDataType.S8,
-        TypeCode.UInt16 => ImGuiDataType.U16,
-        TypeCode.Int16 => ImGuiDataType.S16,
-        TypeCode.UInt32 => ImGuiDataType.U32,
-        TypeCode.Int32 => ImGuiDataType.S32,
-        TypeCode.UInt64 => ImGuiDataType.U64,
-        TypeCode.Int64 => ImGuiDataType.S64,
-        TypeCode.Single => ImGuiDataType.Float,
-        TypeCode.Double => ImGuiDataType.Double,
-
-        _ => throw new NotImplementedException()
-    };
-
-    private static ImGuiDataType ToImGuiDataType(Type type) => ToImGuiDataType(Type.GetTypeCode(type));
-
-    public static unsafe bool DragScalar<T>(string label, T value, out T output, string format = null, T? min = null, T? max = null, float speed = 1) where T : unmanaged
-    {
-        T realMin = min.HasValue ? min.Value : default(T);
-        T realMax = max.HasValue ? max.Value : default(T);
+        T realMin = min.HasValue ? min.Value : default;
+        T realMax = max.HasValue ? max.Value : default;
 
         bool result = ImGui.DragScalar(label, ToImGuiDataType(typeof(T)), (IntPtr)(&value), speed, (IntPtr)(&realMin), (IntPtr)(&realMax), format);
+        
+        if (result)
+        {
+            if (min.HasValue && value < realMin)
+                value = realMin;
+            if (max.HasValue && value > realMax)
+                value = realMax;
+        }
+
         output = value;
+
         return result;
     }
 
@@ -251,6 +244,24 @@ public static class ImGuiEx
 
     public static Color GetColor(ImGuiCol idx)
         => ColorConvertU32ToColor(ImGui.GetColorU32(idx));
+
+    private static ImGuiDataType ToImGuiDataType(TypeCode type) => type switch
+    {
+        TypeCode.Byte => ImGuiDataType.U8,
+        TypeCode.SByte => ImGuiDataType.S8,
+        TypeCode.UInt16 => ImGuiDataType.U16,
+        TypeCode.Int16 => ImGuiDataType.S16,
+        TypeCode.UInt32 => ImGuiDataType.U32,
+        TypeCode.Int32 => ImGuiDataType.S32,
+        TypeCode.UInt64 => ImGuiDataType.U64,
+        TypeCode.Int64 => ImGuiDataType.S64,
+        TypeCode.Single => ImGuiDataType.Float,
+        TypeCode.Double => ImGuiDataType.Double,
+
+        _ => throw new NotImplementedException()
+    };
+
+    private static ImGuiDataType ToImGuiDataType(Type type) => ToImGuiDataType(Type.GetTypeCode(type));
 
     [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
     private static extern void igItemSize_Rect(ImRect bb, float textBaselineY);
