@@ -9,7 +9,7 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport;
 
 abstract class InteractiveViewportPanel : ViewportPanel
 {
-    private readonly IApplicationSettingsService _applicationSettings;
+    protected readonly IApplicationSettingsService _applicationSettings;
     protected readonly Gizmo _gizmo;
     protected readonly RenderGroupVisibilityManager _visibilityManager;
     private readonly SelectionRectangle _selectionRect = new();
