@@ -48,19 +48,19 @@ public class PerspectiveCameraControls
 
         var translation = Vector3.Zero;
 
-        if (controls.Forward.IsDown())
+        if (controls.Forward.IsDown(false))
             translation -= viewInverse.Row2.Xyz * speed; //Forward
-        if (controls.Backward.IsDown())
+        if (controls.Backward.IsDown(false))
             translation += viewInverse.Row2.Xyz * speed; //Backwards
 
-        if (controls.Left.IsDown())
+        if (controls.Left.IsDown(false))
             translation -= viewInverse.Row0.Xyz * speed; //Left
-        if (controls.Right.IsDown())
+        if (controls.Right.IsDown(false))
             translation += viewInverse.Row0.Xyz * speed; //Right
 
-        if (controls.Up.IsDown())
+        if (controls.Up.IsDown(false))
             translation += Vector3.UnitY * speed; //Up 
-        if (controls.Down.IsDown())
+        if (controls.Down.IsDown(false))
             translation -= Vector3.UnitY * speed; //Down
 
         if (translation != Vector3.Zero)
