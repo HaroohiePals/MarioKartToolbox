@@ -37,9 +37,9 @@ namespace HaroohiePals.Gui.Input
             var io = ImGui.GetIO();
 
             if (exclusive)
-                return ImGui.IsKeyPressed(Key) && Ctrl == io.KeyCtrl && Shift == io.KeyShift && Alt == io.KeyAlt;
+                return ImGui.IsKeyPressed(Key, false) && Ctrl == io.KeyCtrl && Shift == io.KeyShift && Alt == io.KeyAlt;
 
-            return ImGui.IsKeyPressed(Key) && (!Ctrl || io.KeyCtrl) && (!Shift || io.KeyShift) && (!Alt || io.KeyAlt);
+            return ImGui.IsKeyPressed(Key, false) && (!Ctrl || io.KeyCtrl) && (!Shift || io.KeyShift) && (!Alt || io.KeyAlt);
         }
 
         public override string ToString()
