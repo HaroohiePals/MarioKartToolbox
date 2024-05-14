@@ -83,14 +83,7 @@ public abstract class ImGuiGameWindow : GameWindow
     {
         base.OnTextInput(e);
 
-        _controller.PressChar((char)e.Unicode);
-    }
-
-    protected override void OnMouseWheel(MouseWheelEventArgs e)
-    {
-        base.OnMouseWheel(e);
-
-        _controller.MouseScroll(e.Offset);
+        _controller.PressInputChar((char)e.Unicode);
     }
 
     protected void SetIcon(params byte[][] iconFiles)
