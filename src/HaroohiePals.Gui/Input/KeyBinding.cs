@@ -7,13 +7,13 @@ namespace HaroohiePals.Gui.Input
         public bool IsDown()
         {
             var io = ImGui.GetIO();
-            return ImGui.IsKeyDown(Key) && (Ctrl == io.KeyCtrl) && (Shift == io.KeyShift) && (Alt == io.KeyAlt);
+            return ImGui.IsKeyDown(Key) && (!Ctrl || io.KeyCtrl) && (!Shift || io.KeyShift) && (!Alt || io.KeyAlt);
         }
 
         public bool IsPressed()
         {
             var io = ImGui.GetIO();
-            return ImGui.IsKeyPressed(Key) && (Ctrl == io.KeyCtrl) && (Shift == io.KeyShift) && (Alt == io.KeyAlt);
+            return ImGui.IsKeyPressed(Key) && (!Ctrl || io.KeyCtrl) && (!Shift || io.KeyShift) && (!Alt || io.KeyAlt);
         }
 
         public override string ToString()
