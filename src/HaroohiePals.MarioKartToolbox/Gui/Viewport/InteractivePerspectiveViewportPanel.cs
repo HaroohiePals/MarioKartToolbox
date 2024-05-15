@@ -25,6 +25,7 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
         base.UpdateControls(deltaTime);
 
         _cameraControls.Update(Context, deltaTime);
+        _cameraControls.ViewportKeyBindings = _applicationSettings.Settings.KeyBindings.Viewport.ToViewportKeyBindings();
     }
 
     public override void RenderControls()

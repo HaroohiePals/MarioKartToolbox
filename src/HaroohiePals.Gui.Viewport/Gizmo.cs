@@ -399,6 +399,12 @@ public class Gizmo
 
     private void HandleImGuizmoShortcuts()
     {
+        if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+        {
+            CancelGizmoTransform();
+            return;
+        }
+
         if (!ImGui.IsWindowFocused() || ImGui.IsMouseDown(ImGuiMouseButton.Right))
             return;
 
