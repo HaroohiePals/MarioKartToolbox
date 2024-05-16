@@ -60,8 +60,14 @@ class MapObjectIdEditor : IPropertyEditor
         if (_selectorWindow.Confirm)
         {
             bool isTimeTrialVisible = _mobjDatabase.GetById(_selectorWindow.MapObjectId).IsTimeTrialVisible;
+
             context.TempActions.Add(new SetPropertyAction(context.Property.SourceObjects, context.Property.Name, _selectorWindow.MapObjectId));
-            context.TempActions.Add(new SetPropertyAction(context.Property.SourceObjects, nameof(MkdsMapObject.TTVisible), isTimeTrialVisible));
+
+            foreach (var mobj in context.Property.SourceObjects.Where(x => x is MkdsMapObject).Cast<MkdsMapObject>())
+            {
+                context.TempActions.Add(mobj.SetPropertyAction(x => x.TTVisible, isTimeTrialVisible));
+            }
+
             result = true;
             context.ApplyEdits = true;
 
