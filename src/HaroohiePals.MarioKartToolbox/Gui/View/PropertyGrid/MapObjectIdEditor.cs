@@ -59,8 +59,9 @@ class MapObjectIdEditor : IPropertyEditor
 
         if (_selectorWindow.Confirm)
         {
-            context.TempActions.Add(
-                new SetPropertyAction(context.Property.SourceObjects, context.Property.Name, _selectorWindow.MapObjectId));
+            bool isTimeTrialVisible = _mobjDatabase.GetById(_selectorWindow.MapObjectId).IsTimeTrialVisible;
+            context.TempActions.Add(new SetPropertyAction(context.Property.SourceObjects, context.Property.Name, _selectorWindow.MapObjectId));
+            context.TempActions.Add(new SetPropertyAction(context.Property.SourceObjects, nameof(MkdsMapObject.TTVisible), isTimeTrialVisible));
             result = true;
             context.ApplyEdits = true;
 
