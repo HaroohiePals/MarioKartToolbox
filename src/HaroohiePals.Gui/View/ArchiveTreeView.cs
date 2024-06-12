@@ -14,7 +14,7 @@ public class ArchiveTreeView : IView
     private IReadOnlyArchive _archive;
     private readonly TreeView _tree;
 
-    private readonly Dictionary<string, char> _fileExtIcons;
+    private readonly IReadOnlyDictionary<string, char> _fileExtIcons;
 
     public event Action<ArchiveTreeView, string, bool> Activate;
 
@@ -32,7 +32,7 @@ public class ArchiveTreeView : IView
 
     public string Id { get; }
 
-    public ArchiveTreeView(string id, Dictionary<string, char> fileExtIcons = null)
+    public ArchiveTreeView(string id, IReadOnlyDictionary<string, char> fileExtIcons = null)
     {
         Id = id;
         _tree = new(Id);

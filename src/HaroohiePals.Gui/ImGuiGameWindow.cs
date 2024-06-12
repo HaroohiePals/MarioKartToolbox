@@ -9,7 +9,6 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Image = OpenTK.Windowing.Common.Input.Image;
 
@@ -20,8 +19,7 @@ public abstract class ImGuiGameWindow : GameWindow
     private static readonly Color4 ClearColor = new Color4(0, 32, 48, 255);
 
     private ImGuiController _controller;
-    private float _uiScale;
-    protected IReadOnlyCollection<ImGuiIcon> _appIcons;
+    private ImGuiGameWindowSettings _settings;
 
     public ImGuiGameWindow() : this(ImGuiGameWindowSettings.Default) { }
     public ImGuiGameWindow(ImGuiGameWindowSettings settings)
@@ -34,8 +32,7 @@ public abstract class ImGuiGameWindow : GameWindow
         Flags = ContextFlags.ForwardCompatible
     })
     {
-        _appIcons = settings.AppIcons;
-        _uiScale = settings.UiScale;
+        _settings = settings;
     }
 
     protected abstract void RenderLayout(FrameEventArgs args);
@@ -46,7 +43,7 @@ public abstract class ImGuiGameWindow : GameWindow
 
         GLContext.Current = new GLContext();
 
-        _controller = new ImGuiController(ClientSize.X, ClientSize.Y, _uiScale, _appIcons.ToArray());
+        _controller = new ImGuiController(ClientSize.X, ClientSize.Y, _settings);
 
         ImGuiThemeManager.Init();
 

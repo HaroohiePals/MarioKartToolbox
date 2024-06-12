@@ -8,10 +8,13 @@ namespace HaroohiePals.KclViewer.Gui;
 
 internal sealed class KclViewerWindow : ImGuiViewWindow
 {
+    private const string WINDOW_TITLE = "KCL Viewer";
+    private static readonly Vector2i WindowSize = new Vector2i(1200, 800);
+
     private string _kclFilePath;
 
     public KclViewerWindow(IModalService modalService)
-        : base(new ImGuiGameWindowSettings("KCL Viewer", new Vector2i(1200, 800), 1f, []), modalService)
+        : base(ImGuiGameWindowSettings.Default with { Title = WINDOW_TITLE, Size = WindowSize }, modalService)
     {
         MainMenuItems = [
             new("File")
