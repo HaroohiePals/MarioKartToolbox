@@ -21,8 +21,8 @@ static class IconConsts
 
     public static class FileTypes
     {
-        public static char MapData = FontAwesome6.Map[0];
-        public static char Model = FontAwesome6.Cube[0];
-        public static char Animation = FontAwesome6.Images[0];
+        public static readonly char MapData = FontAwesome6.Map[0];
+        public static readonly char Model = FontAwesome6.Cube[0];
+        public static readonly char Animation = FontAwesome6.Images[0];
     }
 }
