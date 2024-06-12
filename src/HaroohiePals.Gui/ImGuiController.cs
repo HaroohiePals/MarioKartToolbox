@@ -32,7 +32,7 @@ namespace HaroohiePals.Gui
         private int _windowWidth;
         private int _windowHeight;
 
-        private List<ImGuiIcon> _icons = new();
+        private List<ImGuiIconGlyph> _icons = new();
 
         private System.Numerics.Vector2 _scaleFactor = System.Numerics.Vector2.One;
 
@@ -44,7 +44,7 @@ namespace HaroohiePals.Gui
         /// <summary>
         /// Constructs a new ImGuiController.
         /// </summary>
-        public ImGuiController(int width, int height, float uiScale = 1.0f, ImGuiIcon[] icons = null)
+        public ImGuiController(int width, int height, float uiScale = 1.0f, ImGuiIconGlyph[] icons = null)
         {
             _uiScale = uiScale;
             _windowWidth = width;
@@ -189,16 +189,16 @@ void main()
             return io.Fonts.AddCustomRectFontGlyph(io.Fonts.Fonts[0], character, size, size, size);
         }
 
-        private void InitIcons(ImGuiIcon[] icons)
+        private void InitIcons(ImGuiIconGlyph[] icons)
         {
             //Default icons
-            _icons.Add(new ImGuiIcon(Resources.Icons.Folder_16x, FontAwesome6.Folder[0], 16));
-            _icons.Add(new ImGuiIcon(Resources.Icons.Document_16x, FontAwesome6.File[0], 16));
-            _icons.Add(new ImGuiIcon(Resources.Icons.ImportFile_16x, FontAwesome6.FileImport[0], 16));
-            _icons.Add(new ImGuiIcon(Resources.Icons.ExportFile_16x, FontAwesome6.FileExport[0], 16));
-            _icons.Add(new ImGuiIcon(Resources.Icons.VSO_RecycleBin_16x, FontAwesome6.TrashCan[0], 16));
-            _icons.Add(new ImGuiIcon(Resources.Icons.Undo_16x, FontAwesome6.ArrowRotateLeft[0], 16));
-            _icons.Add(new ImGuiIcon(Resources.Icons.Redo_16x, FontAwesome6.ArrowRotateRight[0], 16));
+            _icons.Add(new ImGuiIconGlyph(Resources.Icons.Folder_16x, FontAwesome6.Folder[0], 16));
+            _icons.Add(new ImGuiIconGlyph(Resources.Icons.Document_16x, FontAwesome6.File[0], 16));
+            _icons.Add(new ImGuiIconGlyph(Resources.Icons.ImportFile_16x, FontAwesome6.FileImport[0], 16));
+            _icons.Add(new ImGuiIconGlyph(Resources.Icons.ExportFile_16x, FontAwesome6.FileExport[0], 16));
+            _icons.Add(new ImGuiIconGlyph(Resources.Icons.VSO_RecycleBin_16x, FontAwesome6.TrashCan[0], 16));
+            _icons.Add(new ImGuiIconGlyph(Resources.Icons.Undo_16x, FontAwesome6.ArrowRotateLeft[0], 16));
+            _icons.Add(new ImGuiIconGlyph(Resources.Icons.Redo_16x, FontAwesome6.ArrowRotateRight[0], 16));
 
             if (icons != null)
                 _icons.AddRange(icons);
@@ -211,7 +211,7 @@ void main()
         {
             var io = ImGui.GetIO();
 
-            Dictionary<ImGuiIcon, int> registeredIcons = new();
+            Dictionary<ImGuiIconGlyph, int> registeredIcons = new();
 
             foreach (var icon in _icons)
                 registeredIcons.Add(icon, RegisterIcon(icon.CodePoint, 16));

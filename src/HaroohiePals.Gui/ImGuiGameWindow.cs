@@ -21,7 +21,7 @@ public abstract class ImGuiGameWindow : GameWindow
 
     private ImGuiController _controller;
     private float _uiScale;
-    protected IReadOnlyCollection<ImGuiIcon> _appIcons;
+    protected IReadOnlyCollection<ImGuiIconGlyph> _iconGlyphs;
 
     public ImGuiGameWindow() : this(ImGuiGameWindowSettings.Default) { }
     public ImGuiGameWindow(ImGuiGameWindowSettings settings)
@@ -34,7 +34,7 @@ public abstract class ImGuiGameWindow : GameWindow
         Flags = ContextFlags.ForwardCompatible
     })
     {
-        _appIcons = settings.AppIcons;
+        _iconGlyphs = settings.IconGlyphs;
         _uiScale = settings.UiScale;
     }
 
@@ -46,7 +46,7 @@ public abstract class ImGuiGameWindow : GameWindow
 
         GLContext.Current = new GLContext();
 
-        _controller = new ImGuiController(ClientSize.X, ClientSize.Y, _uiScale, _appIcons.ToArray());
+        _controller = new ImGuiController(ClientSize.X, ClientSize.Y, _uiScale, _iconGlyphs.ToArray());
 
         ImGuiThemeManager.Init();
 

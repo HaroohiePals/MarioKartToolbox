@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace HaroohiePals.Gui;
 
-public record struct ImGuiGameWindowSettings(string Title, Vector2i Size, float UiScale, IReadOnlyCollection<ImGuiIcon> AppIcons)
+public record struct ImGuiGameWindowSettings(string Title, Vector2i Size, float UiScale, IReadOnlyCollection<ImGuiIconGlyph> IconGlyphs)
 {
     public static readonly ImGuiGameWindowSettings Default = new("ImGui App", new(800, 600), 1f, []);
 }

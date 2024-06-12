@@ -5,11 +5,11 @@ namespace HaroohiePals.MarioKartToolbox.Gui
 {
     internal static class IconConsts
     {
-        public static ImGuiIcon[] Icons = new ImGuiIcon[]
+        public static ImGuiIconGlyph[] Icons = new ImGuiIconGlyph[]
         {
-            new ImGuiIcon(Resources.Icons.Model3D_16x, FileTypes.Model, 16),
-            new ImGuiIcon(Resources.Icons.TrafficCone_16x, FileTypes.MapData, 16),
-            new ImGuiIcon(Resources.Icons.ImageStack_16x, FileTypes.Animation, 16),
+            new ImGuiIconGlyph(Resources.Icons.Model3D_16x, FileTypes.Model, 16),
+            new ImGuiIconGlyph(Resources.Icons.TrafficCone_16x, FileTypes.MapData, 16),
+            new ImGuiIconGlyph(Resources.Icons.ImageStack_16x, FileTypes.Animation, 16),
         };
 
         public static Dictionary<string, char> FileExtIcons = new Dictionary<string, char>
