@@ -16,6 +16,9 @@ namespace HaroohiePals.Gui
 {
     internal partial class ImGuiController : IDisposable
     {
+        private const float BASE_FONT_SIZE = 15f;
+        private const float BASE_ICON_FONT_SIZE = 16f;
+
         private static readonly Keys[] KeyValues = Enum.GetValues<Keys>();
 
         private bool _frameBegun;
@@ -215,45 +218,62 @@ void main()
                 _icons.AddRange(icons);
         }
 
-        private void InitFonts()
+        private ImFontConfigPtr GetImFontConfig(bool isIconFont = false)
         {
-            var io = ImGui.GetIO();
-
             ImFontConfigPtr conf;
             unsafe
             {
                 conf = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
             }
 
-            conf.PixelSnapH = true; //false;
+            conf.PixelSnapH = true;
             conf.OversampleH = 1;
             conf.OversampleV = 1;
 
-            ImFontConfigPtr conf2;
-
-            unsafe
+            if (isIconFont)
             {
-                byte[] font = Resources.Fonts.Roboto_Regular;
-                fixed (byte* p = Resources.Fonts.Roboto_Regular)
-                    io.Fonts.AddFontFromMemoryTTF((IntPtr)p, font.Length, 15f * _uiScale, conf);
-                conf2 = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
+                conf.MergeMode = true;
+                conf.GlyphOffset.Y = 1;
+                conf.GlyphMinAdvanceX = 16f; // Use if you want to make the icon monospaced
             }
 
-            conf2.PixelSnapH = true;
-            conf2.OversampleH = 1;
-            conf2.OversampleV = 1;
-            conf2.MergeMode = true;
-            conf2.GlyphOffset.Y = 1;
-            conf2.GlyphMinAdvanceX = 16f; // Use if you want to make the icon monospaced
-            var iconRanges = new ushort[] { FontAwesome6.IconMin, FontAwesome6.IconMax, 0 };
-            unsafe
+            return conf;
+        }
+
+        private void InitFonts()
+        {
+            var io = ImGui.GetIO();
+
+            bool isDefaultFont = true;
+
+            foreach (var font in _fonts)
             {
-                byte[] font = Resources.Fonts.fa_solid_900;
-                fixed (byte* p = Resources.Fonts.fa_solid_900)
+                ImFontConfigPtr fontConf = GetImFontConfig();
+                
+                unsafe
                 {
-                    fixed (ushort* rang = iconRanges)
-                        io.Fonts.AddFontFromMemoryTTF((IntPtr)p, font.Length, 16f * _uiScale, conf2, (IntPtr)rang);
+                    fixed (byte* p = font.Data)
+                        io.Fonts.AddFontFromMemoryTTF((IntPtr)p, font.Data.Length, BASE_FONT_SIZE * _uiScale, fontConf);
                 }
+
+                // Merge icon font only for the default font (first font)
+                if (isDefaultFont)
+                {
+                    ImFontConfigPtr iconFontConf = GetImFontConfig(true);
+
+                    var iconRanges = new ushort[] { FontAwesome6.IconMin, FontAwesome6.IconMax, 0 };
+                    unsafe
+                    {
+                        fixed (byte* p = _iconFont.Data)
+                        {
+                            fixed (ushort* rang = iconRanges)
+                                io.Fonts.AddFontFromMemoryTTF((IntPtr)p, _iconFont.Data.Length, BASE_ICON_FONT_SIZE * _uiScale, iconFontConf, (IntPtr)rang);
+                        }
+                    }
+
+                }
+
+                isDefaultFont = false;
             }
         }
 
