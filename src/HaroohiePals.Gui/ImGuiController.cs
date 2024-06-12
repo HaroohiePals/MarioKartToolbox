@@ -274,7 +274,9 @@ void main()
         Dictionary<ImGuiIconGlyph, int> registeredIcons = new();
 
         foreach (var icon in _icons)
+        {
             registeredIcons.Add(icon, RegisterIcon(icon.CodePoint, 16));
+        }
 
         io.Fonts.GetTexDataAsRGBA32(out IntPtr pixels, out int width, out int height, out int bytesPerPixel);
 
@@ -291,7 +293,7 @@ void main()
         io.Fonts.ClearTexData();
     }
 
-    private unsafe void LoadIcon(int rectId, in IntPtr pixels, byte[] iconBytes, int width, int height)
+    private unsafe void LoadIcon(int rectId, IntPtr pixels, byte[] iconBytes, int width, int height)
     {
         var io = ImGui.GetIO();
 
@@ -303,7 +305,9 @@ void main()
             {
                 uint* p = pixPtr + (rect.Y + y) * width + (rect.X);
                 for (int x = 0; x < rect.Width; x++)
+                {
                     p[x] = icon[x, y].PackedValue;
+                }
             }
         }
     }

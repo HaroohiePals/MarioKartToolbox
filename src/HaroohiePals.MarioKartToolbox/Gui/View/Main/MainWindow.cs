@@ -16,7 +16,7 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.Main;
 class MainWindow : ImGuiViewWindow
 {
     private const string WINDOW_TITLE = "Mario Kart Toolbox";
-    private readonly static Vector2i WindowSize = new Vector2i(1400, 900);
+    private static readonly Vector2i WindowSize = new Vector2i(1400, 900);
 
     private readonly MainWindowViewModel _viewModel;
     private readonly IApplicationSettingsService _applicationSettingsService;
