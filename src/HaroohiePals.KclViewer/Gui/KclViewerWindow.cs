@@ -11,7 +11,7 @@ internal sealed class KclViewerWindow : ImGuiViewWindow
     private string _kclFilePath;
 
     public KclViewerWindow(IModalService modalService)
-        : base(new ImGuiGameWindowSettings("KCL Viewer", new Vector2i(1200, 800), 1f, []), modalService)
+        : base(new ImGuiGameWindowSettings("KCL Viewer", new Vector2i(1200, 800), 1f, [], [ImGuiFont.DefaultIconFont]), modalService)
     {
         MainMenuItems = [
             new("File")
