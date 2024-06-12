@@ -33,6 +33,8 @@ namespace HaroohiePals.Gui
         private int _windowHeight;
 
         private List<ImGuiIconGlyph> _icons = new();
+        private IReadOnlyCollection<ImGuiFont> _fonts;
+        private ImGuiFont _iconFont;
 
         private System.Numerics.Vector2 _scaleFactor = System.Numerics.Vector2.One;
 
@@ -44,58 +46,20 @@ namespace HaroohiePals.Gui
         /// <summary>
         /// Constructs a new ImGuiController.
         /// </summary>
-        public ImGuiController(int width, int height, float uiScale = 1.0f, ImGuiIconGlyph[] icons = null)
+        public ImGuiController(int width, int height, ImGuiGameWindowSettings settings)
         {
-            _uiScale = uiScale;
+            _fonts = settings.Fonts;
+            _iconFont = settings.IconFont ?? new ImGuiFont(Resources.Fonts.fa_solid_900);
+            _uiScale = settings.UiScale;
             _windowWidth = width;
             _windowHeight = height;
 
             IntPtr context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
-            //ImGuizmo.SetImGuiContext(context);
-            //IntPtr implotContext = ImPlot.CreateContext();
-            //ImPlot.SetCurrentContext(implotContext);
-            //ImPlot.SetImGuiContext(context);
 
             var io = ImGui.GetIO();
 
-            //io.Fonts.AddFontDefault();
-            ImFontConfigPtr conf;
-            unsafe
-            {
-                conf = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
-            }
-
-            conf.PixelSnapH = true; //false;
-            conf.OversampleH = 1;
-            conf.OversampleV = 1;
-
-            ImFontConfigPtr conf2;
-
-            unsafe
-            {
-                byte[] font = Resources.Fonts.Roboto_Regular;
-                fixed (byte* p = Resources.Fonts.Roboto_Regular)
-                    io.Fonts.AddFontFromMemoryTTF((IntPtr)p, font.Length, 15f * _uiScale, conf);
-                conf2 = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
-            }
-
-            conf2.PixelSnapH = true;
-            conf2.OversampleH = 1;
-            conf2.OversampleV = 1;
-            conf2.MergeMode = true;
-            conf2.GlyphOffset.Y = 1;
-            conf2.GlyphMinAdvanceX = 16f; // Use if you want to make the icon monospaced
-            var iconRanges = new ushort[] { FontAwesome6.IconMin, FontAwesome6.IconMax, 0 };
-            unsafe
-            {
-                byte[] font = Resources.Fonts.fa_solid_900;
-                fixed (byte* p = Resources.Fonts.fa_solid_900)
-                {
-                    fixed (ushort* rang = iconRanges)
-                        io.Fonts.AddFontFromMemoryTTF((IntPtr)p, font.Length, 16f * _uiScale, conf2, (IntPtr)rang);
-                }
-            }
+            InitFonts();
 
             io.BackendFlags = ImGuiBackendFlags.RendererHasVtxOffset | ImGuiBackendFlags.RendererHasViewports |
                               ImGuiBackendFlags.HasMouseCursors;
@@ -104,7 +68,7 @@ namespace HaroohiePals.Gui
             io.ConfigWindowsMoveFromTitleBarOnly = true;
             io.ConfigDragClickToInputText = true;
 
-            InitIcons(icons);
+            InitIcons(settings.IconGlyphs);
             CreateDeviceResources();
             SetKeyMappings();
 
@@ -183,13 +147,60 @@ void main()
             Util.CheckGLError("End of ImGui setup");
         }
 
+        /// <summary>
+        /// Renders the ImGui draw list data.
+        /// </summary>
+        public void Render()
+        {
+            if (_frameBegun)
+            {
+                _frameBegun = false;
+                ImGui.Render();
+                RenderImDrawData(ImGui.GetDrawData());
+            }
+        }
+
+        /// <summary>
+        /// Updates ImGui input and IO configuration state.
+        /// </summary>
+        public void Update(GameWindow wnd, float deltaSeconds)
+        {
+            if (_frameBegun)
+            {
+                ImGui.Render();
+            }
+
+            SetPerFrameImGuiData(deltaSeconds);
+            UpdateImGuiInput(wnd);
+
+            _frameBegun = true;
+            ImGui.NewFrame();
+            //ImGuizmo.BeginFrame();
+        }
+
+        /// <summary>
+        /// Frees all graphics resources used by the renderer.
+        /// </summary>
+        public void Dispose()
+        {
+            _vertexArray.Dispose();
+            _vertexBuffer.Dispose();
+            _indexBuffer.Dispose();
+
+            _fontTexture.Dispose();
+            _shader.Dispose();
+        }
+
+        internal void PressInputChar(char keyChar)
+            => _pressedInputChars.Add(keyChar);
+
         private int RegisterIcon(char character, int size)
         {
             var io = ImGui.GetIO();
             return io.Fonts.AddCustomRectFontGlyph(io.Fonts.Fonts[0], character, size, size, size);
         }
 
-        private void InitIcons(ImGuiIconGlyph[] icons)
+        private void InitIcons(IReadOnlyCollection<ImGuiIconGlyph> icons)
         {
             //Default icons
             _icons.Add(new ImGuiIconGlyph(Resources.Icons.Folder_16x, FontAwesome6.Folder[0], 16));
@@ -202,6 +213,48 @@ void main()
 
             if (icons != null)
                 _icons.AddRange(icons);
+        }
+
+        private void InitFonts()
+        {
+            var io = ImGui.GetIO();
+
+            ImFontConfigPtr conf;
+            unsafe
+            {
+                conf = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
+            }
+
+            conf.PixelSnapH = true; //false;
+            conf.OversampleH = 1;
+            conf.OversampleV = 1;
+
+            ImFontConfigPtr conf2;
+
+            unsafe
+            {
+                byte[] font = Resources.Fonts.Roboto_Regular;
+                fixed (byte* p = Resources.Fonts.Roboto_Regular)
+                    io.Fonts.AddFontFromMemoryTTF((IntPtr)p, font.Length, 15f * _uiScale, conf);
+                conf2 = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
+            }
+
+            conf2.PixelSnapH = true;
+            conf2.OversampleH = 1;
+            conf2.OversampleV = 1;
+            conf2.MergeMode = true;
+            conf2.GlyphOffset.Y = 1;
+            conf2.GlyphMinAdvanceX = 16f; // Use if you want to make the icon monospaced
+            var iconRanges = new ushort[] { FontAwesome6.IconMin, FontAwesome6.IconMax, 0 };
+            unsafe
+            {
+                byte[] font = Resources.Fonts.fa_solid_900;
+                fixed (byte* p = Resources.Fonts.fa_solid_900)
+                {
+                    fixed (ushort* rang = iconRanges)
+                        io.Fonts.AddFontFromMemoryTTF((IntPtr)p, font.Length, 16f * _uiScale, conf2, (IntPtr)rang);
+                }
+            }
         }
 
         /// <summary>
@@ -246,37 +299,6 @@ void main()
             io.Fonts.SetTexID((IntPtr)_fontTexture.Handle);
 
             io.Fonts.ClearTexData();
-        }
-
-        /// <summary>
-        /// Renders the ImGui draw list data.
-        /// </summary>
-        public void Render()
-        {
-            if (_frameBegun)
-            {
-                _frameBegun = false;
-                ImGui.Render();
-                RenderImDrawData(ImGui.GetDrawData());
-            }
-        }
-
-        /// <summary>
-        /// Updates ImGui input and IO configuration state.
-        /// </summary>
-        public void Update(GameWindow wnd, float deltaSeconds)
-        {
-            if (_frameBegun)
-            {
-                ImGui.Render();
-            }
-
-            SetPerFrameImGuiData(deltaSeconds);
-            UpdateImGuiInput(wnd);
-
-            _frameBegun = true;
-            ImGui.NewFrame();
-            //ImGuizmo.BeginFrame();
         }
 
         /// <summary>
@@ -334,9 +356,6 @@ void main()
 
             _pressedInputChars.Clear();
         }
-
-        internal void PressInputChar(char keyChar)
-            => _pressedInputChars.Add(keyChar);
 
         private void SetKeyMappings()
         {
@@ -531,19 +550,6 @@ void main()
 
             GL.Disable(EnableCap.Blend);
             GL.Disable(EnableCap.ScissorTest);
-        }
-
-        /// <summary>
-        /// Frees all graphics resources used by the renderer.
-        /// </summary>
-        public void Dispose()
-        {
-            _vertexArray.Dispose();
-            _vertexBuffer.Dispose();
-            _indexBuffer.Dispose();
-
-            _fontTexture.Dispose();
-            _shader.Dispose();
         }
     }
 }

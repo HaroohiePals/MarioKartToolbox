@@ -11,6 +11,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime;
 using Image = OpenTK.Windowing.Common.Input.Image;
 
 namespace HaroohiePals.Gui;
@@ -20,8 +21,7 @@ public abstract class ImGuiGameWindow : GameWindow
     private static readonly Color4 ClearColor = new Color4(0, 32, 48, 255);
 
     private ImGuiController _controller;
-    private float _uiScale;
-    protected IReadOnlyCollection<ImGuiIconGlyph> _iconGlyphs;
+    private ImGuiGameWindowSettings _settings;
 
     public ImGuiGameWindow() : this(ImGuiGameWindowSettings.Default) { }
     public ImGuiGameWindow(ImGuiGameWindowSettings settings)
@@ -34,8 +34,7 @@ public abstract class ImGuiGameWindow : GameWindow
         Flags = ContextFlags.ForwardCompatible
     })
     {
-        _iconGlyphs = settings.IconGlyphs;
-        _uiScale = settings.UiScale;
+        _settings = settings;
     }
 
     protected abstract void RenderLayout(FrameEventArgs args);
@@ -46,7 +45,7 @@ public abstract class ImGuiGameWindow : GameWindow
 
         GLContext.Current = new GLContext();
 
-        _controller = new ImGuiController(ClientSize.X, ClientSize.Y, _uiScale, _iconGlyphs.ToArray());
+        _controller = new ImGuiController(ClientSize.X, ClientSize.Y, _settings);
 
         ImGuiThemeManager.Init();
 

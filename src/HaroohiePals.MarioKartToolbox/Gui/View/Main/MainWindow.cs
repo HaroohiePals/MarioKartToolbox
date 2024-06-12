@@ -48,7 +48,7 @@ class MainWindow : ImGuiViewWindow
     ];
 
     public MainWindow(IModalService modalService, IApplicationSettingsService applicationSettingsService, MainWindowViewModel viewModel)
-        : base(new ImGuiGameWindowSettings(WINDOW_TITLE, new Vector2i(1400, 900), viewModel.GetUiScaleSetting(), IconConsts.Icons),
+        : base(new ImGuiGameWindowSettings(WINDOW_TITLE, new Vector2i(1400, 900), viewModel.GetUiScaleSetting(), IconConsts.Icons, [ ImGuiFont.Default ]),
             modalService)
     {
         _viewModel = viewModel;

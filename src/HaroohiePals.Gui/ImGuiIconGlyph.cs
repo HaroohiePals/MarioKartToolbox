@@ -1,6 +1,3 @@
-﻿//using ImPlotNET;
+﻿namespace HaroohiePals.Gui;
 
-namespace HaroohiePals.Gui
-{
-    public record ImGuiIconGlyph(byte[] ImageBytes, char CodePoint, int Size);
-}
+public sealed record ImGuiIconGlyph(byte[] ImageBytes, char CodePoint, int Size);
