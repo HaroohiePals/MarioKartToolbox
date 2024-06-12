@@ -49,7 +49,7 @@ internal sealed class ImGuiController : IDisposable
     public ImGuiController(int width, int height, ImGuiGameWindowSettings settings)
     {
         _fonts = settings.Fonts;
-        _iconFont = settings.IconFont ?? ImGuiFont.DefaultIconFont;
+        _iconFont = settings.IconFont;
         _uiScale = settings.UiScale;
         _windowWidth = width;
         _windowHeight = height;
@@ -221,26 +221,22 @@ void main()
 
         foreach (var font in _fonts)
         {
-            AddFont(font, GetImFontConfig());
+            AddFont(font);
 
             // Merge icon font only for the default font (first font)
-            if (isDefaultFont)
+            if (isDefaultFont && _iconFont is not null)
             {
                 var iconRanges = new ushort[] { FontAwesome6.IconMin, FontAwesome6.IconMax, 0 };
-                AddFont(_iconFont, GetImFontConfig(true), iconRanges);
+                AddFont(_iconFont, true, iconRanges);
             }
 
             isDefaultFont = false;
         }
     }
 
-    private ImFontConfigPtr GetImFontConfig(bool isIconFont = false)
+    private unsafe ImFontConfigPtr CreateImFontConfig(ImGuiFont font, bool isIconFont = false)
     {
-        ImFontConfigPtr conf;
-        unsafe
-        {
-            conf = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
-        }
+        var conf = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
 
         conf.PixelSnapH = true;
         conf.OversampleH = 1;
@@ -250,20 +246,21 @@ void main()
         {
             conf.MergeMode = true;
             conf.GlyphOffset.Y = 1;
-            conf.GlyphMinAdvanceX = 16f; // Use if you want to make the icon monospaced
+            conf.GlyphMinAdvanceX = font.Size; // Use if you want to make the icon monospaced
         }
 
         return conf;
     }
 
-    private unsafe void AddFont(ImGuiFont font, in ImFontConfigPtr fontConfig, ushort[] iconRanges = null)
+    private unsafe void AddFont(ImGuiFont font, bool isIconFont = false, ushort[] iconRanges = null)
     {
         var io = ImGui.GetIO();
+        var fontConfig = CreateImFontConfig(_iconFont, isIconFont);
 
         fixed (byte* p = font.Data)
+        fixed (ushort* range = iconRanges)
         {
-            fixed (ushort* rang = iconRanges)
-                io.Fonts.AddFontFromMemoryTTF((IntPtr)p, font.Data.Length, font.Size * _uiScale, fontConfig, (IntPtr)rang);
+            io.Fonts.AddFontFromMemoryTTF((IntPtr)p, font.Data.Length, font.Size * _uiScale, fontConfig, (IntPtr)range);
         }
     }
 
@@ -281,34 +278,34 @@ void main()
 
         io.Fonts.GetTexDataAsRGBA32(out IntPtr pixels, out int width, out int height, out int bytesPerPixel);
 
-        void loadIcon(int rectId, byte[] iconBytes)
-        {
-            using (var icon = Image.Load<Bgra32>(iconBytes))
-            {
-                unsafe
-                {
-                    uint* pixPtr = (uint*)pixels;
-                    var rect = io.Fonts.GetCustomRectByIndex(rectId);
-                    for (int y = 0; y < rect.Height; y++)
-                    {
-                        uint* p = pixPtr + (rect.Y + y) * width + (rect.X);
-                        for (int x = 0; x < rect.Width; x++)
-                            p[x] = icon[x, y].PackedValue;
-                    }
-                }
-            }
-        }
-
         foreach (var icon in _icons)
-            loadIcon(registeredIcons[icon], icon.ImageBytes);
+        {
+            LoadIcon(registeredIcons[icon], pixels, icon.ImageBytes, width, height);
+        }
 
         _fontTexture = new GLTexture(pixels, width, height, PixelFormat.Bgra, PixelType.UnsignedByte,
             TextureWrapMode.Clamp, TextureWrapMode.Clamp);
         _fontTexture.SetFilterMode(TextureFilterMode.Linear, TextureFilterMode.Linear);
 
         io.Fonts.SetTexID((IntPtr)_fontTexture.Handle);
-
         io.Fonts.ClearTexData();
+    }
+
+    private unsafe void LoadIcon(int rectId, in IntPtr pixels, byte[] iconBytes, int width, int height)
+    {
+        var io = ImGui.GetIO();
+
+        using (var icon = Image.Load<Bgra32>(iconBytes))
+        {
+            uint* pixPtr = (uint*)pixels;
+            var rect = io.Fonts.GetCustomRectByIndex(rectId);
+            for (int y = 0; y < rect.Height; y++)
+            {
+                uint* p = pixPtr + (rect.Y + y) * width + (rect.X);
+                for (int x = 0; x < rect.Width; x++)
+                    p[x] = icon[x, y].PackedValue;
+            }
+        }
     }
 
     /// <summary>

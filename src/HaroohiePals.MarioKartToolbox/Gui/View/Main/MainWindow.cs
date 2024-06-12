@@ -3,6 +3,7 @@ using HaroohiePals.Gui.View.Menu;
 using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
 using HaroohiePals.MarioKartToolbox.Gui.ViewModel.Main;
+using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;
@@ -15,11 +16,12 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.Main;
 class MainWindow : ImGuiViewWindow
 {
     private const string WINDOW_TITLE = "Mario Kart Toolbox";
+    private readonly static Vector2i WindowSize = new Vector2i(1400, 900);
 
     private readonly MainWindowViewModel _viewModel;
     private readonly IApplicationSettingsService _applicationSettingsService;
 
-    private IReadOnlyCollection<MenuItem> _mainMenuItems => 
+    private IReadOnlyCollection<MenuItem> _mainMenuItems =>
     [
         new("File")
         {
@@ -47,9 +49,14 @@ class MainWindow : ImGuiViewWindow
         new("About", _viewModel.ShowAbout)
     ];
 
-    public MainWindow(IModalService modalService, IApplicationSettingsService applicationSettingsService, MainWindowViewModel viewModel)
-        : base(new ImGuiGameWindowSettings(WINDOW_TITLE, new Vector2i(1400, 900), viewModel.GetUiScaleSetting(), IconConsts.Icons, [ ImGuiFont.Default ]),
-            modalService)
+    public MainWindow(IModalService modalService, IApplicationSettingsService applicationSettingsService, 
+        MainWindowViewModel viewModel) : base(ImGuiGameWindowSettings.Default with
+        {
+            Title = WINDOW_TITLE,
+            Size = WindowSize,
+            UiScale = viewModel.GetUiScaleSetting(),
+            IconGlyphs = IconConsts.Icons
+        }, modalService)
     {
         _viewModel = viewModel;
         _applicationSettingsService = applicationSettingsService;
