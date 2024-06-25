@@ -37,6 +37,7 @@ public class Gizmo
     public GizmoKeyBindings KeyBindings = new();
 
     public GizmoTool Tool = GizmoTool.Translate;
+    public ImGuizmoMode Mode = ImGuizmoMode.Local;
     public GizmoRotateScaleMode RotateScaleMode = GizmoRotateScaleMode.MedianPoint;
 
     public DrawTool DrawTool;
@@ -146,15 +147,15 @@ public class Gizmo
 
         var mtx = Matrix4.CreateTranslation((Vector3)avgPos);
 
-        if (Tool == GizmoTool.Rotate)
-        {
+        //if (Tool == GizmoTool.Rotate)
+        //{
             mtx = Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_currentRotation.X)) *
                   Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(_currentRotation.Y)) *
                   Matrix4.CreateRotationZ((float)MathHelper.DegreesToRadians(_currentRotation.Z)) * mtx;
-        }
+        //}
 
-        if (!_imGuizmo.Manipulate(context.ViewMatrix, context.ProjectionMatrix, guizmoOperation, ImGuizmoMode.Local,
-            ref mtx, out var deltaMtx/*, null, new float[] { -16f, -16f, -16f, 16f, 16f, 16f }*/))
+        if (!_imGuizmo.Manipulate(context.ViewMatrix, context.ProjectionMatrix, guizmoOperation, Mode,
+            ref mtx, out var deltaMtx/*, null, [ -160f, -160f, -160f, 160f, 160f, 160f ]*/))
             return;
 
         if (!Started)

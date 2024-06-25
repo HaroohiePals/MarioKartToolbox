@@ -1626,10 +1626,8 @@ public class ImGuizmo
                 else
                 {
                     //This would cause weird NaN calculations so I simplified it
-                    //float lengthOnAxis = Vector3.Dot(axisValue, delta);
-                    //delta = axisValue * lengthOnAxis;
-
-                    delta *= axisValue;
+                    float lengthOnAxis = Vector3.Dot(axisValue, delta);
+                    delta = axisValue * lengthOnAxis;
 
                     //Prevent shooting up really fast
                     //todo: find a better way to do this
