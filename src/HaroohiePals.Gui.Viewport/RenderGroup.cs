@@ -10,13 +10,13 @@ public abstract class RenderGroup
 
     public virtual object GetObject(int index) => null;
 
-    public virtual bool GetObjectTransform(object obj, int subIndex, out Transform transform)
+    public virtual bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
     {
         transform = Transform.Identity;
         return false;
     }
 
-    public virtual bool SetObjectTransform(object obj, int subIndex, in Transform transform) => false;
+    public virtual bool TrySetObjectTransform(object obj, int subIndex, in Transform transform) => false;
 
     public virtual bool ContainsObject(object obj) => false;
 }

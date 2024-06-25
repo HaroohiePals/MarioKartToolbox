@@ -141,7 +141,7 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
 
         public override object GetObject(int index) => _paths[index >> PathIdShift].Points[index & PointIdMask];
 
-        public override bool GetObjectTransform(object obj, int subIndex, out Transform transform)
+        public override bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
         {
             transform = new Transform(new(0), new(0), new(1));
 
@@ -165,7 +165,7 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
             return true;
         }
 
-        public override bool SetObjectTransform(object obj, int subIndex, in Transform transform)
+        public override bool TrySetObjectTransform(object obj, int subIndex, in Transform transform)
         {
             if (obj is MkdsCheckPoint checkpoint)
             {

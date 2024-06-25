@@ -39,7 +39,7 @@ class KartPointRenderGroup<TPoint> : RenderGroup, IColoredRenderGroup, IDisposab
 
     public override object GetObject(int index) => _collection[index];
 
-    public override bool GetObjectTransform(object obj, int subIndex, out Transform transform)
+    public override bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
     {
         if (subIndex != -1 || obj is not IPoint point)
         {
@@ -55,7 +55,7 @@ class KartPointRenderGroup<TPoint> : RenderGroup, IColoredRenderGroup, IDisposab
         return true;
     }
 
-    public override bool SetObjectTransform(object obj, int subIndex, in Transform transform)
+    public override bool TrySetObjectTransform(object obj, int subIndex, in Transform transform)
     {
         if (subIndex != -1 || obj is not IPoint point)
             return false;

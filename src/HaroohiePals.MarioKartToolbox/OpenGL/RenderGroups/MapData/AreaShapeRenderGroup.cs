@@ -74,7 +74,7 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
 
         public override bool ContainsObject(object obj) => obj is MkdsArea instance && _collection.Contains(instance);
 
-        public override bool GetObjectTransform(object obj, int subIndex, out Transform transform)
+        public override bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
         {
             if (subIndex != -1 || obj is not MkdsArea area)
             {
@@ -87,7 +87,7 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
             return true;
         }
 
-        public override bool SetObjectTransform(object obj, int subIndex, in Transform transform)
+        public override bool TrySetObjectTransform(object obj, int subIndex, in Transform transform)
         {
             if (subIndex != -1 || obj is not MkdsArea area)
                 return false;

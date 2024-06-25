@@ -131,7 +131,7 @@ public class Gizmo
                 if (!context.SceneObjectHolder.IsSubIndexSelected(obj, i))
                     continue;
 
-                if (!_renderGroupScene.RenderGroups.GetObjectTransform(obj, i, out var transform))
+                if (!_renderGroupScene.RenderGroups.TryGetObjectTransform(obj, i, out var transform))
                     continue;
 
                 _currentTransforms.Add((obj, i), transform);
@@ -255,7 +255,7 @@ public class Gizmo
             if (KeyBindings.SnapToCollision.IsDown() && FindCollisionIntersection(oldTransform, transform, out var newPos))
                 transform.Translation = newPos;
             
-            _renderGroupScene.RenderGroups.SetObjectTransform(transformKeyValue.Key.obj, transformKeyValue.Key.subIndex, transform);
+            _renderGroupScene.RenderGroups.TrySetObjectTransform(transformKeyValue.Key.obj, transformKeyValue.Key.subIndex, transform);
         }
     }
 
@@ -280,7 +280,7 @@ public class Gizmo
             if (FindCollisionIntersection(oldTransform, transform, out var newPos))
             {
                 transform.Translation = newPos;
-                _renderGroupScene.RenderGroups.SetObjectTransform(transformKeyValue.Key.obj, transformKeyValue.Key.subIndex, transform);
+                _renderGroupScene.RenderGroups.TrySetObjectTransform(transformKeyValue.Key.obj, transformKeyValue.Key.subIndex, transform);
             }
         }
 
@@ -302,11 +302,10 @@ public class Gizmo
         var actions = new List<IAction>(objs.Count);
         foreach (var transformKeyValue in _currentTransforms)
         {
-            var oldTransform = _oldTransforms[transformKeyValue.Key];
-            var group = _renderGroupScene.RenderGroups.GetObjectTransformGroup(transformKeyValue.Key.obj,
-                transformKeyValue.Key.subIndex, out var transform);
-            if (group != null)
+            if (_renderGroupScene.RenderGroups.TryGetObjectTransformGroup(transformKeyValue.Key.obj,
+                transformKeyValue.Key.subIndex, out var transform, out var group))
             {
+                var oldTransform = _oldTransforms[transformKeyValue.Key];
                 actions.Add(new SetObjectTransformAction(group, transformKeyValue.Key.obj,
                     transformKeyValue.Key.subIndex, oldTransform, transform));
             }
@@ -319,7 +318,7 @@ public class Gizmo
     private void RestoreOldTransforms()
     {
         foreach (var oldTransform in _oldTransforms)
-            _renderGroupScene.RenderGroups.SetObjectTransform(oldTransform.Key.obj, oldTransform.Key.subIndex, oldTransform.Value);
+            _renderGroupScene.RenderGroups.TrySetObjectTransform(oldTransform.Key.obj, oldTransform.Key.subIndex, oldTransform.Value);
     }
 
     public void CancelGizmoTransform()
