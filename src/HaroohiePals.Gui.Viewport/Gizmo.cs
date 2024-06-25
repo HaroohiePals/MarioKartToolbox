@@ -37,7 +37,7 @@ public class Gizmo
     public GizmoKeyBindings KeyBindings = new();
 
     public GizmoTool Tool = GizmoTool.Translate;
-    public ImGuizmoMode Mode = ImGuizmoMode.Local;
+    public ImGuizmoMode Mode = ImGuizmoMode.World;
     public GizmoRotateScaleMode RotateScaleMode = GizmoRotateScaleMode.MedianPoint;
 
     public DrawTool DrawTool;
