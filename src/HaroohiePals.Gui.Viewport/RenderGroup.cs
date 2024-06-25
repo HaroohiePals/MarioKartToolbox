@@ -1,4 +1,6 @@
-﻿namespace HaroohiePals.Gui.Viewport;
+﻿using HaroohiePals.Mathematics;
+
+namespace HaroohiePals.Gui.Viewport;
 
 public abstract class RenderGroup
 {

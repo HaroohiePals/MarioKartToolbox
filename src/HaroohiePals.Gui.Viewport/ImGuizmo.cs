@@ -1073,7 +1073,6 @@ public class ImGuizmo
             axesWorldDirections[0] = bestAxisWorldDirection;
             numAxes = 1;
         }
-
         else if (bestAxis != axes[0])
         {
             int bestIndex = 0;

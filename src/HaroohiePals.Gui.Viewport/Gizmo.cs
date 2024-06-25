@@ -1,5 +1,6 @@
 ﻿using HaroohiePals.Actions;
 using HaroohiePals.Gui.Viewport.Actions;
+using HaroohiePals.Mathematics;
 using ImGuiNET;
 using OpenTK.Mathematics;
 using System.Globalization;
@@ -175,8 +176,17 @@ public class Gizmo
                   Matrix4.CreateRotationZ((float)MathHelper.DegreesToRadians(_currentRotation.Z)) *
                   Matrix4.CreateTranslation((Vector3)averagePos);
 
+        float[] bb = null;
+
+        if (_currentBounds.Count == 1)
+        {
+            var firstBound = _currentBounds.First().Value;
+            bb = [(float)firstBound.Minimum.X, (float)firstBound.Minimum.Y, (float)firstBound.Minimum.Z,
+                  (float)firstBound.Maximum.X, (float)firstBound.Maximum.Y, (float)firstBound.Maximum.Z];
+        }
+
         if (!_imGuizmo.Manipulate(context.ViewMatrix, context.ProjectionMatrix, guizmoOperation, Mode,
-            ref mtx, out var deltaMtx/*, null, [ -160f, -160f, -160f, 160f, 160f, 160f ]*/))
+            ref mtx, out var deltaMtx, null, bb))
             return;
 
         if (!Started)

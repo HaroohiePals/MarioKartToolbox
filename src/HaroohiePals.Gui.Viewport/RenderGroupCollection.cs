@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using HaroohiePals.Mathematics;
+using System.Collections;
 
 namespace HaroohiePals.Gui.Viewport;
 

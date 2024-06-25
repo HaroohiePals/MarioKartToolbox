@@ -2,6 +2,7 @@
 using HaroohiePals.Gui.Viewport;
 using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.MarioKartToolbox.OpenGL.Renderers;
+using HaroohiePals.Mathematics;
 using HaroohiePals.NitroKart.Extensions;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using System;

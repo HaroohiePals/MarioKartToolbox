@@ -2,6 +2,7 @@
 using HaroohiePals.Gui.Viewport;
 using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.MarioKartToolbox.OpenGL.Renderers;
+using HaroohiePals.Mathematics;
 using System;
 using System.Drawing;
 using System.Linq;

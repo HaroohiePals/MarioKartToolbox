@@ -1,4 +1,5 @@
-﻿using HaroohiePals.NitroKart.MapData;
+﻿using HaroohiePals.Mathematics;
+using HaroohiePals.NitroKart.MapData;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using OpenTK.Mathematics;
 
@@ -6,6 +7,8 @@ namespace HaroohiePals.NitroKart.Extensions;
 
 public static class AreaExtensions
 {
+    private static readonly Vector3d BaseSize = new Vector3(50, 50, 50);
+
     public static Vector3d GetRotation(this MkdsArea area)
     {
         //Read Handle conversion
@@ -48,16 +51,30 @@ public static class AreaExtensions
         {
             case MkdsAreaShapeType.Box:
                 return
-                    Matrix4.CreateScale((Vector3)(area.LengthVector * new Vector3(50, 50, 50))) *
+                    Matrix4.CreateScale((Vector3)(area.LengthVector * BaseSize)) *
                     rotMatrix *
                     Matrix4.CreateTranslation((Vector3)area.Position);
 
             case MkdsAreaShapeType.Cylinder:
                 var lengthVec = (Vector3)new Vector3d(area.LengthVector.X, area.LengthVector.Y, area.LengthVector.X);
                 return
-                    Matrix4.CreateScale(lengthVec * new Vector3(50, 50, 50)) *
+                    Matrix4.CreateScale(lengthVec * (Vector3)BaseSize) *
                     rotMatrix *
                     Matrix4.CreateTranslation((Vector3)area.Position);
+            default:
+                throw new Exception();
+        }
+    }
+
+    public static AxisAlignedBoundingBox GetLocalBounds(this MkdsArea area)
+    {
+        switch (area.Shape)
+        {
+            case MkdsAreaShapeType.Box:
+                var size = area.LengthVector * BaseSize;
+                return new AxisAlignedBoundingBox(new(-size.X, 0, -size.Z), new (size.X, size.Y * 2, size.Z));
+            case MkdsAreaShapeType.Cylinder:
+                return AxisAlignedBoundingBox.Zero;
             default:
                 throw new Exception();
         }

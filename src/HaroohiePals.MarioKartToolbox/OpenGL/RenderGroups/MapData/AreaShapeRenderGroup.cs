@@ -2,6 +2,7 @@
 using HaroohiePals.Gui.Viewport;
 using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.MarioKartToolbox.OpenGL.Renderers;
+using HaroohiePals.Mathematics;
 using HaroohiePals.NitroKart.Extensions;
 using HaroohiePals.NitroKart.MapData;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
@@ -96,6 +97,18 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
             area.SetRotation(transform.Rotation);
             area.LengthVector = transform.Scale;
 
+            return true;
+        }
+
+        public override bool TryGetLocalObjectBounds(object obj, int subIndex, out AxisAlignedBoundingBox bounds)
+        {
+            if (subIndex != -1 || obj is not MkdsArea area)
+            {
+                bounds = AxisAlignedBoundingBox.Zero;
+                return false;
+            }
+
+            bounds = area.GetLocalBounds();
             return true;
         }
 

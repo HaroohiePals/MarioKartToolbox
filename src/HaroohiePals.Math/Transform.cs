@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace HaroohiePals.Gui.Viewport;
+namespace HaroohiePals.Mathematics;
 
 public record struct Transform(Vector3d Translation, Vector3d Rotation, Vector3d Scale)
 {

@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace HaroohiePals.Gui.Viewport;
+namespace HaroohiePals.Mathematics;
 
 public record struct AxisAlignedBoundingBox(Vector3d Minimum, Vector3d Maximum)
 {
