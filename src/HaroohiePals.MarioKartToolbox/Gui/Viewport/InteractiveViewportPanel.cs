@@ -86,7 +86,7 @@ abstract class InteractiveViewportPanel : ViewportPanel
         if (_renderGroupScene.FramebufferProvider is not IPickableFramebufferProvider pickableFramebufferProvider)
             return;
 
-        if (_gizmo.Tool == Gizmo.GizmoTool.Draw || _gizmo.IsUsing)
+        if (_gizmo.Tool == GizmoTool.Draw || _gizmo.IsUsing)
             return;
 
         if (_selectionRect.Draw())
@@ -144,7 +144,7 @@ abstract class InteractiveViewportPanel : ViewportPanel
             Context.HoverObject = null;
             if (ImGui.IsWindowFocused() && ImGui.IsWindowHovered() &&
                 ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.GetIO().KeyCtrl && !ImGui.GetIO().KeyShift &&
-                _gizmo.Tool != Gizmo.GizmoTool.Draw)
+                _gizmo.Tool != GizmoTool.Draw)
                 Context.SceneObjectHolder.ClearSelection();
         }
     }

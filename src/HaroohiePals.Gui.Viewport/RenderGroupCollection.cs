@@ -55,6 +55,18 @@ public class RenderGroupCollection : IList<RenderGroup>
         return false;
     }
 
+    public bool TryGetLocalObjectBounds(object obj, int subIndex, out AxisAlignedBoundingBox bounds)
+    {
+        foreach (var g in _renderGroups)
+        {
+            if (g.ContainsObject(obj) && g.TryGetLocalObjectBounds(obj, subIndex, out bounds))
+                return true;
+        }
+
+        bounds = AxisAlignedBoundingBox.Zero;
+        return false;
+    }
+
     public void Update(float deltaTime)
     {
         foreach (var group in _renderGroups)

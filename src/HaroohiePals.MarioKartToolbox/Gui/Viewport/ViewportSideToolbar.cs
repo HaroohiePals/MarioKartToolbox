@@ -32,37 +32,37 @@ internal class ViewportSideToolbar
 
             int i = 1;
 
-            if (gizmo.Tool == Gizmo.GizmoTool.Draw)
+            if (gizmo.Tool == GizmoTool.Draw)
                 ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
             if (ImGui.Button($"{FontAwesome6.Pencil}##Draw", new(btnSize)))
-                targetTool = Gizmo.GizmoTool.Draw;
-            if (gizmo.Tool == Gizmo.GizmoTool.Draw)
+                targetTool = GizmoTool.Draw;
+            if (gizmo.Tool == GizmoTool.Draw)
                 ImGui.PopStyleColor();
 
             ImGui.SetCursorPosY((btnSize + spacing) * i++);
 
-            if (gizmo.Tool == Gizmo.GizmoTool.Translate)
+            if (gizmo.Tool == GizmoTool.Translate)
                 ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
             if (ImGui.Button($"{FontAwesome6.UpDownLeftRight}##Translate", new(btnSize)))
-                targetTool = Gizmo.GizmoTool.Translate;
-            if (gizmo.Tool == Gizmo.GizmoTool.Translate)
+                targetTool = GizmoTool.Translate;
+            if (gizmo.Tool == GizmoTool.Translate)
                 ImGui.PopStyleColor();
 
             ImGui.SetCursorPosY((btnSize + spacing) * i++);
 
-            if (gizmo.Tool == Gizmo.GizmoTool.Rotate)
+            if (gizmo.Tool == GizmoTool.Rotate)
                 ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
             if (ImGui.Button($"{FontAwesome6.ArrowsRotate}##Rotate", new(btnSize)))
-                targetTool = Gizmo.GizmoTool.Rotate;
-            if (gizmo.Tool == Gizmo.GizmoTool.Rotate)
+                targetTool = GizmoTool.Rotate;
+            if (gizmo.Tool == GizmoTool.Rotate)
                 ImGui.PopStyleColor();
             ImGui.SetCursorPosY((btnSize + spacing) * i++);
 
-            if (gizmo.Tool == Gizmo.GizmoTool.Scale)
+            if (gizmo.Tool == GizmoTool.Scale)
                 ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
             if (ImGui.Button($"{FontAwesome6.UpRightAndDownLeftFromCenter}##Scale", new(btnSize)))
-                targetTool = Gizmo.GizmoTool.Scale;
-            if (gizmo.Tool == Gizmo.GizmoTool.Scale)
+                targetTool = GizmoTool.Scale;
+            if (gizmo.Tool == GizmoTool.Scale)
                 ImGui.PopStyleColor();
 
             ImGui.EndChildFrame();

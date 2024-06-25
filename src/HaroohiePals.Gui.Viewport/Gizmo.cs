@@ -8,32 +8,6 @@ namespace HaroohiePals.Gui.Viewport;
 
 public class Gizmo
 {
-    public enum GizmoTool
-    {
-        Pointer,
-        Translate,
-        Rotate,
-        Scale,
-        Draw
-    }
-
-    public enum GizmoRotateScaleMode
-    {
-        IndividualOrigins,
-        MedianPoint,
-        MedianPointTranslateOnly
-    }
-
-    private ImGuizmo _imGuizmo = new();
-    private string _inputOverrideValue = "";
-
-    private readonly Dictionary<(object obj, int subIndex), Transform> _oldTransforms = new();
-    private readonly Dictionary<(object obj, int subIndex), Transform> _currentTransforms = new();
-    private Vector3d _oldAvgPos = Vector3.Zero;
-    private Vector3d _currentRotation = Vector3.Zero;
-
-    private readonly RenderGroupScene _renderGroupScene;
-
     public GizmoKeyBindings KeyBindings = new();
 
     public GizmoTool Tool = GizmoTool.Translate;
@@ -50,6 +24,17 @@ public class Gizmo
     public bool IsOver => _imGuizmo.IsOver();
 
     public bool IsUsingDrawTool => DrawTool is { IsUsing: true };
+
+    private readonly ImGuizmo _imGuizmo = new();
+    private readonly Dictionary<(object obj, int subIndex), Transform> _oldTransforms = new();
+    private readonly Dictionary<(object obj, int subIndex), Transform> _currentTransforms = new();
+    private readonly Dictionary<(object obj, int subIndex), AxisAlignedBoundingBox> _currentBounds = new();
+
+    private readonly RenderGroupScene _renderGroupScene;
+
+    private string _inputOverrideValue = "";
+    private Vector3d _oldAveragePos = Vector3.Zero;
+    private Vector3d _currentRotation = Vector3.Zero;
 
     public Gizmo(RenderGroupScene renderGroupScene)
     {
@@ -72,6 +57,30 @@ public class Gizmo
                     DrawTool?.PerformDraw(context);
                 break;
         }
+    }
+
+    public void CancelGizmoTransform()
+    {
+        if (!Started)
+            return;
+
+        RestoreOldTransforms();
+
+        Started = false;
+        _imGuizmo.ConfirmAction = ImGuizmoConfirmAction.MouseUp;
+        _imGuizmo.StopUsing();
+    }
+
+    public void Update()
+    {
+        if (KeyBindings.CancelOperation.IsPressed())
+            CancelGizmoTransform();
+
+        if (KeyBindings.SnapToCollision.IsPressed())
+            ApplyCollision();
+
+        HandleOverrideValue();
+        HandleImGuizmoShortcuts();
     }
 
     private ImGuizmoOperation _guizmoOperation =>
@@ -102,6 +111,39 @@ public class Gizmo
         }
     }
 
+    private void UpdateCurrentTransformsAndBounds(ViewportContext context, bool updateBounds)
+    {
+        _currentTransforms.Clear();
+        _currentBounds.Clear();
+
+        foreach (object obj in context.SceneObjectHolder.GetSelection())
+        {
+            for (int i = -1; i <= 2; i++)
+            {
+                if (!context.SceneObjectHolder.IsSubIndexSelected(obj, i))
+                    continue;
+
+                if (_renderGroupScene.RenderGroups.TryGetObjectTransform(obj, i, out var transform))
+                    _currentTransforms.Add((obj, i), transform);
+
+                if (updateBounds && _renderGroupScene.RenderGroups.TryGetLocalObjectBounds(obj, i, out var bounds))
+                    _currentBounds.Add((obj, i), bounds);
+            }
+        }
+    }
+    
+    private Vector3d GetAveragePosition()
+    {
+        var avgPos = Vector3d.Zero;
+
+        var currentPositions = _currentTransforms.Select(x => x.Value.Translation).ToList();
+
+        foreach (var pos in currentPositions)
+            avgPos += pos;
+
+        return avgPos / currentPositions.Count;
+    }
+
     private void DrawGizmo(ViewportContext context)
     {
         if (context.SceneObjectHolder.SelectionSize == 0)
@@ -113,46 +155,25 @@ public class Gizmo
 
         _imGuizmo.SetOrthographic(IsOrthographic);
         _imGuizmo.BeginFrame();
-
         _imGuizmo.SetDrawlist();
 
         var contentPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
         _imGuizmo.SetRect(contentPos.X, contentPos.Y, context.ViewportSize.X, context.ViewportSize.Y);
 
-        var avgPos = Vector3d.Zero;
+        UpdateCurrentTransformsAndBounds(context, context.SceneObjectHolder.SelectionSize == 1);
+
+        var averagePos = GetAveragePosition();
 
         if (!Started && context.SceneObjectHolder.SelectionSize > 1)
             _currentRotation = Vector3d.Zero;
 
-        _currentTransforms.Clear();
-        foreach (object obj in context.SceneObjectHolder.GetSelection())
-        {
-            for (int i = -1; i <= 2; i++)
-            {
-                if (!context.SceneObjectHolder.IsSubIndexSelected(obj, i))
-                    continue;
-
-                if (!_renderGroupScene.RenderGroups.TryGetObjectTransform(obj, i, out var transform))
-                    continue;
-
-                _currentTransforms.Add((obj, i), transform);
-                avgPos += transform.Translation;
-            }
-        }
-
         if (_currentTransforms.Count == 1)
             _currentRotation = _currentTransforms.First().Value.Rotation;
 
-        avgPos /= _currentTransforms.Count;
-
-        var mtx = Matrix4.CreateTranslation((Vector3)avgPos);
-
-        //if (Tool == GizmoTool.Rotate)
-        //{
-            mtx = Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_currentRotation.X)) *
+        var mtx = Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_currentRotation.X)) *
                   Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(_currentRotation.Y)) *
-                  Matrix4.CreateRotationZ((float)MathHelper.DegreesToRadians(_currentRotation.Z)) * mtx;
-        //}
+                  Matrix4.CreateRotationZ((float)MathHelper.DegreesToRadians(_currentRotation.Z)) *
+                  Matrix4.CreateTranslation((Vector3)averagePos);
 
         if (!_imGuizmo.Manipulate(context.ViewMatrix, context.ProjectionMatrix, guizmoOperation, Mode,
             ref mtx, out var deltaMtx/*, null, [ -160f, -160f, -160f, 160f, 160f, 160f ]*/))
@@ -167,7 +188,7 @@ public class Gizmo
                 foreach (var keyValue in _currentTransforms)
                     _oldTransforms.Add(keyValue.Key, keyValue.Value);
             }
-            _oldAvgPos = avgPos;
+            _oldAveragePos = averagePos;
         }
 
         var posDiff = Vector3d.Zero;
@@ -200,11 +221,11 @@ public class Gizmo
                     if (RotateScaleMode is GizmoRotateScaleMode.MedianPoint
                         or GizmoRotateScaleMode.MedianPointTranslateOnly)
                     {
-                        var diff = oldTransform.Translation - _oldAvgPos;
+                        var diff = oldTransform.Translation - _oldAveragePos;
                         var vec4 = new Vector4((float)diff.X, (float)diff.Y, (float)diff.Z, 0);
                         var rotated = vec4 * rotMtx;
 
-                        transform.Translation = rotated.Xyz + _oldAvgPos;
+                        transform.Translation = rotated.Xyz + _oldAveragePos;
                     }
 
                     if (RotateScaleMode is GizmoRotateScaleMode.MedianPoint
@@ -213,7 +234,7 @@ public class Gizmo
                         //Multiple selection
                         if (_currentTransforms.Count > 1)
                         {
-                            var oldMatrix = 
+                            var oldMatrix =
                                 Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(oldTransform.Rotation.X)) *
                                 Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(oldTransform.Rotation.Y)) *
                                 Matrix4.CreateRotationZ((float)MathHelper.DegreesToRadians(oldTransform.Rotation.Z)) *
@@ -236,7 +257,7 @@ public class Gizmo
                         RotateScaleMode is GizmoRotateScaleMode.MedianPoint
                             or GizmoRotateScaleMode.MedianPointTranslateOnly)
                     {
-                        transform.Translation = ((oldTransform.Translation - _oldAvgPos) * scale) + _oldAvgPos;
+                        transform.Translation = ((oldTransform.Translation - _oldAveragePos) * scale) + _oldAveragePos;
                     }
 
                     if (_currentTransforms.Count == 1 ||
@@ -255,7 +276,7 @@ public class Gizmo
             //Apply collision
             if (KeyBindings.SnapToCollision.IsDown() && FindCollisionIntersection(oldTransform, transform, out var newPos))
                 transform.Translation = newPos;
-            
+
             _renderGroupScene.RenderGroups.TrySetObjectTransform(transformKeyValue.Key.obj, transformKeyValue.Key.subIndex, transform);
         }
     }
@@ -264,7 +285,7 @@ public class Gizmo
     {
         newPos = Vector3d.Zero;
 
-        return ViewportCollision is not null && 
+        return ViewportCollision is not null &&
             ViewportCollision.FindIntersection(oldTransform.Translation, transform.Translation, out newPos);
     }
 
@@ -320,30 +341,6 @@ public class Gizmo
     {
         foreach (var oldTransform in _oldTransforms)
             _renderGroupScene.RenderGroups.TrySetObjectTransform(oldTransform.Key.obj, oldTransform.Key.subIndex, oldTransform.Value);
-    }
-
-    public void CancelGizmoTransform()
-    {
-        if (!Started)
-            return;
-
-        RestoreOldTransforms();
-
-        Started = false;
-        _imGuizmo.ConfirmAction = ImGuizmoConfirmAction.MouseUp;
-        _imGuizmo.StopUsing();
-    }
-
-    public void Update()
-    {
-        if (KeyBindings.CancelOperation.IsPressed())
-            CancelGizmoTransform();
-
-        if (KeyBindings.SnapToCollision.IsPressed())
-            ApplyCollision();
-
-        HandleOverrideValue();
-        HandleImGuizmoShortcuts();
     }
 
     private void HandleOverrideValue()

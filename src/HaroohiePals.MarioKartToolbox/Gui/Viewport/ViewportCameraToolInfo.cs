@@ -43,7 +43,7 @@ class ViewportCameraToolInfo
 
         switch (gizmo.Tool)
         {
-            case Gizmo.GizmoTool.Draw:
+            case GizmoTool.Draw:
                 if (gizmo.DrawTool == null)
                 {
                     info += " | Select a path or point to draw";

@@ -16,7 +16,17 @@ public abstract class RenderGroup
         return false;
     }
 
-    public virtual bool TrySetObjectTransform(object obj, int subIndex, in Transform transform) => false;
+    public virtual bool TrySetObjectTransform(object obj, int subIndex, in Transform transform) 
+        => false;
+
+    public virtual bool TryGetLocalObjectBounds(object obj, int subIndex, out AxisAlignedBoundingBox bounds)
+    {
+        bounds = AxisAlignedBoundingBox.Zero;
+        return false;
+    }
+
+    public virtual bool TrySetLocalObjectTransform(object obj, int subIndex, in Transform transform) 
+        => false;
 
     public virtual bool ContainsObject(object obj) => false;
 }
