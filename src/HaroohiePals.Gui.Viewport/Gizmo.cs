@@ -132,7 +132,7 @@ public class Gizmo
             }
         }
     }
-    
+
     private Vector3d GetAveragePosition()
     {
         var avgPos = Vector3d.Zero;
@@ -165,27 +165,32 @@ public class Gizmo
 
         var averagePos = GetAveragePosition();
 
+        var currentScale = Vector3d.One;
+
         if (!Started && context.SceneObjectHolder.SelectionSize > 1)
             _currentRotation = Vector3d.Zero;
 
         if (_currentTransforms.Count == 1)
             _currentRotation = _currentTransforms.First().Value.Rotation;
 
-        var mtx = Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_currentRotation.X)) *
-                  Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(_currentRotation.Y)) *
-                  Matrix4.CreateRotationZ((float)MathHelper.DegreesToRadians(_currentRotation.Z)) *
-                  Matrix4.CreateTranslation((Vector3)averagePos);
-
         float[] bb = null;
 
-        if (_currentBounds.Count == 1)
+        if (Tool == GizmoTool.Scale && _currentBounds.Count == 1)
         {
             var firstBound = _currentBounds.First().Value;
             bb = [(float)firstBound.Minimum.X, (float)firstBound.Minimum.Y, (float)firstBound.Minimum.Z,
                   (float)firstBound.Maximum.X, (float)firstBound.Maximum.Y, (float)firstBound.Maximum.Z];
         }
 
-        if (!_imGuizmo.Manipulate(context.ViewMatrix, context.ProjectionMatrix, guizmoOperation, Mode,
+        var mtx = Matrix4.CreateScale((Vector3)currentScale) *
+                  Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_currentRotation.X)) *
+                  Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(_currentRotation.Y)) *
+                  Matrix4.CreateRotationZ((float)MathHelper.DegreesToRadians(_currentRotation.Z)) *
+                  Matrix4.CreateTranslation((Vector3)averagePos);
+
+        var actualMode = _currentTransforms.Count > 1 ? ImGuizmoMode.World : Mode;
+
+        if (!_imGuizmo.Manipulate(context.ViewMatrix, context.ProjectionMatrix, guizmoOperation, actualMode,
             ref mtx, out var deltaMtx, null, bb))
             return;
 
@@ -201,22 +206,10 @@ public class Gizmo
             _oldAveragePos = averagePos;
         }
 
-        var posDiff = Vector3d.Zero;
-        var scale = Vector3d.One;
-        var rotMtx = Matrix4.Identity;
-
-        if (Tool == GizmoTool.Translate)
-            posDiff = deltaMtx.ExtractTranslation();
-        if (Tool == GizmoTool.Rotate)
-        {
-            rotMtx = mtx.ClearTranslation().ClearScale();
-
-            ImGuizmoUtils.DecomposeMatrixToComponents(mtx, out _, out _currentRotation, out _);
-        }
-
-        if (Tool == GizmoTool.Scale)
-            scale = mtx.ExtractScale();
-
+        var resultPosDiff = deltaMtx.ExtractTranslation();
+        var resultPosition = mtx.ExtractTranslation();
+        var resultScale = mtx.ExtractScale();
+        
         foreach (var transformKeyValue in _currentTransforms)
         {
             var transform = transformKeyValue.Value;
@@ -225,15 +218,18 @@ public class Gizmo
             switch (Tool)
             {
                 case GizmoTool.Translate:
-                    transform.Translation += posDiff;
+                    transform.Translation += resultPosDiff;
                     break;
                 case GizmoTool.Rotate:
+                    var resultRotMtx = mtx.ClearTranslation().ClearScale();
+                    ImGuizmoUtils.DecomposeMatrixToComponents(mtx, out _, out _currentRotation, out _);
+
                     if (RotateScaleMode is GizmoRotateScaleMode.MedianPoint
                         or GizmoRotateScaleMode.MedianPointTranslateOnly)
                     {
                         var diff = oldTransform.Translation - _oldAveragePos;
                         var vec4 = new Vector4((float)diff.X, (float)diff.Y, (float)diff.Z, 0);
-                        var rotated = vec4 * rotMtx;
+                        var rotated = vec4 * resultRotMtx;
 
                         transform.Translation = rotated.Xyz + _oldAveragePos;
                     }
@@ -267,15 +263,18 @@ public class Gizmo
                         RotateScaleMode is GizmoRotateScaleMode.MedianPoint
                             or GizmoRotateScaleMode.MedianPointTranslateOnly)
                     {
-                        transform.Translation = ((oldTransform.Translation - _oldAveragePos) * scale) + _oldAveragePos;
+                        transform.Translation = ((oldTransform.Translation - _oldAveragePos) * resultScale) + _oldAveragePos;
                     }
 
                     if (_currentTransforms.Count == 1 ||
                         RotateScaleMode is GizmoRotateScaleMode.MedianPoint
                             or GizmoRotateScaleMode.IndividualOrigins)
                     {
-                        transform.Scale = oldTransform.Scale * scale;
+                        transform.Scale = oldTransform.Scale * resultScale;
                     }
+
+                    if (_currentBounds.Count == 1)
+                        transform.Translation = resultPosition;
 
                     break;
             }

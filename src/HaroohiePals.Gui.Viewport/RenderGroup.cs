@@ -27,8 +27,5 @@ public abstract class RenderGroup
         return false;
     }
 
-    public virtual bool TrySetLocalObjectTransform(object obj, int subIndex, in Transform transform) 
-        => false;
-
     public virtual bool ContainsObject(object obj) => false;
 }

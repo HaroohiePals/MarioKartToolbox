@@ -35,7 +35,10 @@ internal static class MktbRendererUtil
                 return new InstancedPoint((Vector3)x.Position, (Vector3)r.Rotation, (Vector3)scale, color, true, x, pickingId, isHovered, isSelected);
 
             if (x is MkdsArea a)
-                return new InstancedPoint((Vector3)x.Position, (Vector3)a.GetRotation(), (Vector3)scale, color, true, x, pickingId, isHovered, isSelected);
+            {
+                var transform = a.GetTransform();
+                return new InstancedPoint((Vector3)transform.Translation, (Vector3)transform.Rotation, (Vector3)scale, color, true, x, pickingId, isHovered, isSelected);
+            }
 
             return new InstancedPoint((Vector3)x.Position, new(), (Vector3)scale, color, false, x, pickingId, isHovered, isSelected);
         }).ToArray();

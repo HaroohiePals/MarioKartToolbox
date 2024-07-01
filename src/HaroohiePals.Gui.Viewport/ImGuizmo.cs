@@ -162,7 +162,7 @@ public class ImGuizmo
 
             if (localBounds != null && localBounds.Length == 6 && !_context.IsUsing)
             {
-                HandleAndDrawLocalBounds(localBounds, ref matrix, boundsSnap, operation);
+                manipulated = HandleAndDrawLocalBounds(localBounds, ref matrix, boundsSnap, operation);
             }
 
             _context.Operation = operation;
@@ -1029,8 +1029,10 @@ public class ImGuizmo
         }
     }
 
-    private void HandleAndDrawLocalBounds(float[] bounds, ref Matrix4 matrix, Vector3? snapValues, ImGuizmoOperation operation)
+    private bool HandleAndDrawLocalBounds(float[] bounds, ref Matrix4 matrix, Vector3? snapValues, ImGuizmoOperation operation)
     {
+        bool modified = false;
+
         var io = ImGui.GetIO();
         var drawList = _context.DrawList;
 
@@ -1279,6 +1281,7 @@ public class ImGuizmo
 
                 var res = preScale * scale * postScale * _context.BoundsMatrix;
                 matrix = res;
+                modified = true;
 
                 // info text
                 var destinationPosOnScreen = ImGuizmoUtils.WorldToPos(_context.Model.Row3.Xyz, _context.ViewProjection, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
@@ -1316,6 +1319,8 @@ public class ImGuizmo
                 break;
             }
         }
+
+        return modified;
     }
 
     private bool HandleRotation(ref Matrix4 matrix, ref Matrix4 deltaMatrix, ImGuizmoOperation op, ref ImGuizmoMoveType type, Vector3? snap)

@@ -50,7 +50,7 @@ abstract class MapDataEntryRenderGroup : RenderGroup, IColoredRenderGroup, IDisp
             transform.Scale = mapObject.Scale;
 
         if (obj is MkdsArea area)
-            transform = new Transform(area.Position, area.GetRotation(), area.LengthVector);
+            transform = area.GetTransform();
 
         return true;
     }
@@ -69,10 +69,7 @@ abstract class MapDataEntryRenderGroup : RenderGroup, IColoredRenderGroup, IDisp
             mapObject.Scale = transform.Scale;
 
         if (obj is MkdsArea area)
-        {
-            area.SetRotation(transform.Rotation);
-            area.LengthVector = transform.Scale;
-        }
+            area.SetTransform(transform);
 
         return true;
     }

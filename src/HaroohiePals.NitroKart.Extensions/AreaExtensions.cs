@@ -2,11 +2,15 @@
 using HaroohiePals.NitroKart.MapData;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using OpenTK.Mathematics;
+using System.Drawing;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace HaroohiePals.NitroKart.Extensions;
 
 public static class AreaExtensions
 {
+    private const string EXCEPTION_MESSAGE_UNKNOWN_SHAPE_TYPE = "Unknown shape type for MkdsArea";
+
     private static readonly Vector3d BaseSize = new Vector3(50, 50, 50);
 
     public static Vector3d GetRotation(this MkdsArea area)
@@ -62,21 +66,55 @@ public static class AreaExtensions
                     rotMatrix *
                     Matrix4.CreateTranslation((Vector3)area.Position);
             default:
-                throw new Exception();
+                throw new Exception(EXCEPTION_MESSAGE_UNKNOWN_SHAPE_TYPE);
+        }
+    }
+
+    public static Transform GetTransform(this MkdsArea area)
+    {
+        var mtx = area.GetTransformMatrix();
+        return new Transform(mtx.ExtractTranslation(), area.GetRotation(), mtx.ExtractScale());
+    }
+
+    public static void SetTransform(this MkdsArea area, Transform transform)
+    {
+        area.Position = transform.Translation;
+        area.SetRotation(transform.Rotation);
+
+        var scale = transform.Scale;
+
+        switch (area.Shape)
+        {
+            case MkdsAreaShapeType.Box:
+                area.LengthVector = scale / BaseSize;
+                break;
+            case MkdsAreaShapeType.Cylinder:
+                // For cylinder, scale X and Z are the same
+                area.LengthVector = new Vector3d(scale.X / BaseSize.X, scale.Y / BaseSize.Y, scale.X / BaseSize.Z);
+                break;
+            default:
+                throw new Exception(EXCEPTION_MESSAGE_UNKNOWN_SHAPE_TYPE);
         }
     }
 
     public static AxisAlignedBoundingBox GetLocalBounds(this MkdsArea area)
     {
+        var size = Vector3d.Zero;
+
         switch (area.Shape)
         {
             case MkdsAreaShapeType.Box:
-                var size = area.LengthVector * BaseSize;
-                return new AxisAlignedBoundingBox(new(-size.X, 0, -size.Z), new (size.X, size.Y * 2, size.Z));
+                size = area.LengthVector * BaseSize;
+                return new AxisAlignedBoundingBox(new(-size.X, 0, -size.Z), new(size.X, size.Y * 2, size.Z));
             case MkdsAreaShapeType.Cylinder:
-                return AxisAlignedBoundingBox.Zero;
+                size = new Vector3d(
+                    area.LengthVector.X * BaseSize.X,
+                    area.LengthVector.Y * BaseSize.Y,
+                    area.LengthVector.X * BaseSize.Z);
+                return new AxisAlignedBoundingBox(new(-size.X, -size.Y, -size.Z), new(size.X, size.Y, size.Z));
             default:
-                throw new Exception();
+                throw new Exception(EXCEPTION_MESSAGE_UNKNOWN_SHAPE_TYPE);
         }
+        
     }
 }
