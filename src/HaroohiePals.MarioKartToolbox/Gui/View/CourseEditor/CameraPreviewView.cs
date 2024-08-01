@@ -49,6 +49,7 @@ internal class CameraPreviewView : CourseViewportView
 
     private bool _showControls = true;
 
+
     public CameraPreviewView(ICourseEditorContext context, IApplicationSettingsService applicationSettings,
         string title = "Camera Preview") : base(title, context)
     {
@@ -217,11 +218,10 @@ internal class CameraPreviewView : CourseViewportView
     public override bool Draw()
     {
         float scale = ImGuiEx.GetUiScale();
-        float timeControlFixedSpace = 0; // 50f * scale;
 
         bool popWindowPadding = true;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-        if (ImGui.Begin(_title))
+        if (ImGui.Begin(_title, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
             if (ImGui.IsWindowAppearing())
             {
@@ -229,21 +229,30 @@ internal class CameraPreviewView : CourseViewportView
                 ImGui.SetWindowFocus(_title);
             }
 
-            float screenGap = 10f;
             var availableSpace = ImGui.GetContentRegionAvail();
 
-            availableSpace.Y -= timeControlFixedSpace;
+            float dsScreenHeight = 192f;
+            float dsScreenWidth = 256f;
+            float dsScreenGap = 64f;
 
-            float screenY = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? availableSpace.Y / 2 - screenGap : 0;
-            float screenX = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? screenY / 192 * 256 : 0;
+            float targetHeight = availableSpace.Y;
 
-            var frameSize = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? new Vector2(screenX, screenY * 2 + 10) : new Vector2(0);
+            if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen && _settings.UseNativeResolution)
+                targetHeight = dsScreenHeight * 2 + (_settings.UseScreenGap ? dsScreenGap : 0);
 
-            ImGui.SetCursorPosX(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? availableSpace.X / 2f - screenX / 2f : 0f);
+            float screenGapFactor = _settings.UseScreenGap ? targetHeight / (dsScreenGap + (dsScreenHeight * 2)) : 0;
+            float screenGap = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? dsScreenGap * screenGapFactor : 0;
+            float screenHeight = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? (targetHeight - screenGap) / 2 : 0;
+            float screenWidth = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? screenHeight / dsScreenHeight * dsScreenWidth : 0;
+
+            var frameSize = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? new Vector2(screenWidth, screenHeight * 2 + screenGap) : new Vector2(0);
+
+            ImGui.SetCursorPosX(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? availableSpace.X / 2f - screenWidth / 2f : 0f);
+            ImGui.SetCursorPosY(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? ImGui.GetCursorPosY() + ((availableSpace.Y - targetHeight) / 2f) : 0f);
             if (ImGui.BeginChild(ImGui.GetID("TestFrames"), frameSize, false, ImGuiWindowFlags.None))
             {
-                _viewportPanel.Size = new Vector2(screenX, screenY);
-                _bottomViewportPanel.Size = new Vector2(screenX, screenY);
+                _viewportPanel.Size = new Vector2(screenWidth, screenHeight);
+                _bottomViewportPanel.Size = new Vector2(screenWidth, screenHeight);
 
                 bool isEdit = _settings.Mode == CameraPreviewMode.Edit;
                 if (_viewportPanel is CameraPreviewViewportPanel topPanel)
@@ -258,6 +267,7 @@ internal class CameraPreviewView : CourseViewportView
 
                 if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen)
                 {
+                    ImGui.SetCursorPosY(screenHeight + screenGap);
                     ApplyViewProjection(_bottomViewportPanel,
                         isEdit ? _viewportPanel.Context.ViewMatrix : _bottomView, _bottomProj, null);
                     _bottomViewportPanel.Draw();
@@ -297,7 +307,7 @@ internal class CameraPreviewView : CourseViewportView
 
         float width = 330 * scale;
         float smallWidth = (ImGui.CalcTextSize(title).X + 64) * scale;
-        float height = (_settings.Mode == CameraPreviewMode.AnimIntro ? 80 : 200) * scale;
+        float height = (_settings.Mode == CameraPreviewMode.AnimIntro ? 130 : 250) * scale;
         float smallHeight = 21 * scale;
 
         CameraPreviewMode oldMode = _settings.Mode;
@@ -315,7 +325,14 @@ internal class CameraPreviewView : CourseViewportView
             if (ImGui.CollapsingHeader(title))
             {
                 _showControls = true;
-                ImGuiEx.ComboEnum("Viewport mode", ref _settings.ViewportMode);
+                ImGuiEx.ComboEnum("Screens", ref _settings.ViewportMode);
+
+                if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen)
+                {
+                    ImGui.Checkbox("Use Native Resolution", ref _settings.UseNativeResolution);
+                    ImGui.Checkbox("Use Screen Gap", ref _settings.UseScreenGap);
+                }
+
                 ImGuiEx.ComboEnum("Mode", ref _settings.Mode);
 
                 if (_settings.Mode == CameraPreviewMode.AnimReplay)
