@@ -47,6 +47,8 @@ internal class CameraPreviewView : CourseViewportView
     private int _lastFrame = -2;
     private int _lastActionCount = 0;
 
+    private bool _showControls = true;
+
     public CameraPreviewView(ICourseEditorContext context, IApplicationSettingsService applicationSettings,
         string title = "Camera Preview") : base(title, context)
     {
@@ -217,6 +219,7 @@ internal class CameraPreviewView : CourseViewportView
         float scale = ImGuiEx.GetUiScale();
         float timeControlFixedSpace = 0; // 50f * scale;
 
+        bool popWindowPadding = true;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         if (ImGui.Begin(_title))
         {
@@ -225,10 +228,6 @@ internal class CameraPreviewView : CourseViewportView
                 ImGui.SetWindowFocus("Timeline");
                 ImGui.SetWindowFocus(_title);
             }
-
-            ImGui.PopStyleVar();
-            RenderControls();
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
 
             float screenGap = 10f;
             var availableSpace = ImGui.GetContentRegionAvail();
@@ -267,39 +266,116 @@ internal class CameraPreviewView : CourseViewportView
                 ImGui.EndChild();
             }
 
+            ImGui.SetCursorPosY(32 * scale);
+            ImGui.SetCursorPosX(8 * scale);
+
+            if (popWindowPadding)
+            {
+                popWindowPadding = false;
+                ImGui.PopStyleVar();
+            }
+
+            RenderControls();
+
             ImGui.End();
         }
-        ImGui.PopStyleVar();
+
+        if (popWindowPadding)
+        {
+            popWindowPadding = false;
+            ImGui.PopStyleVar();
+        }
 
         return true;
     }
 
     private void RenderControls()
     {
+        string title = "Controls";
+
         float scale = ImGuiEx.GetUiScale();
 
-        float btnSize = 24 * scale;
-        float spacing = 2 * scale;
+        float width = 330 * scale;
+        float smallWidth = (ImGui.CalcTextSize(title).X + 64) * scale;
+        float height = (_settings.Mode == CameraPreviewMode.AnimIntro ? 80 : 200) * scale;
+        float smallHeight = 21 * scale;
 
         CameraPreviewMode oldMode = _settings.Mode;
 
-        if (ImGui.Button($"{FontAwesome6.Gear}##CameraPreviewSettings", new(btnSize)))
-            ImGui.OpenPopup("Camera Preview Settings");
+        bool popAlpha = true;
 
-        if (ImGui.BeginPopup("Camera Preview Settings", ImGuiWindowFlags.AlwaysAutoResize))
+        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.75f);
+        if (ImGui.BeginChild("ControlsChild", new Vector2(_showControls ? width : smallWidth, _showControls ? height : smallHeight), false, ImGuiWindowFlags.NoScrollbar))
         {
-            ImGuiEx.ComboEnum("Mode", ref _settings.Mode);
-            ImGuiEx.ComboEnum("Viewport mode", ref _settings.ViewportMode);
-
-            if (_settings.Mode == CameraPreviewMode.AnimReplay)
+            if (popAlpha)
             {
-                ImGui.Checkbox("Simulate Countdown", ref _settings.ReplaySimulateCountdown);
-                ImGui.Checkbox("Move Driver", ref _settings.ReplayMoveDriver);
-                ImGui.SliderFloat("Driver Speed", ref _settings.ReplayDriverMoveSpeed, 0f, 100f);
-                ImGui.Checkbox("Apply Driver Pos on KTP2", ref _settings.ReplayApplyDriverPosOnKtp2);
+                ImGui.PopStyleVar();
+                popAlpha = false;
+            }
+            if (ImGui.CollapsingHeader(title))
+            {
+                _showControls = true;
+                ImGuiEx.ComboEnum("Viewport mode", ref _settings.ViewportMode);
+                ImGuiEx.ComboEnum("Mode", ref _settings.Mode);
+
+                if (_settings.Mode == CameraPreviewMode.AnimReplay)
+                {
+                    ImGui.Checkbox("Simulate Countdown", ref _settings.ReplaySimulateCountdown);
+                    ImGui.Checkbox("Move Driver", ref _settings.ReplayMoveDriver);
+                    ImGui.SliderFloat("Driver Speed", ref _settings.ReplayDriverMoveSpeed, 0f, 100f);
+                    ImGui.Checkbox("Apply Driver Pos on KTP2", ref _settings.ReplayApplyDriverPosOnKtp2);
+                }
+
+                if (_settings.Mode == CameraPreviewMode.Edit)
+                {
+                    var selectedCamera = GetSelectedCamera();
+
+                    if (selectedCamera is null)
+                    {
+                        ImGui.BeginDisabled();
+                    }
+
+                    if (ImGui.RadioButton("Target A", !_settings.EditSecondTarget))
+                    {
+                        _settings.EditSecondTarget = false;
+                        Initialize();
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.RadioButton("Target B", _settings.EditSecondTarget))
+                    {
+                        _settings.EditSecondTarget = true;
+                        Initialize();
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.Button("Apply view"))
+                    {
+                        ApplyEditView();
+                    }
+                    ImGui.Checkbox("Keep original target distance", ref _settings.EditKeepOriginalTargetDistance);
+                    if (!_settings.EditKeepOriginalTargetDistance)
+                    {
+                        ImGui.SetNextItemWidth(200f);
+                        ImGui.DragFloat("Target distance", ref _settings.EditTargetDistance, 1f, 100f, 3000f);
+                    }
+
+                    if (selectedCamera is null)
+                    {
+                        ImGui.EndDisabled();
+                        ImGui.TextUnformatted("Please select a compatible camera on the tree or viewport.");
+                    }
+                }
+            }
+            else
+            {
+                _showControls = false;
             }
 
-            ImGui.EndPopup();
+            ImGui.EndChild();
+        }
+        if (popAlpha)
+        {
+            ImGui.PopStyleVar();
+            popAlpha = false;
         }
 
         //todo: Shortcuts
@@ -308,48 +384,6 @@ internal class CameraPreviewView : CourseViewportView
 
         if (oldMode != _settings.Mode)
             Initialize();
-
-        if (_settings.Mode == CameraPreviewMode.Edit)
-        {
-            ImGui.SameLine();
-
-            if (GetSelectedCamera() != null)
-            {
-                //if (ImGui.Button("Get"))
-                //{
-                //    Initialize();
-                //}
-                //ImGui.SameLine();
-                if (ImGui.Button("Apply view"))
-                {
-                    ApplyEditView();
-                }
-                ImGui.SameLine();
-                if (ImGui.RadioButton("Target A", !_settings.EditSecondTarget))
-                {
-                    _settings.EditSecondTarget = false;
-                    Initialize();
-                }
-                ImGui.SameLine();
-                if (ImGui.RadioButton("Target B", _settings.EditSecondTarget))
-                {
-                    _settings.EditSecondTarget = true;
-                    Initialize();
-                }
-                ImGui.SameLine();
-                ImGui.Checkbox("Keep original target distance", ref _settings.EditKeepOriginalTargetDistance);
-                if (!_settings.EditKeepOriginalTargetDistance)
-                {
-                    ImGui.SameLine();
-                    ImGui.SetNextItemWidth(200f);
-                    ImGui.DragFloat("Target distance", ref _settings.EditTargetDistance, 1f, 100f, 3000f);
-                }
-            }
-            else
-            {
-                ImGui.TextUnformatted("Please select a compatible camera on the tree or viewport.");
-            }
-        }
     }
 
     private MkdsCamera GetSelectedCamera()
