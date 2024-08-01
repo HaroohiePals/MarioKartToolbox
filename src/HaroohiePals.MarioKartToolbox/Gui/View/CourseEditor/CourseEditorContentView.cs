@@ -47,7 +47,7 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
         {
             Items = new()
             {
-                new("Save", () => { _viewModel?.SaveFile(); }),
+                new("Save", _viewModel.SaveFile),
                 new("Import")
                 {
                     Items = new()

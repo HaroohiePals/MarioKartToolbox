@@ -1,6 +1,6 @@
 ﻿namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
-internal enum CameraPreviewViewportMode
+enum CameraPreviewViewportMode
 {
     SingleScreen,
     DualScreen

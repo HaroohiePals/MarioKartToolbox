@@ -19,8 +19,10 @@ using System.Numerics;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
-internal class CameraPreviewView : CourseViewportView
+class CameraPreviewView : CourseViewportView
 {
+    private const string PANE_TITLE = "Camera Preview";
+
     private readonly IApplicationSettingsService _applicationSettings;
     private readonly CameraPreviewViewportPanel _bottomViewportPanel;
 
@@ -49,9 +51,7 @@ internal class CameraPreviewView : CourseViewportView
 
     private bool _showControls = true;
 
-
-    public CameraPreviewView(ICourseEditorContext context, IApplicationSettingsService applicationSettings,
-        string title = "Camera Preview") : base(title, context)
+    public CameraPreviewView(ICourseEditorContext context, IApplicationSettingsService applicationSettings) : base(PANE_TITLE, context)
     {
         _applicationSettings = applicationSettings;
         _lastActionCount = Context.ActionStack.UndoActionsCount;
@@ -70,33 +70,6 @@ internal class CameraPreviewView : CourseViewportView
         context.SceneObjectHolder.SelectionChanged += SelectionChanged;
 
         Initialize();
-    }
-
-    private void SelectionChanged()
-    {
-        if (_settings.Mode == CameraPreviewMode.Edit)
-            Initialize();
-    }
-
-    private NitroKartRenderGroupScenePerspective CreateScene()
-    {
-        var scene = new NitroKartRenderGroupScenePerspective
-        {
-            StageInfo = Context.Course.MapData.StageInfo
-        };
-
-        if (Context.Course.MapData.MapObjects != null)
-        {
-            var mobjRenderGroup = new MkdsMObjRenderGroup(Context);
-            scene.RenderGroups.Add(mobjRenderGroup);
-            mobjRenderGroup.EditMode = false;
-        }
-
-        var perspectiveNsbmdGroup = new CourseModelRenderGroup();
-        perspectiveNsbmdGroup.Load(Context.Course);
-        scene.RenderGroups.Add(perspectiveNsbmdGroup);
-
-        return scene;
     }
 
     public override void Dispose()
@@ -126,6 +99,117 @@ internal class CameraPreviewView : CourseViewportView
             else
                 GoToFrame(Context.TimelineManager.CurrentFrame);
         }
+    }
+
+    public override bool Draw()
+    {
+        float scale = ImGuiEx.GetUiScale();
+
+        bool popWindowPadding = true;
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        if (ImGui.Begin(_title, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        {
+            if (ImGui.IsWindowAppearing())
+            {
+                ImGui.SetWindowFocus("Timeline");
+                ImGui.SetWindowFocus(_title);
+            }
+
+            var availableSpace = ImGui.GetContentRegionAvail();
+
+            float dsScreenHeight = 192f;
+            float dsScreenWidth = 256f;
+            float dsScreenGap = 64f;
+
+            float targetHeight = availableSpace.Y;
+
+            if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen && _settings.UseNativeResolution)
+                targetHeight = dsScreenHeight * 2 + (_settings.UseScreenGap ? dsScreenGap : 0);
+
+            float screenGapFactor = _settings.UseScreenGap ? targetHeight / (dsScreenGap + (dsScreenHeight * 2)) : 0;
+            float screenGap = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? dsScreenGap * screenGapFactor : 0;
+            float screenHeight = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? (targetHeight - screenGap) / 2 : 0;
+            float screenWidth = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? screenHeight / dsScreenHeight * dsScreenWidth : 0;
+
+            var frameSize = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? new Vector2(screenWidth, screenHeight * 2 + screenGap) : new Vector2(0);
+
+            ImGui.SetCursorPosX(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? availableSpace.X / 2f - screenWidth / 2f : 0f);
+            ImGui.SetCursorPosY(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? ImGui.GetCursorPosY() + ((availableSpace.Y - targetHeight) / 2f) : 0f);
+            if (ImGui.BeginChild(ImGui.GetID("TestFrames"), frameSize, false, ImGuiWindowFlags.None))
+            {
+                _viewportPanel.Size = new Vector2(screenWidth, screenHeight);
+                _bottomViewportPanel.Size = new Vector2(screenWidth, screenHeight);
+
+                bool isEdit = _settings.Mode == CameraPreviewMode.Edit;
+                if (_viewportPanel is CameraPreviewViewportPanel topPanel)
+                {
+                    topPanel.EnableCameraControls = isEdit;
+
+                    if (!isEdit)
+                        ApplyViewProjection(topPanel, _topView, _topProj, _topFov);
+
+                    _viewportPanel.Draw();
+                }
+
+                if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen)
+                {
+                    ImGui.SetCursorPosY(screenHeight + screenGap);
+                    ApplyViewProjection(_bottomViewportPanel,
+                        isEdit ? _viewportPanel.Context.ViewMatrix : _bottomView, _bottomProj, null);
+                    _bottomViewportPanel.Draw();
+                }
+
+                ImGui.EndChild();
+            }
+
+            ImGui.SetCursorPosY(32 * scale);
+            ImGui.SetCursorPosX(8 * scale);
+
+            if (popWindowPadding)
+            {
+                popWindowPadding = false;
+                ImGui.PopStyleVar();
+            }
+
+            RenderControls();
+
+            ImGui.End();
+        }
+
+        if (popWindowPadding)
+        {
+            popWindowPadding = false;
+            ImGui.PopStyleVar();
+        }
+
+        return true;
+    }
+
+    private void SelectionChanged()
+    {
+        if (_settings.Mode == CameraPreviewMode.Edit)
+            Initialize();
+    }
+
+    private NitroKartRenderGroupScenePerspective CreateScene()
+    {
+        var scene = new NitroKartRenderGroupScenePerspective
+        {
+            StageInfo = Context.Course.MapData.StageInfo
+        };
+
+        if (Context.Course.MapData.MapObjects != null)
+        {
+            var mobjRenderGroup = new MkdsMObjRenderGroup(Context);
+            scene.RenderGroups.Add(mobjRenderGroup);
+            mobjRenderGroup.EditMode = false;
+        }
+
+        var perspectiveNsbmdGroup = new CourseModelRenderGroup();
+        perspectiveNsbmdGroup.Load(Context.Course);
+        scene.RenderGroups.Add(perspectiveNsbmdGroup);
+
+        return scene;
     }
 
     private void RecalculateFrame()
@@ -213,90 +297,6 @@ internal class CameraPreviewView : CourseViewportView
             viewportPanel.ApplyFov(fov.Value);
         else
             viewportPanel.ApplyProjection(proj);
-    }
-
-    public override bool Draw()
-    {
-        float scale = ImGuiEx.GetUiScale();
-
-        bool popWindowPadding = true;
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-        if (ImGui.Begin(_title, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-        {
-            if (ImGui.IsWindowAppearing())
-            {
-                ImGui.SetWindowFocus("Timeline");
-                ImGui.SetWindowFocus(_title);
-            }
-
-            var availableSpace = ImGui.GetContentRegionAvail();
-
-            float dsScreenHeight = 192f;
-            float dsScreenWidth = 256f;
-            float dsScreenGap = 64f;
-
-            float targetHeight = availableSpace.Y;
-
-            if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen && _settings.UseNativeResolution)
-                targetHeight = dsScreenHeight * 2 + (_settings.UseScreenGap ? dsScreenGap : 0);
-
-            float screenGapFactor = _settings.UseScreenGap ? targetHeight / (dsScreenGap + (dsScreenHeight * 2)) : 0;
-            float screenGap = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? dsScreenGap * screenGapFactor : 0;
-            float screenHeight = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? (targetHeight - screenGap) / 2 : 0;
-            float screenWidth = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? screenHeight / dsScreenHeight * dsScreenWidth : 0;
-
-            var frameSize = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? new Vector2(screenWidth, screenHeight * 2 + screenGap) : new Vector2(0);
-
-            ImGui.SetCursorPosX(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? availableSpace.X / 2f - screenWidth / 2f : 0f);
-            ImGui.SetCursorPosY(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? ImGui.GetCursorPosY() + ((availableSpace.Y - targetHeight) / 2f) : 0f);
-            if (ImGui.BeginChild(ImGui.GetID("TestFrames"), frameSize, false, ImGuiWindowFlags.None))
-            {
-                _viewportPanel.Size = new Vector2(screenWidth, screenHeight);
-                _bottomViewportPanel.Size = new Vector2(screenWidth, screenHeight);
-
-                bool isEdit = _settings.Mode == CameraPreviewMode.Edit;
-                if (_viewportPanel is CameraPreviewViewportPanel topPanel)
-                {
-                    topPanel.EnableCameraControls = isEdit;
-
-                    if (!isEdit)
-                        ApplyViewProjection(topPanel, _topView, _topProj, _topFov);
-
-                    _viewportPanel.Draw();
-                }
-
-                if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen)
-                {
-                    ImGui.SetCursorPosY(screenHeight + screenGap);
-                    ApplyViewProjection(_bottomViewportPanel,
-                        isEdit ? _viewportPanel.Context.ViewMatrix : _bottomView, _bottomProj, null);
-                    _bottomViewportPanel.Draw();
-                }
-
-                ImGui.EndChild();
-            }
-
-            ImGui.SetCursorPosY(32 * scale);
-            ImGui.SetCursorPosX(8 * scale);
-
-            if (popWindowPadding)
-            {
-                popWindowPadding = false;
-                ImGui.PopStyleVar();
-            }
-
-            RenderControls();
-
-            ImGui.End();
-        }
-
-        if (popWindowPadding)
-        {
-            popWindowPadding = false;
-            ImGui.PopStyleVar();
-        }
-
-        return true;
     }
 
     private void RenderControls()
@@ -404,11 +404,10 @@ internal class CameraPreviewView : CourseViewportView
     }
 
     private MkdsCamera GetSelectedCamera()
-    {
-        return Context.SceneObjectHolder.GetSelection().OfType<MkdsCamera>().SingleOrDefault(x => x.Type is
+        => Context.SceneObjectHolder.GetSelection().OfType<MkdsCamera>()
+            .SingleOrDefault(x => x.Type is
                 MkdsCameraType.FixedLookAtTargets or
                 MkdsCameraType.RouteLookAtTargets);
-    }
 
     private void Initialize()
     {
