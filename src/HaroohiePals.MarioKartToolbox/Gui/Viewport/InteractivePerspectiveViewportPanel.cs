@@ -57,13 +57,6 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                 ImGui.OpenPopup("Viewport Settings");
             }
 
-            // ImGui.SameLine();
-            // ImGui.SetCursorPosX((btnSize + 4) * i++);
-            // if (ImGui.Button($"{IconFonts.FontAwesome6.Camera}", new(btnSize)))
-            // {
-            //     // RipFramebuffers(context);
-            // }
-
             if (ImGui.BeginPopup("Viewport Settings", ImGuiWindowFlags.AlwaysAutoResize))
             {
                 float x = 4 * scale;
@@ -93,7 +86,20 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
 
                     y += btnSize;
 
-                    // Camera settings
+                    // Gizmo settings
+                    ImGui.SetCursorPosX(x);
+                    ImGui.SetCursorPosY(y);
+
+                    ImGui.Text("Gizmo Mode");
+
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - inputWidth - 10f);
+
+                    ImGui.PushItemWidth(inputWidth);
+                    ImGuiEx.ComboEnum("##GizmoMode", ref _gizmo.Mode);
+
+                    y += btnSize;
+
                     ImGui.SetCursorPosX(x);
                     ImGui.SetCursorPosY(y);
 
@@ -105,9 +111,9 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                     ImGui.PushItemWidth(inputWidth);
                     ImGuiEx.ComboEnum("##RotateScaleMode", ref _gizmo.RotateScaleMode);
 
+                    // Camera settings
                     y += btnSize;
 
-                    // Camera settings
                     ImGui.SetCursorPosX(x);
                     ImGui.SetCursorPosY(y);
 

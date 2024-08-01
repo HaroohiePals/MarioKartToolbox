@@ -75,10 +75,8 @@ class NitroKartRenderGroupScenePerspective : NitroRenderGroupScenePerspective
 
         var first = context.SceneObjectHolder.GetSelection().FirstOrDefault();
 
-        if (first is IPoint)
+        if (first is IPoint && RenderGroups.TryGetObjectTransform(first, -1, out var transform))
         {
-            RenderGroups.GetObjectTransform(first, -1, out var transform);
-
             float distance = 100f;
             float angle = OpenTK.Mathematics.MathHelper.DegreesToRadians(30);
 

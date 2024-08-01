@@ -1,40 +1,24 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
+using System.Drawing;
+using System.Security.Principal;
 
 namespace HaroohiePals.Gui.Viewport;
 
 //Based on ImGuizmo: https://github.com/CedricGuillemet/ImGuizmo/blob/master/ImGuizmo.cpp
-public class ImGuizmo
+sealed class ImGuizmo
 {
-    private ImGuizmoContext _context = new();
-
-    //Added later
     public ImGuizmoConfirmAction ConfirmAction = ImGuizmoConfirmAction.MouseUp;
-
-    //Experimental
     public float? OverrideValue = null;
+    public bool IsUsing =>
+        (_context.IsUsing && (_context.ActualID == -1 || _context.ActualID == _context.EditingID))
+        || _context.IsUsingBounds;
 
-    private static readonly string[] _translationInfoMask = { "X : {0:0.000}", "Y : {0:0.000}", "Z : {0:0.000}", "Y : {0:0.000} Z : {1:0.000}", "X : {0:0.000} Z : {1:0.000}", "X : {0:0.000} Y : {1:0.000}", "X : {0:0.000} Y : {1:0.000} Z : {2:0.000}" };
-    private static readonly string[] _scaleInfoMask = { "X : {0:0.00}", "Y : {0:0.00}", "Z : {0:0.00}", "XYZ : {0:0.00}" };
-    private static readonly string[] _rotationInfoMask = { "X : {0:0.00} deg {1:0.00} rad", "Y : {0:0.00} deg {1:0.00} rad", "Z : {0:0.00} deg {1:0.00} rad", "Screen : {0:0.00} deg {1:0.00} rad" };
-    private static readonly int[] _translationInfoIndex = { 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1, 2 };
-    private static readonly float _quadMin = 0.5f;
-    private static readonly float _quadMax = 0.8f;
-    private static readonly float[] _quadUV = { _quadMin, _quadMin, _quadMin, _quadMax, _quadMax, _quadMax, _quadMax, _quadMin };
-    private static readonly int _halfCircleSegmentCount = 64;
-    private static readonly float _snapTension = 0.5f;
-
-    private float _screenRotateSize = 0.06f;
-    // scale a bit so translate axis do not touch when in universal
-    private float _rotationDisplayFactor = 1.2f;
-
-    // Matches MT_MOVE_AB order
-    private static readonly ImGuizmoOperation[] TRANSLATE_PLANS = new[]
-    {
-        ImGuizmoOperation.TranslateY | ImGuizmoOperation.TranslateZ,
-        ImGuizmoOperation.TranslateX | ImGuizmoOperation.TranslateZ,
-        ImGuizmoOperation.TranslateX | ImGuizmoOperation.TranslateY
-    };
+    private ImGuizmoContext _context = new();
+    private bool _forceActivate = false;
+    private bool _canActivate
+        => _forceActivate || (ImGui.IsMouseClicked(ImGuiMouseButton.Left)
+            && !ImGui.IsAnyItemHovered() && !ImGui.IsAnyItemActive());
 
     public void SetDrawlist(ImDrawListPtr? drawList = null)
         => _context.DrawList = drawList ?? ImGui.GetWindowDrawList();
@@ -92,10 +76,6 @@ public class ImGuizmo
         return false;
     }
 
-    public bool IsUsing =>
-        (_context.IsUsing && (_context.ActualID == -1 || _context.ActualID == _context.EditingID))
-        || _context.IsUsingBounds;
-
     //New function
     public void StartMoveType(ImGuizmoMoveType moveType)
     {
@@ -123,14 +103,15 @@ public class ImGuizmo
         _context.Width = width;
         _context.Height = height;
         _context.XMax = _context.X + _context.Width;
-        _context.YMax = _context.Y + _context.XMax;
+        _context.YMax = _context.Y + _context.Height;
         _context.DisplayRatio = width / height;
     }
 
     public void SetOrthographic(bool isOrthographic)
         => _context.IsOrthographic = isOrthographic;
 
-    public bool Manipulate(Matrix4 view, Matrix4 projection, ImGuizmoOperation operation, ImGuizmoMode mode, ref Matrix4 matrix, out Matrix4 deltaMatrix, Vector3? snap = null, float[] localBounds = null, Vector3? boundsSnap = null)
+    public bool Manipulate(Matrix4 view, Matrix4 projection, ImGuizmoOperation operation, ImGuizmoMode mode,
+        ref Matrix4 matrix, out Matrix4 deltaMatrix, Vector3? snap = null, Box3d? localBounds = null, Vector3? boundsSnap = null)
     {
         // set delta to identity
         deltaMatrix = Matrix4.Identity;
@@ -142,7 +123,7 @@ public class ImGuizmo
 
             // behind camera
             var camSpacePosition = Vector3.Zero.TransformPoint(_context.MVP);
-            if (!_context.IsOrthographic && camSpacePosition.Z < 0.001f)
+            if (!_context.IsOrthographic && camSpacePosition.Z < 0.001f && !_context.IsUsing)
             {
                 return false;
             }
@@ -160,9 +141,9 @@ public class ImGuizmo
                 }
             }
 
-            if (localBounds != null && localBounds.Length == 6 && !_context.IsUsing)
+            if (localBounds is not null && !_context.IsUsing)
             {
-                HandleAndDrawLocalBounds(localBounds, ref matrix, boundsSnap, operation);
+                manipulated = HandleAndDrawLocalBounds(localBounds.Value, ref matrix, boundsSnap, operation);
             }
 
             _context.Operation = operation;
@@ -288,17 +269,15 @@ public class ImGuizmo
         _context.CameraUp = viewInverse.Row1.Xyz;
 
         // Fix for orthographic projection view
-        if (_context.CameraEye == Vector3.Zero)
-            _context.CameraEye = new Vector3(0, 0.001f, 0.0f);
+        if (_context.IsOrthographic)
+            _context.CameraEye = _context.ModelSource.Row3.Xyz + _context.CameraDir;
 
         // projection reverse
-        Vector4 nearPos, farPos;
-
         var nearVec = new Vector4(0, 0, 1f, 1f);
         var farVec = new Vector4(0, 0, 2f, 1f);
 
-        nearPos = nearVec.Transform(_context.ProjectionMat);
-        farPos = farVec.Transform(_context.ProjectionMat);
+        var nearPos = nearVec.Transform(_context.ProjectionMat);
+        var farPos = farVec.Transform(_context.ProjectionMat);
 
         _context.Reversed = (nearPos.Z / nearPos.W) > (farPos.Z / farPos.W);
 
@@ -317,8 +296,24 @@ public class ImGuizmo
         _context.ScreenSquareMin = new Vector2(centerSSpace.X - 5f, centerSSpace.Y - 5f);
         _context.ScreenSquareMax = new Vector2(centerSSpace.X + 5f, centerSSpace.Y + 5f);
 
-        ImGuizmoUtils.ComputeCameraRay(out _context.RayOrigin, out _context.RayVector, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height), _context.ProjectionMat, _context.ViewMat);
+        ImGuizmoUtils.ComputeCameraRay(out _context.RayOrigin, out _context.RayVector, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height), _context.ProjectionMat, _context.ViewMat, _context.Reversed);
     }
+
+    private uint ComputeDirectionColor(int index) => index switch
+    {
+        0 => GetColorU32(_context.Style.Colors.DirectionX),
+        1 => GetColorU32(_context.Style.Colors.DirectionY),
+        2 => GetColorU32(_context.Style.Colors.DirectionZ),
+        _ => GetColorU32(_context.Style.Colors.DirectionX),
+    };
+
+    private uint ComputePlaneColor(int index) => index switch
+    {
+        0 => GetColorU32(_context.Style.Colors.PlaneX),
+        1 => GetColorU32(_context.Style.Colors.PlaneY),
+        2 => GetColorU32(_context.Style.Colors.PlaneZ),
+        _ => GetColorU32(_context.Style.Colors.PlaneX),
+    };
 
     private uint[] ComputeColors(ImGuizmoMoveType type, ImGuizmoOperation operation)
     {
@@ -326,32 +321,33 @@ public class ImGuizmo
 
         if (_context.Enabled)
         {
-            uint selectionColor = GetColorU32(ImGuizmoColor.Selection);
+            uint selectionColor = GetColorU32(_context.Style.Colors.Selection);
+            uint unselectedColor = GetColorU32(_context.Style.Colors.Unselected);
 
             switch (operation)
             {
                 case ImGuizmoOperation.Translate:
-                    colors[0] = (type == ImGuizmoMoveType.MoveScreen) ? selectionColor : 0xFFFFFFFF;
+                    colors[0] = (type == ImGuizmoMoveType.MoveScreen) ? selectionColor : unselectedColor;
                     for (int i = 0; i < 3; i++)
                     {
-                        colors[i + 1] = (type == (ImGuizmoMoveType.MoveX + i)) ? selectionColor : GetColorU32(ImGuizmoColor.DirectionX + i);
-                        colors[i + 4] = (type == (ImGuizmoMoveType.MoveYZ + i)) ? selectionColor : GetColorU32(ImGuizmoColor.PlaneX + i);
+                        colors[i + 1] = (type == (ImGuizmoMoveType.MoveX + i)) ? selectionColor : ComputeDirectionColor(i);
+                        colors[i + 4] = (type == (ImGuizmoMoveType.MoveYZ + i)) ? selectionColor : ComputePlaneColor(i);
                         colors[i + 4] = (type == ImGuizmoMoveType.MoveScreen) ? selectionColor : colors[i + 4];
                     }
                     break;
                 case ImGuizmoOperation.Rotate:
-                    colors[0] = (type == ImGuizmoMoveType.RotateScreen) ? selectionColor : 0xFFFFFFFF;
+                    colors[0] = (type == ImGuizmoMoveType.RotateScreen) ? selectionColor : unselectedColor;
                     for (int i = 0; i < 3; i++)
                     {
-                        colors[i + 1] = (type == (ImGuizmoMoveType.RotateX + i)) ? selectionColor : GetColorU32(ImGuizmoColor.DirectionX + i);
+                        colors[i + 1] = (type == (ImGuizmoMoveType.RotateX + i)) ? selectionColor : ComputeDirectionColor(i);
                     }
                     break;
-                case ImGuizmoOperation.ScaleU:
+                case ImGuizmoOperation.ScaleUniversal:
                 case ImGuizmoOperation.Scale:
-                    colors[0] = (type == ImGuizmoMoveType.ScaleXYZ) ? selectionColor : 0xFFFFFFFF;
+                    colors[0] = (type == ImGuizmoMoveType.ScaleXYZ) ? selectionColor : unselectedColor;
                     for (int i = 0; i < 3; i++)
                     {
-                        colors[i + 1] = (type == (ImGuizmoMoveType.ScaleX + i)) ? selectionColor : GetColorU32(ImGuizmoColor.DirectionX + i);
+                        colors[i + 1] = (type == (ImGuizmoMoveType.ScaleX + i)) ? selectionColor : ComputeDirectionColor(i);
                     }
                     break;
                 // note: this internal function is only called with three possible values for operation
@@ -361,7 +357,7 @@ public class ImGuizmo
         }
         else
         {
-            uint inactiveColor = GetColorU32(ImGuizmoColor.Inactive);
+            uint inactiveColor = GetColorU32(_context.Style.Colors.Inactive);
             for (int i = 0; i < 7; i++)
             {
                 colors[i] = inactiveColor;
@@ -371,11 +367,8 @@ public class ImGuizmo
         return colors;
     }
 
-    private uint GetColorU32(ImGuizmoColor color)
-    {
-        var colorVec = _context.Style.Colors[(int)color];
-        return ImGui.ColorConvertFloat4ToU32(new System.Numerics.Vector4(colorVec.R, colorVec.G, colorVec.B, colorVec.A));
-    }
+    private uint GetColorU32(Color color)
+        => ImGuiEx.ColorConvertColorToU32(color);
 
     private ImGuizmoMoveType GetMoveType(ImGuizmoOperation op, out Vector3 gizmoHitProportion)
     {
@@ -428,7 +421,8 @@ public class ImGuizmo
 
             float dx = Vector3.Dot(dirPlaneX, (posOnPlan - modelPos) * (1f / _context.ScreenFactor));
             float dy = Vector3.Dot(dirPlaneY, (posOnPlan - modelPos) * (1f / _context.ScreenFactor));
-            if (belowPlaneLimit && dx >= _quadUV[0] && dx <= _quadUV[4] && dy >= _quadUV[1] && dy <= _quadUV[3] && Contains(op, TRANSLATE_PLANS[i]))
+            if (belowPlaneLimit && dx >= ImGuizmoConsts.QuadUVs[0] && dx <= ImGuizmoConsts.QuadUVs[4]
+                && dy >= ImGuizmoConsts.QuadUVs[1] && dy <= ImGuizmoConsts.QuadUVs[3] && Contains(op, ImGuizmoConsts.TranslatePlaneOperations[i]))
             {
                 type = ImGuizmoMoveType.MoveYZ + i;
             }
@@ -477,7 +471,7 @@ public class ImGuizmo
             var intersectWorldPos = _context.RayOrigin + _context.RayVector * len;
             var intersectViewPos = intersectWorldPos.TransformPoint(_context.ViewMat);
 
-            if (MathF.Abs(modelViewPos.Z) - MathF.Abs(intersectViewPos.Z) < -ImGuizmoConsts.FltEpsilon)
+            if (MathF.Abs(modelViewPos.Z) - MathF.Abs(intersectViewPos.Z) < -ImGuizmoConsts.FLT_EPSILON)
             {
                 continue;
             }
@@ -485,7 +479,7 @@ public class ImGuizmo
             var localPos = intersectWorldPos - modelPos;
             var idealPosOnCircle = localPos.Normalized();
             idealPosOnCircle = Vector3.TransformVector(idealPosOnCircle, _context.ModelInverse);
-            var idealPosOnCircleScreen = ImGuizmoUtils.WorldToPos(idealPosOnCircle * _rotationDisplayFactor * _context.ScreenFactor, _context.MVP, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
+            var idealPosOnCircleScreen = ImGuizmoUtils.WorldToPos(idealPosOnCircle * ImGuizmoConsts.ROTATION_DISPLAY_FACTOR * _context.ScreenFactor, _context.MVP, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
 
             //_context.DrawList.AddCircle(idealPosOnCircleScreen, 5.f, IM_COL32_WHITE);
             var distanceOnScreen = idealPosOnCircleScreen - io.MousePos;
@@ -557,14 +551,14 @@ public class ImGuizmo
 
         var deltaScreen = new Vector3(io.MousePos.X - _context.ScreenSquareCenter.X, io.MousePos.Y - _context.ScreenSquareCenter.Y, 0f);
         float dist = deltaScreen.Length;
-        if (Contains(op, ImGuizmoOperation.ScaleU) && dist >= 17.0f && dist < 23.0f)
+        if (Contains(op, ImGuizmoOperation.ScaleUniversal) && dist >= 17.0f && dist < 23.0f)
         {
             type = ImGuizmoMoveType.ScaleXYZ;
         }
 
         for (int i = 0; i < 3 && type == ImGuizmoMoveType.None; i++)
         {
-            if (!Intersects(op, (ImGuizmoOperation)((int)ImGuizmoOperation.ScaleXU << i)))
+            if (!Intersects(op, (ImGuizmoOperation)((int)ImGuizmoOperation.ScaleXUniversal << i)))
             {
                 continue;
             }
@@ -622,9 +616,9 @@ public class ImGuizmo
 
             // For readability
             bool allowFlip = _context.AllowAxisFlip;
-            float mulAxis = (allowFlip && lenDir < lenDirMinus && MathF.Abs(lenDir - lenDirMinus) > ImGuizmoConsts.FltEpsilon) ? -1f : 1f;
-            float mulAxisX = (allowFlip && lenDirPlaneX < lenDirMinusPlaneX && MathF.Abs(lenDirPlaneX - lenDirMinusPlaneX) > ImGuizmoConsts.FltEpsilon) ? -1f : 1f;
-            float mulAxisY = (allowFlip && lenDirPlaneY < lenDirMinusPlaneY && MathF.Abs(lenDirPlaneY - lenDirMinusPlaneY) > ImGuizmoConsts.FltEpsilon) ? -1f : 1f;
+            float mulAxis = (allowFlip && lenDir < lenDirMinus && MathF.Abs(lenDir - lenDirMinus) > ImGuizmoConsts.FLT_EPSILON) ? -1f : 1f;
+            float mulAxisX = (allowFlip && lenDirPlaneX < lenDirMinusPlaneX && MathF.Abs(lenDirPlaneX - lenDirMinusPlaneX) > ImGuizmoConsts.FLT_EPSILON) ? -1f : 1f;
+            float mulAxisY = (allowFlip && lenDirPlaneY < lenDirMinusPlaneY && MathF.Abs(lenDirPlaneY - lenDirMinusPlaneY) > ImGuizmoConsts.FLT_EPSILON) ? -1f : 1f;
             dirAxis *= mulAxis;
             dirPlaneX *= mulAxisX;
             dirPlaneY *= mulAxisY;
@@ -651,14 +645,14 @@ public class ImGuizmo
         var mvp = localCoordinates ? _context.MVPLocal : _context.MVP;
 
         startOfSegment = startOfSegment.TransformPoint(mvp);
-        if (MathF.Abs(startOfSegment.W) > ImGuizmoConsts.FltEpsilon) // check for axis aligned with camera direction
+        if (MathF.Abs(startOfSegment.W) > ImGuizmoConsts.FLT_EPSILON) // check for axis aligned with camera direction
         {
             startOfSegment *= 1.0f / startOfSegment.W;
         }
 
         Vector4 endOfSegment = new Vector4(end, 0);
         endOfSegment = endOfSegment.TransformPoint(mvp);
-        if (MathF.Abs(endOfSegment.W) > ImGuizmoConsts.FltEpsilon) // check for axis aligned with camera direction
+        if (MathF.Abs(endOfSegment.W) > ImGuizmoConsts.FLT_EPSILON) // check for axis aligned with camera direction
         {
             endOfSegment *= 1.0f / endOfSegment.W;
         }
@@ -675,7 +669,7 @@ public class ImGuizmo
         for (uint i = 0; i < 3; i++)
         {
             pts[i] = pts[i].TransformPoint(_context.MVP);
-            if (MathF.Abs(pts[i].W) > ImGuizmoConsts.FltEpsilon) // check for axis aligned with camera direction
+            if (MathF.Abs(pts[i].W) > ImGuizmoConsts.FLT_EPSILON) // check for axis aligned with camera direction
             {
                 pts[i] *= 1f / pts[i].W;
             }
@@ -695,13 +689,13 @@ public class ImGuizmo
     {
         var drawList = _context.DrawList;
 
-        if (!Intersects(op, ImGuizmoOperation.ScaleU))
+        if (!Intersects(op, ImGuizmoOperation.ScaleUniversal))
         {
             return;
         }
 
         // colors
-        uint[] colors = ComputeColors(type, ImGuizmoOperation.ScaleU);
+        uint[] colors = ComputeColors(type, ImGuizmoOperation.ScaleUniversal);
 
         // draw
         var scaleDisplay = new Vector3(1);
@@ -713,7 +707,7 @@ public class ImGuizmo
 
         for (int i = 0; i < 3; i++)
         {
-            if (!Intersects(op, (ImGuizmoOperation)((int)ImGuizmoOperation.ScaleXU << i)))
+            if (!Intersects(op, (ImGuizmoOperation)((int)ImGuizmoOperation.ScaleXUniversal << i)))
             {
                 continue;
             }
@@ -743,9 +737,9 @@ public class ImGuizmo
             var destinationPosOnScreen = ImGuizmoUtils.WorldToPos(_context.Model.Row3.Xyz, _context.ViewProjection, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
 
             int componentInfoIndex = (type - ImGuizmoMoveType.ScaleX) * 3;
-            string formattedString = string.Format(_scaleInfoMask[type - ImGuizmoMoveType.ScaleX], scaleDisplay[_translationInfoIndex[componentInfoIndex]]);
-            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(ImGuizmoColor.TextShadow), formattedString);
-            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(ImGuizmoColor.Text), formattedString);
+            string formattedString = string.Format(ImGuizmoConsts.ScaleInfoMask[type - ImGuizmoMoveType.ScaleX], scaleDisplay[ImGuizmoConsts.TranslationInfoIndex[componentInfoIndex]]);
+            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(_context.Style.Colors.TextShadow), formattedString);
+            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(_context.Style.Colors.Text), formattedString);
         }
     }
 
@@ -791,7 +785,7 @@ public class ImGuizmo
 
                     if (_context.IsUsing && (_context.ActualID == -1 || _context.ActualID == _context.EditingID))
                     {
-                        uint scaleLineColor = GetColorU32(ImGuizmoColor.ScaleLine);
+                        uint scaleLineColor = GetColorU32(_context.Style.Colors.ScaleLine);
                         drawList.AddLine(baseSSpace, worldDirSSpaceNoScale, scaleLineColor, _context.Style.ScaleLineThickness);
                         drawList.AddCircleFilled(worldDirSSpaceNoScale, _context.Style.ScaleLineCircleSize, scaleLineColor);
                     }
@@ -819,9 +813,9 @@ public class ImGuizmo
             var destinationPosOnScreen = ImGuizmoUtils.WorldToPos(_context.Model.Row3.Xyz, _context.ViewProjection, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
 
             int componentInfoIndex = (type - ImGuizmoMoveType.ScaleX) * 3;
-            string formattedString = string.Format(_scaleInfoMask[type - ImGuizmoMoveType.ScaleX], scaleDisplay[_translationInfoIndex[componentInfoIndex]]);
-            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(ImGuizmoColor.TextShadow), formattedString);
-            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(ImGuizmoColor.Text), formattedString);
+            string formattedString = string.Format(ImGuizmoConsts.ScaleInfoMask[type - ImGuizmoMoveType.ScaleX], scaleDisplay[ImGuizmoConsts.TranslationInfoIndex[componentInfoIndex]]);
+            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(_context.Style.Colors.TextShadow), formattedString);
+            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(_context.Style.Colors.Text), formattedString);
         }
     }
 
@@ -883,15 +877,15 @@ public class ImGuizmo
             // draw plane
             if (!_context.IsUsing || (_context.IsUsing && type == ImGuizmoMoveType.MoveYZ + i))
             {
-                if (belowPlaneLimit && Contains(op, TRANSLATE_PLANS[i]))
+                if (belowPlaneLimit && Contains(op, ImGuizmoConsts.TranslatePlaneOperations[i]))
                 {
                     System.Numerics.Vector2[] screenQuadPts = new System.Numerics.Vector2[4];
                     for (int j = 0; j < 4; ++j)
                     {
-                        var cornerWorldPos = (dirPlaneX * _quadUV[j * 2] + dirPlaneY * _quadUV[j * 2 + 1]) * _context.ScreenFactor;
+                        var cornerWorldPos = (dirPlaneX * ImGuizmoConsts.QuadUVs[j * 2] + dirPlaneY * ImGuizmoConsts.QuadUVs[j * 2 + 1]) * _context.ScreenFactor;
                         screenQuadPts[j] = ImGuizmoUtils.WorldToPos(cornerWorldPos, _context.MVP, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
                     }
-                    drawList.AddPolyline(ref screenQuadPts[0], 4, GetColorU32(ImGuizmoColor.DirectionX + i), ImDrawFlags.Closed, 1.0f);
+                    drawList.AddPolyline(ref screenQuadPts[0], 4, ComputeDirectionColor(i), ImDrawFlags.Closed, 1.0f);
                     drawList.AddConvexPolyFilled(ref screenQuadPts[0], 4, colors[i + 4]);
                 }
             }
@@ -902,7 +896,7 @@ public class ImGuizmo
 
         if (_context.IsUsing && (_context.ActualID == -1 || _context.ActualID == _context.EditingID) && IsTranslateType(type))
         {
-            uint translationLineColor = GetColorU32(ImGuizmoColor.TranslationLine);
+            uint translationLineColor = GetColorU32(_context.Style.Colors.TranslationLine);
 
             var sourcePosOnScreen = ImGuizmoUtils.WorldToPos(_context.MatrixOrigin, _context.ViewProjection, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
             var destinationPosOnScreen = ImGuizmoUtils.WorldToPos(_context.Model.Row3.Xyz, _context.ViewProjection, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
@@ -916,13 +910,13 @@ public class ImGuizmo
 
             var deltaInfo = _context.Model.Row3.Xyz - _context.MatrixOrigin;
             int componentInfoIndex = (type - ImGuizmoMoveType.MoveX) * 3;
-            string formattedString = string.Format(_translationInfoMask[type - ImGuizmoMoveType.MoveX],
-                deltaInfo[_translationInfoIndex[componentInfoIndex]],
-                deltaInfo[_translationInfoIndex[componentInfoIndex + 1]],
-                deltaInfo[_translationInfoIndex[componentInfoIndex + 2]]);
+            string formattedString = string.Format(ImGuizmoConsts.TranslationInfoMask[type - ImGuizmoMoveType.MoveX],
+                deltaInfo[ImGuizmoConsts.TranslationInfoIndex[componentInfoIndex]],
+                deltaInfo[ImGuizmoConsts.TranslationInfoIndex[componentInfoIndex + 1]],
+                deltaInfo[ImGuizmoConsts.TranslationInfoIndex[componentInfoIndex + 2]]);
 
-            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(ImGuizmoColor.TextShadow), formattedString);
-            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(ImGuizmoColor.Text), formattedString);
+            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(_context.Style.Colors.TextShadow), formattedString);
+            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(_context.Style.Colors.Text), formattedString);
         }
     }
 
@@ -937,7 +931,7 @@ public class ImGuizmo
         {
             var baseSSpace2 = ImGuizmoUtils.WorldToPos(axis * 0.05f * (float)(j * 2) * _context.ScreenFactor, _context.MVP, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
             var worldDirSSpace2 = ImGuizmoUtils.WorldToPos(axis * 0.05f * (float)(j * 2 + 1) * _context.ScreenFactor, _context.MVP, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
-            _context.DrawList.AddLine(baseSSpace2, worldDirSSpace2, GetColorU32(ImGuizmoColor.HatchedAxisLines), _context.Style.HatchedAxisLineThickness);
+            _context.DrawList.AddLine(baseSSpace2, worldDirSSpace2, GetColorU32(_context.Style.Colors.HatchedAxisLines), _context.Style.HatchedAxisLineThickness);
         }
     }
 
@@ -965,7 +959,7 @@ public class ImGuizmo
 
         cameraToModelNormalized = Vector3.TransformVector(cameraToModelNormalized, _context.ModelInverse);
 
-        _context.RadiusSquareCenter = _screenRotateSize * _context.Height;
+        _context.RadiusSquareCenter = ImGuizmoConsts.SCREEN_ROTATE_SIZE * _context.Height;
 
         bool hasRSC = Intersects(op, ImGuizmoOperation.RotateScreen);
         for (int axis = 0; axis < 3; axis++)
@@ -977,20 +971,20 @@ public class ImGuizmo
             bool usingAxis = (_context.IsUsing && type == ImGuizmoMoveType.RotateZ - axis);
             int circleMul = (hasRSC && !usingAxis) ? 1 : 2;
 
-            var circlePos = new System.Numerics.Vector2[circleMul * _halfCircleSegmentCount + 1];
+            var circlePos = new System.Numerics.Vector2[circleMul * ImGuizmoConsts.HALF_CIRCLE_SEGMENT_COUNT + 1];
 
             float angleStart = MathF.Atan2(cameraToModelNormalized[(4 - axis) % 3], cameraToModelNormalized[(3 - axis) % 3]) + MathF.PI * 0.5f;
 
             for (int i = 0; i < circlePos.Length; i++)
             {
-                float ng = angleStart + circleMul * MathF.PI * (i / (float)_halfCircleSegmentCount);
+                float ng = angleStart + circleMul * MathF.PI * (i / (float)ImGuizmoConsts.HALF_CIRCLE_SEGMENT_COUNT);
                 var axisPos = new Vector3(MathF.Cos(ng), MathF.Sin(ng), 0f);
-                var pos = new Vector3(axisPos[axis], axisPos[(axis + 1) % 3], axisPos[(axis + 2) % 3]) * _context.ScreenFactor * _rotationDisplayFactor;
+                var pos = new Vector3(axisPos[axis], axisPos[(axis + 1) % 3], axisPos[(axis + 2) % 3]) * _context.ScreenFactor * ImGuizmoConsts.ROTATION_DISPLAY_FACTOR;
                 circlePos[i] = ImGuizmoUtils.WorldToPos(pos, _context.MVP, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
             }
             if (!_context.IsUsing || usingAxis)
             {
-                drawList.AddPolyline(ref circlePos[0], circleMul * _halfCircleSegmentCount + 1, colors[3 - axis], ImDrawFlags.None, _context.Style.RotationLineThickness);
+                drawList.AddPolyline(ref circlePos[0], circleMul * ImGuizmoConsts.HALF_CIRCLE_SEGMENT_COUNT + 1, colors[3 - axis], ImDrawFlags.None, _context.Style.RotationLineThickness);
             }
 
             var worldToPos = ImGuizmoUtils.WorldToPos(_context.Model.Row3.Xyz, _context.ViewProjection, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height)) - circlePos[0];
@@ -1008,29 +1002,37 @@ public class ImGuizmo
 
         if (_context.IsUsing && (_context.ActualID == -1 || _context.ActualID == _context.EditingID) && IsRotateType(type))
         {
-            var circlePos = new System.Numerics.Vector2[_halfCircleSegmentCount + 1];
+            var circlePos = new System.Numerics.Vector2[ImGuizmoConsts.HALF_CIRCLE_SEGMENT_COUNT + 1];
 
             circlePos[0] = ImGuizmoUtils.WorldToPos(_context.Model.Row3.Xyz, _context.ViewProjection, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
-            for (uint i = 1; i < _halfCircleSegmentCount; i++)
+            for (uint i = 1; i < ImGuizmoConsts.HALF_CIRCLE_SEGMENT_COUNT; i++)
             {
-                float ng = _context.RotationAngle * ((i - 1) / (float)(_halfCircleSegmentCount - 1));
+                float ng = _context.RotationAngle * ((i - 1) / (float)(ImGuizmoConsts.HALF_CIRCLE_SEGMENT_COUNT - 1));
                 var rotateVectorMatrix = Matrix4.CreateFromAxisAngle(_context.TranslationPlane.Xyz, ng);
                 var pos = _context.RotationVectorSource.TransformPoint(rotateVectorMatrix);
-                pos *= _context.ScreenFactor * _rotationDisplayFactor;
+                pos *= _context.ScreenFactor * ImGuizmoConsts.ROTATION_DISPLAY_FACTOR;
                 circlePos[i] = ImGuizmoUtils.WorldToPos(pos + _context.Model.Row3.Xyz, _context.ViewProjection, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
             }
-            drawList.AddConvexPolyFilled(ref circlePos[0], _halfCircleSegmentCount, GetColorU32(ImGuizmoColor.RotationUsingFill));
-            drawList.AddPolyline(ref circlePos[0], _halfCircleSegmentCount, GetColorU32(ImGuizmoColor.RotationUsingBorders), ImDrawFlags.None, _context.Style.RotationLineThickness);
+            drawList.AddConvexPolyFilled(ref circlePos[0], ImGuizmoConsts.HALF_CIRCLE_SEGMENT_COUNT, GetColorU32(_context.Style.Colors.RotationUsingFill));
+            drawList.AddPolyline(ref circlePos[0], ImGuizmoConsts.HALF_CIRCLE_SEGMENT_COUNT, GetColorU32(_context.Style.Colors.RotationUsingBorder), ImDrawFlags.None, _context.Style.RotationLineThickness);
 
             var destinationPosOnScreen = circlePos[1];
-            string formattedString = string.Format(_rotationInfoMask[type - ImGuizmoMoveType.RotateX], (_context.RotationAngle / MathF.PI) * 180f, _context.RotationAngle);
-            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(ImGuizmoColor.TextShadow), formattedString);
-            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(ImGuizmoColor.Text), formattedString);
+            string formattedString = string.Format(ImGuizmoConsts.RotationInfoMask[type - ImGuizmoMoveType.RotateX], (_context.RotationAngle / MathF.PI) * 180f, _context.RotationAngle);
+            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(_context.Style.Colors.TextShadow), formattedString);
+            drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(_context.Style.Colors.Text), formattedString);
         }
     }
 
-    private void HandleAndDrawLocalBounds(float[] bounds, ref Matrix4 matrix, Vector3? snapValues, ImGuizmoOperation operation)
+    private bool HandleAndDrawLocalBounds(Box3d localBounds, ref Matrix4 matrix, Vector3? snapValues, ImGuizmoOperation operation)
     {
+        float[] bounds =
+        [
+            (float)localBounds.Min.X, (float)localBounds.Min.Y, (float)localBounds.Min.Z,
+            (float)localBounds.Max.X, (float)localBounds.Max.Y, (float)localBounds.Max.Z
+        ];
+
+        bool modified = false;
+
         var io = ImGui.GetIO();
         var drawList = _context.DrawList;
 
@@ -1047,8 +1049,7 @@ public class ImGuizmo
             float bestDot = 0f;
             for (int i = 0; i < 3; i++)
             {
-                var dirPlaneNormalWorld = Vector3.TransformVector(ImGuizmoConsts.DirectionUnary[i], _context.ModelSource);
-                dirPlaneNormalWorld.Normalize();
+                var dirPlaneNormalWorld = Vector3.TransformVector(ImGuizmoConsts.DirectionUnary[i], _context.ModelSource).Normalized();
 
                 float dt = MathF.Abs(Vector3.Dot((_context.CameraEye - _context.ModelSource.Row3.Xyz).Normalized(), dirPlaneNormalWorld));
                 if (dt >= bestDot)
@@ -1073,7 +1074,6 @@ public class ImGuizmo
             axesWorldDirections[0] = bestAxisWorldDirection;
             numAxes = 1;
         }
-
         else if (bestAxis != axes[0])
         {
             int bestIndex = 0;
@@ -1116,17 +1116,18 @@ public class ImGuizmo
             }
 
             // draw bounds
-            byte anchorAlpha = (byte)(_context.Enabled ? 0xFF : 0x80);
+            uint boundsColor = GetColorU32(_context.Enabled ? _context.Style.Colors.LocalBounds : _context.Style.Colors.LocalBoundsDisabled);
 
             Matrix4 boundsMVP = _context.ModelSource * _context.ViewProjection;
+
             for (int i = 0; i < 4; i++)
             {
-                var worldBound1 = ImGuizmoUtils.WorldToPos(aabb[i].Xyz, boundsMVP, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
-                var worldBound2 = ImGuizmoUtils.WorldToPos(aabb[(i + 1) % 4].Xyz, boundsMVP, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
+                var worldBound1 = ImGuizmoUtils.WorldToPos(aabb[i].Xyz, boundsMVP, (_context.X, _context.Y), (_context.Width, _context.Height));
+                var worldBound2 = ImGuizmoUtils.WorldToPos(aabb[(i + 1) % 4].Xyz, boundsMVP, (_context.X, _context.Y), (_context.Width, _context.Height));
+
                 if (!IsInContextRect(worldBound1) || !IsInContextRect(worldBound2))
-                {
                     continue;
-                }
+
                 float boundDistance = MathF.Sqrt((worldBound1 - worldBound2).LengthSquared());
                 int stepCount = (int)(boundDistance / 10f);
                 stepCount = Math.Min(stepCount, 1000);
@@ -1137,15 +1138,14 @@ public class ImGuizmo
                     float t2 = j * stepLength + stepLength * 0.5f;
                     var worldBoundSS1 = System.Numerics.Vector2.Lerp(worldBound1, worldBound2, t1);
                     var worldBoundSS2 = System.Numerics.Vector2.Lerp(worldBound1, worldBound2, t2);
-                    //drawList.AddLine(worldBoundSS1, worldBoundSS2, IM_COL32(0, 0, 0, 0) + anchorAlpha, 3.f);
-                    drawList.AddLine(worldBoundSS1, worldBoundSS2, 0xAAAAAA00 + anchorAlpha, 2f);
+                    drawList.AddLine(worldBoundSS1, worldBoundSS2, boundsColor, _context.Style.LocalBoundsLineThickness);
                 }
                 var midPoint = (aabb[i] + aabb[(i + 1) % 4]) * 0.5f;
-                var midBound = ImGuizmoUtils.WorldToPos(midPoint.Xyz, boundsMVP, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
-                float AnchorBigRadius = 8f;
-                float AnchorSmallRadius = 6f;
-                bool overBigAnchor = (worldBound1 - io.MousePos).LengthSquared() <= (AnchorBigRadius * AnchorBigRadius);
-                bool overSmallAnchor = (midBound - io.MousePos).LengthSquared() <= (AnchorBigRadius * AnchorBigRadius);
+                var midBound = ImGuizmoUtils.WorldToPos(midPoint.Xyz, boundsMVP, (_context.X, _context.Y), (_context.Width, _context.Height));
+                float anchorBigRadius = _context.Style.LocalBoundsAnchorBigRadius;
+                float anchorSmallRadius = _context.Style.LocalBoundsAnchorSmallRadius;
+                bool overBigAnchor = (worldBound1 - io.MousePos).LengthSquared() <= (anchorBigRadius * anchorBigRadius);
+                bool overSmallAnchor = (midBound - io.MousePos).LengthSquared() <= (anchorBigRadius * anchorBigRadius);
 
                 ImGuizmoMoveType type = ImGuizmoMoveType.None;
 
@@ -1168,17 +1168,20 @@ public class ImGuizmo
                     overSmallAnchor = false;
                 }
 
-                uint selectionColor = GetColorU32(ImGuizmoColor.Selection);
+                uint selectionColor = GetColorU32(_context.Style.Colors.Selection);
+                uint borderColor = GetColorU32(_context.Style.Colors.LocalBoundsCircleBorder);
 
-                uint bigAnchorColor = overBigAnchor ? selectionColor : (0xAAAAAA00 + anchorAlpha);
-                uint smallAnchorColor = overSmallAnchor ? selectionColor : (0xAAAAAA00 + anchorAlpha);
+                uint bigAnchorColor = overBigAnchor ? selectionColor : boundsColor;
+                uint smallAnchorColor = overSmallAnchor ? selectionColor : boundsColor;
 
-                drawList.AddCircleFilled(worldBound1, AnchorBigRadius, 0x000000FF);
-                drawList.AddCircleFilled(worldBound1, AnchorBigRadius - 1.2f, bigAnchorColor);
+                drawList.AddCircleFilled(worldBound1, anchorBigRadius, borderColor);
+                drawList.AddCircleFilled(worldBound1, anchorBigRadius - _context.Style.LocalBoundsAnchorBorderLineThickness, bigAnchorColor);
 
-                drawList.AddCircleFilled(midBound, AnchorSmallRadius, 0x000000FF);
-                drawList.AddCircleFilled(midBound, AnchorSmallRadius - 1.2f, smallAnchorColor);
+                drawList.AddCircleFilled(midBound, anchorSmallRadius, borderColor);
+                drawList.AddCircleFilled(midBound, anchorSmallRadius - _context.Style.LocalBoundsAnchorBorderLineThickness, smallAnchorColor);
+
                 int oppositeIndex = (i + 2) % 4;
+
                 // big anchor on corners
                 if (!_context.IsUsingBounds && _context.Enabled && overBigAnchor && _canActivate)
                 {
@@ -1186,7 +1189,7 @@ public class ImGuizmo
 
                     _context.BoundsPivot = aabb[(i + 2) % 4].Xyz.TransformPoint(_context.ModelSource);
                     _context.BoundsAnchor = aabb[i].Xyz.TransformPoint(_context.ModelSource);
-                    _context.BoundsPlane = ImGuizmoUtils.BuildPlane(_context.BoundsAnchor, bestAxisWorldDirection).Xyz;
+                    _context.BoundsPlane = ImGuizmoUtils.BuildPlane(_context.BoundsAnchor, bestAxisWorldDirection);
                     _context.BoundsBestAxis = bestAxis;
                     _context.BoundsAxis[0] = secondAxis;
                     _context.BoundsAxis[1] = thirdAxis;
@@ -1199,6 +1202,7 @@ public class ImGuizmo
                     _context.EditingID = _context.ActualID;
                     _context.BoundsMatrix = _context.ModelSource;
                 }
+
                 // small anchor on middle of segment
                 if (!_context.IsUsingBounds && _context.Enabled && overSmallAnchor && _canActivate)
                 {
@@ -1207,14 +1211,14 @@ public class ImGuizmo
                     var midPointOpposite = (aabb[(i + 2) % 4] + aabb[(i + 3) % 4]) * 0.5f;
                     _context.BoundsPivot = midPointOpposite.Xyz.TransformPoint(_context.ModelSource);
                     _context.BoundsAnchor = midPoint.Xyz.TransformPoint(_context.ModelSource);
-                    _context.BoundsPlane = ImGuizmoUtils.BuildPlane(_context.BoundsAnchor, bestAxisWorldDirection).Xyz;
+                    _context.BoundsPlane = ImGuizmoUtils.BuildPlane(_context.BoundsAnchor, bestAxisWorldDirection);
                     _context.BoundsBestAxis = bestAxis;
                     int[] indices = new[] { secondAxis, thirdAxis };
                     _context.BoundsAxis[0] = indices[i % 2];
                     _context.BoundsAxis[1] = -1;
 
                     _context.BoundsLocalPivot = Vector3.Zero;
-                    _context.BoundsLocalPivot[_context.BoundsAxis[0]] = aabb[oppositeIndex][indices[i % 2]];// bounds[_context.BoundsAxis[0]] * (((i + 1) & 2) ? 1.f : -1.f);
+                    _context.BoundsLocalPivot[_context.BoundsAxis[0]] = aabb[oppositeIndex][indices[i % 2]];
 
                     _context.IsUsingBounds = true;
                     _context.EditingID = _context.ActualID;
@@ -1253,7 +1257,7 @@ public class ImGuizmo
 
                     float dtAxis = Vector3.Dot(axisDir, referenceVector);
                     float boundSize = bounds[axisIndex1 + 3] - bounds[axisIndex1];
-                    if (dtAxis > ImGuizmoConsts.FltEpsilon)
+                    if (dtAxis > ImGuizmoConsts.FLT_EPSILON)
                     {
                         ratioAxis = Vector3.Dot(axisDir, deltaVector) / dtAxis;
                     }
@@ -1261,8 +1265,8 @@ public class ImGuizmo
                     if (snapValues.HasValue)
                     {
                         float length = boundSize * ratioAxis;
-                        length = ImGuizmoUtils.ComputeSnap(length, snapValues.Value[axisIndex1], _snapTension);
-                        if (boundSize > ImGuizmoConsts.FltEpsilon)
+                        length = ImGuizmoUtils.ComputeSnap(length, snapValues.Value[axisIndex1], ImGuizmoConsts.SNAP_TENSION);
+                        if (boundSize > ImGuizmoConsts.FLT_EPSILON)
                         {
                             ratioAxis = length / boundSize;
                         }
@@ -1280,16 +1284,17 @@ public class ImGuizmo
 
                 var res = preScale * scale * postScale * _context.BoundsMatrix;
                 matrix = res;
+                modified = true;
 
                 // info text
                 var destinationPosOnScreen = ImGuizmoUtils.WorldToPos(_context.Model.Row3.Xyz, _context.ViewProjection, new Vector2(_context.X, _context.Y), new Vector2(_context.Width, _context.Height));
-                string formattedString = string.Format("X : {0:0.000} Y : {1:0.000} Z : {2:0.000}"
+                string formattedString = string.Format(ImGuizmoConsts.TranslationInfoMask[((int)ImGuizmoMoveType.MoveScreen) - 1]
                    , (bounds[3] - bounds[0]) * _context.BoundsMatrix.Row0.Length * scale.Row0.Length
                    , (bounds[4] - bounds[1]) * _context.BoundsMatrix.Row1.Length * scale.Row1.Length
                    , (bounds[5] - bounds[2]) * _context.BoundsMatrix.Row2.Length * scale.Row2.Length
                 );
-                drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(ImGuizmoColor.TextShadow), formattedString);
-                drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(ImGuizmoColor.Text), formattedString);
+                drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 15, destinationPosOnScreen.Y + 15), GetColorU32(_context.Style.Colors.TextShadow), formattedString);
+                drawList.AddText(new System.Numerics.Vector2(destinationPosOnScreen.X + 14, destinationPosOnScreen.Y + 14), GetColorU32(_context.Style.Colors.Text), formattedString);
             }
 
             bool confirm = false;
@@ -1317,6 +1322,8 @@ public class ImGuizmo
                 break;
             }
         }
+
+        return modified;
     }
 
     private bool HandleRotation(ref Matrix4 matrix, ref Matrix4 deltaMatrix, ImGuizmoOperation op, ref ImGuizmoMoveType type, Vector3? snap)
@@ -1374,12 +1381,12 @@ public class ImGuizmo
         {
             ImGui.SetNextFrameWantCaptureMouse(true);
 
-            _context.RotationAngle = !OverrideValue.HasValue ? ComputeAngleOnPlane() : OverrideValue.Value * ImGuizmoConsts.DegToRad;
+            _context.RotationAngle = !OverrideValue.HasValue ? ComputeAngleOnPlane() : OverrideValue.Value * ImGuizmoConsts.DEG_TO_RAD;
             if (snap.HasValue)
             {
-                float snapInRadian = snap.Value[0] * ImGuizmoConsts.DegToRad;
+                float snapInRadian = snap.Value[0] * ImGuizmoConsts.DEG_TO_RAD;
 
-                _context.RotationAngle = ImGuizmoUtils.ComputeSnap(_context.RotationAngle, snapInRadian, _snapTension);
+                _context.RotationAngle = ImGuizmoUtils.ComputeSnap(_context.RotationAngle, snapInRadian, ImGuizmoConsts.SNAP_TENSION);
             }
 
             var rotationAxisLocalSpace = Vector3.TransformVector(_context.TranslationPlane.Xyz, _context.ModelInverse);
@@ -1440,7 +1447,7 @@ public class ImGuizmo
 
     private bool HandleScale(ref Matrix4 matrix, ref Matrix4 deltaMatrix, ImGuizmoOperation op, ref ImGuizmoMoveType type, Vector3? snap)
     {
-        if ((!Intersects(op, ImGuizmoOperation.Scale) && !Intersects(op, ImGuizmoOperation.ScaleU)) || type != ImGuizmoMoveType.None /*|| !_context.MouseOver*/)
+        if ((!Intersects(op, ImGuizmoOperation.Scale) && !Intersects(op, ImGuizmoOperation.ScaleUniversal)) || type != ImGuizmoMoveType.None /*|| !_context.MouseOver*/)
         {
             return false;
         }
@@ -1526,7 +1533,7 @@ public class ImGuizmo
             if (snap.HasValue)
             {
                 var scaleSnap = new Vector3(snap.Value.X);
-                _context.Scale = ImGuizmoUtils.ComputeSnap(_context.Scale, scaleSnap, _snapTension);
+                _context.Scale = ImGuizmoUtils.ComputeSnap(_context.Scale, scaleSnap, ImGuizmoConsts.SNAP_TENSION);
             }
 
             // no 0 allowed
@@ -1626,10 +1633,8 @@ public class ImGuizmo
                 else
                 {
                     //This would cause weird NaN calculations so I simplified it
-                    //float lengthOnAxis = Vector3.Dot(axisValue, delta);
-                    //delta = axisValue * lengthOnAxis;
-
-                    delta *= axisValue;
+                    float lengthOnAxis = Vector3.Dot(axisValue, delta);
+                    delta = axisValue * lengthOnAxis;
 
                     //Prevent shooting up really fast
                     //todo: find a better way to do this
@@ -1649,12 +1654,12 @@ public class ImGuizmo
                     var modelSourceNormalizedInverse = modelSourceNormalized.Inverted();
 
                     cumulativeDelta = Vector3.TransformVector(cumulativeDelta, modelSourceNormalizedInverse);
-                    cumulativeDelta = ImGuizmoUtils.ComputeSnap(cumulativeDelta, snap.Value, _snapTension);
+                    cumulativeDelta = ImGuizmoUtils.ComputeSnap(cumulativeDelta, snap.Value, ImGuizmoConsts.SNAP_TENSION);
                     cumulativeDelta = Vector3.TransformVector(cumulativeDelta, modelSourceNormalized);
                 }
                 else
                 {
-                    cumulativeDelta = ImGuizmoUtils.ComputeSnap(cumulativeDelta, snap.Value, _snapTension);
+                    cumulativeDelta = ImGuizmoUtils.ComputeSnap(cumulativeDelta, snap.Value, ImGuizmoConsts.SNAP_TENSION);
                 }
                 delta = _context.MatrixOrigin + cumulativeDelta - _context.Model.Row3.Xyz;
 
@@ -1728,12 +1733,6 @@ public class ImGuizmo
         return modified;
     }
 
-    private bool _forceActivate = false;
-
-    private bool _canActivate
-        => _forceActivate || (ImGui.IsMouseClicked(ImGuiMouseButton.Left)
-            && !ImGui.IsAnyItemHovered() && !ImGui.IsAnyItemActive());
-
     private static bool IsTranslateType(ImGuizmoMoveType type)
     {
         return type >= ImGuizmoMoveType.MoveX && type <= ImGuizmoMoveType.MoveScreen;
@@ -1774,8 +1773,8 @@ public class ImGuizmo
     }
 
     private bool IsInContextRect(System.Numerics.Vector2 p)
-    {
-        bool isWithin(float x, float y, float z) { return (x >= y) && (x <= z); }
-        return isWithin(p.X, _context.X, _context.XMax) && isWithin(p.Y, _context.Y, _context.YMax);
-    }
+        => IsWithin(p.X, _context.X, _context.XMax) && IsWithin(p.Y, _context.Y, _context.YMax);
+
+    private static bool IsWithin(float value, float min, float max)
+        => (value >= min) && (value <= max);
 }

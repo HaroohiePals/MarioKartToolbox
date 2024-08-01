@@ -2,6 +2,7 @@
 using HaroohiePals.Gui.Viewport;
 using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.MarioKartToolbox.OpenGL.Renderers;
+using HaroohiePals.Mathematics;
 using HaroohiePals.NitroKart.Extensions;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using System;
@@ -32,7 +33,7 @@ abstract class MapDataEntryRenderGroup : RenderGroup, IColoredRenderGroup, IDisp
         _renderer?.Dispose();
     }
 
-    public override bool GetObjectTransform(object obj, int subIndex, out Transform transform)
+    public override bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
     {
         if (subIndex != -1 || obj is not IPoint point)
         {
@@ -49,12 +50,12 @@ abstract class MapDataEntryRenderGroup : RenderGroup, IColoredRenderGroup, IDisp
             transform.Scale = mapObject.Scale;
 
         if (obj is MkdsArea area)
-            transform = new Transform(area.Position, area.GetRotation(), area.LengthVector);
+            transform = area.GetTransform();
 
         return true;
     }
 
-    public override bool SetObjectTransform(object obj, int subIndex, in Transform transform)
+    public override bool TrySetObjectTransform(object obj, int subIndex, in Transform transform)
     {
         if (subIndex != -1 || obj is not IPoint point)
             return false;
@@ -68,10 +69,7 @@ abstract class MapDataEntryRenderGroup : RenderGroup, IColoredRenderGroup, IDisp
             mapObject.Scale = transform.Scale;
 
         if (obj is MkdsArea area)
-        {
-            area.SetRotation(transform.Rotation);
-            area.LengthVector = transform.Scale;
-        }
+            area.SetTransform(transform);
 
         return true;
     }

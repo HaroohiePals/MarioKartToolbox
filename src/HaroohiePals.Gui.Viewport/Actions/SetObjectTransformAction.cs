@@ -1,4 +1,5 @@
 ﻿using HaroohiePals.Actions;
+using HaroohiePals.Mathematics;
 
 namespace HaroohiePals.Gui.Viewport.Actions;
 
@@ -19,7 +20,7 @@ public sealed class SetObjectTransformAction : IAction
         _subIndex = subIndex;
         _transform = transform;
 
-        if (!_group.GetObjectTransform(_object, _subIndex, out _oldTransform))
+        if (!_group.TryGetObjectTransform(_object, _subIndex, out _oldTransform))
             throw new ArgumentException("Invalid group specified", nameof(group));
     }
 
@@ -34,11 +35,11 @@ public sealed class SetObjectTransformAction : IAction
 
     public void Do()
     {
-        _group.SetObjectTransform(_object, _subIndex, _transform);
+        _group.TrySetObjectTransform(_object, _subIndex, _transform);
     }
 
     public void Undo()
     {
-        _group.SetObjectTransform(_object, _subIndex, _oldTransform);
+        _group.TrySetObjectTransform(_object, _subIndex, _oldTransform);
     }
 }

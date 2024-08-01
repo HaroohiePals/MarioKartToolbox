@@ -3,7 +3,7 @@ using OpenTK.Mathematics;
 
 namespace HaroohiePals.Gui.Viewport;
 
-internal static class ImGuizmoUtils
+static class ImGuizmoUtils
 {
     public static Vector4 BuildPlane(Vector3 pPoint1, Vector3 pNormal)
     {
@@ -16,22 +16,19 @@ internal static class ImGuizmoUtils
         return result;
     }
 
-    public static float IntersectRayPlane(Vector3 rOrigin, Vector3 rVector, Vector3 plane)
-        => IntersectRayPlane(rOrigin, rVector, new Vector4(plane, 0));
-
     public static float IntersectRayPlane(Vector3 rOrigin, Vector3 rVector, Vector4 plane)
     {
         float numer = Vector3.Dot(plane.Xyz, rOrigin) - plane.W;
         float denom = Vector3.Dot(plane.Xyz, rVector);
 
-        if (MathF.Abs(denom) < ImGuizmoConsts.FltEpsilon) // normal is orthogonal to vector, cant intersect
+        if (MathF.Abs(denom) < ImGuizmoConsts.FLT_EPSILON) // normal is orthogonal to vector, cant intersect
             return -1.0f;
 
         return -(numer / denom);
     }
 
     public static void ComputeCameraRay(out Vector3 rayOrigin, out Vector3 rayDir, Vector2 position, Vector2 size,
-        Matrix4 projMtx, Matrix4 viewMtx)
+        Matrix4 projMtx, Matrix4 viewMtx, bool reversed)
     {
         var io = ImGui.GetIO();
 
@@ -40,8 +37,8 @@ internal static class ImGuizmoUtils
         float mox = (io.MousePos.X - position.X) / size.X * 2f - 1f;
         float moy = (1f - (io.MousePos.Y - position.Y) / size.Y) * 2f - 1f;
 
-        float zNear = /*gContext.mReversed*/false ? 1f - ImGuizmoConsts.FltEpsilon : 0f;
-        float zFar = /*gContext.mReversed*/false ? 0f : 1f - ImGuizmoConsts.FltEpsilon;
+        float zNear = reversed ? 1f - ImGuizmoConsts.FLT_EPSILON : 0f;
+        float zFar = reversed ? 0f : 1f - ImGuizmoConsts.FLT_EPSILON;
 
         rayOrigin = Vector3.TransformPerspective((mox, moy, zNear), mViewProjInverse);
         var rayEnd = Vector3.TransformPerspective((mox, moy, zFar), mViewProjInverse);
@@ -209,9 +206,9 @@ internal static class ImGuizmoUtils
 
         matrix.OrthoNormalize();
 
-        rotation[0] = ImGuizmoConsts.RadToDeg * MathF.Atan2( matrix[1,2], matrix[2,2]);
-        rotation[1] = ImGuizmoConsts.RadToDeg * MathF.Atan2(-matrix[0,2], MathF.Sqrt(matrix[1,2] * matrix[1,2] + matrix[2,2] * matrix[2,2]));
-        rotation[2] = ImGuizmoConsts.RadToDeg * MathF.Atan2( matrix[0,1], matrix[0,0]);
+        rotation[0] = ImGuizmoConsts.RAD_TO_DEG * MathF.Atan2( matrix[1,2], matrix[2,2]);
+        rotation[1] = ImGuizmoConsts.RAD_TO_DEG * MathF.Atan2(-matrix[0,2], MathF.Sqrt(matrix[1,2] * matrix[1,2] + matrix[2,2] * matrix[2,2]));
+        rotation[2] = ImGuizmoConsts.RAD_TO_DEG * MathF.Atan2( matrix[0,1], matrix[0,0]);
 
         translation[0] = matrix.Row3.X;
         translation[1] = matrix.Row3.Y;

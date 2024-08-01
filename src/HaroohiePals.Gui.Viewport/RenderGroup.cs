@@ -1,4 +1,7 @@
-﻿namespace HaroohiePals.Gui.Viewport;
+﻿using HaroohiePals.Mathematics;
+using OpenTK.Mathematics;
+
+namespace HaroohiePals.Gui.Viewport;
 
 public abstract class RenderGroup
 {
@@ -10,13 +13,20 @@ public abstract class RenderGroup
 
     public virtual object GetObject(int index) => null;
 
-    public virtual bool GetObjectTransform(object obj, int subIndex, out Transform transform)
+    public virtual bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
     {
         transform = Transform.Identity;
         return false;
     }
 
-    public virtual bool SetObjectTransform(object obj, int subIndex, in Transform transform) => false;
+    public virtual bool TrySetObjectTransform(object obj, int subIndex, in Transform transform) 
+        => false;
+
+    public virtual bool TryGetLocalObjectBounds(object obj, int subIndex, out Box3d bounds)
+    {
+        bounds = new Box3d();
+        return false;
+    }
 
     public virtual bool ContainsObject(object obj) => false;
 }

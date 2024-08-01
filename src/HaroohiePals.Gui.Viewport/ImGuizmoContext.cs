@@ -3,85 +3,7 @@ using OpenTK.Mathematics;
 
 namespace HaroohiePals.Gui.Viewport;
 
-
-public enum ImGuizmoConfirmAction
-{
-    MouseUp,
-    MouseClickOrEnter
-}
-
-public enum ImGuizmoMoveType : int
-{
-    None,
-    MoveX,
-    MoveY,
-    MoveZ,
-    MoveYZ,
-    MoveZX,
-    MoveXY,
-    MoveScreen,
-    RotateX,
-    RotateY,
-    RotateZ,
-    RotateScreen,
-    ScaleX,
-    ScaleY,
-    ScaleZ,
-    ScaleXYZ
-}
-
-public enum ImGuizmoColor : int
-{
-    DirectionX,      // directionColor[0]
-    DirectionY,      // directionColor[1]
-    DirectionZ,      // directionColor[2]
-    PlaneX,          // planeColor[0]
-    PlaneY,          // planeColor[1]
-    PlaneZ,          // planeColor[2]
-    Selection,        // selectionColor
-    Inactive,         // inactiveColor
-    TranslationLine, // translationLineColor
-    ScaleLine,
-    RotationUsingBorders,
-    RotationUsingFill,
-    HatchedAxisLines,
-    Text,
-    TextShadow,
-    Count
-};
-
-[Flags]
-public enum ImGuizmoOperation : uint
-{
-    TranslateX = (1u << 0),
-    TranslateY = (1u << 1),
-    TranslateZ = (1u << 2),
-    RotateX = (1u << 3),
-    RotateY = (1u << 4),
-    RotateZ = (1u << 5),
-    RotateScreen = (1u << 6),
-    ScaleX = (1u << 7),
-    ScaleY = (1u << 8),
-    ScaleZ = (1u << 9),
-    Bounds = (1u << 10),
-    ScaleXU = (1u << 11),
-    ScaleYU = (1u << 12),
-    ScaleZU = (1u << 13),
-
-    Translate = TranslateX | TranslateY | TranslateZ,
-    Rotate = RotateX | RotateY | RotateZ | RotateScreen,
-    Scale = ScaleX | ScaleY | ScaleZ,
-    ScaleU = ScaleXU | ScaleYU | ScaleZU, // universal
-    Universal = Translate | Rotate | ScaleU
-};
-
-public enum ImGuizmoMode
-{
-    Local,
-    World
-};
-
-internal class ImGuizmoContext
+sealed class ImGuizmoContext
 {
     //Context
     public ImDrawListPtr DrawList;
@@ -145,7 +67,7 @@ internal class ImGuizmoContext
     // bounds stretching
     public Vector3 BoundsPivot;
     public Vector3 BoundsAnchor;
-    public Vector3 BoundsPlane;
+    public Vector4 BoundsPlane;
     public Vector3 BoundsLocalPivot;
     public int BoundsBestAxis;
     public int[] BoundsAxis = new int[2];

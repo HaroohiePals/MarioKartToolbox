@@ -2,6 +2,7 @@
 using HaroohiePals.Gui.Viewport;
 using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.MarioKartToolbox.OpenGL.Renderers;
+using HaroohiePals.Mathematics;
 using HaroohiePals.NitroKart.MapData;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using OpenTK.Mathematics;
@@ -99,7 +100,7 @@ class CameraTargetsRenderGroup : RenderGroup, IColoredRenderGroup, IDisposable
 
     public override object GetObject(int index) => _renderedCameras.ElementAt(index);
 
-    public override bool GetObjectTransform(object obj, int subIndex, out Transform transform)
+    public override bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
     {
         transform = new Transform(new(0), new(0), new(1));
 
@@ -122,7 +123,7 @@ class CameraTargetsRenderGroup : RenderGroup, IColoredRenderGroup, IDisposable
         return true;
     }
 
-    public override bool SetObjectTransform(object obj, int subIndex, in Transform transform)
+    public override bool TrySetObjectTransform(object obj, int subIndex, in Transform transform)
     {
         if (obj is MkdsCamera camera)
         {

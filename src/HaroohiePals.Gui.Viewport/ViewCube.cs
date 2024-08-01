@@ -59,7 +59,7 @@ internal class ViewCube
 
         var cubeView = Matrix4.LookAt(viewInverse.Row2.Xyz * distance, Vector3.Zero, viewInverse.Row1.Xyz);
 
-        ImGuizmoUtils.ComputeCameraRay(out var mRayOrigin, out var mRayVector, position, size, cubeProjection, cubeView);
+        ImGuizmoUtils.ComputeCameraRay(out var mRayOrigin, out var mRayVector, position, size, cubeProjection, cubeView, false);
 
         var res = cubeView * cubeProjection;
 

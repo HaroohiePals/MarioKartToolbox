@@ -64,9 +64,11 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
         ImGui.SetNextWindowPos(ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin() + padding);
-        if (ImGui.BeginChildFrame(ImGui.GetID("TopTools"), new Vector2(200 * scale, btnSize + spacing),
+        if (ImGui.BeginChildFrame(ImGui.GetID("TopTools"), new Vector2(200f * scale, btnSize + spacing),
                 ImGuiWindowFlags.NoBackground))
         {
+            ImGui.PopStyleVar();
+
             int i = 0;
 
             ImGui.SetCursorPosX((btnSize + spacing) * i++);
@@ -74,13 +76,6 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
             {
                 ImGui.OpenPopup("Viewport Settings");
             }
-
-            // ImGui.SameLine();
-            // ImGui.SetCursorPosX((btnSize + 4) * i++);
-            // if (ImGui.Button($"{IconFonts.FontAwesome6.Camera}", new(btnSize)))
-            // {
-            //     // RipFramebuffers(context);
-            // }
 
             if (ImGui.BeginPopup("Viewport Settings", ImGuiWindowFlags.AlwaysAutoResize))
             {
@@ -109,9 +104,22 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
                     ImGui.EndDisabled();
                     ImGui.Separator();
 
+                    // Gizmo settings
                     y += btnSize;
 
-                    // Camera settings
+                    ImGui.SetCursorPosX(x);
+                    ImGui.SetCursorPosY(y);
+
+                    ImGui.Text("Gizmo Mode");
+
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - inputWidth - 10f);
+
+                    ImGui.PushItemWidth(inputWidth);
+                    ImGuiEx.ComboEnum("##GizmoMode", ref _gizmo.Mode);
+
+                    y += btnSize;
+
                     ImGui.SetCursorPosX(x);
                     ImGui.SetCursorPosY(y);
 
@@ -136,7 +144,5 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
 
             ImGui.EndChildFrame();
         }
-
-        ImGui.PopStyleVar();
     }
 }

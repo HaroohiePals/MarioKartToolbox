@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using HaroohiePals.Mathematics;
+using OpenTK.Mathematics;
+using System.Collections;
 
 namespace HaroohiePals.Gui.Viewport;
 
@@ -25,29 +27,45 @@ public class RenderGroupCollection : IList<RenderGroup>
         set => _renderGroups[index] = value;
     }
 
-    public bool GetObjectTransform(object obj, int subIndex, out Transform transform)
-        => GetObjectTransformGroup(obj, subIndex, out transform) != null;
+    public bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
+        => TryGetObjectTransformGroup(obj, subIndex, out transform, out _);
 
-    public RenderGroup GetObjectTransformGroup(object obj, int subIndex, out Transform transform)
+    public bool TryGetObjectTransformGroup(object obj, int subIndex, out Transform transform, out RenderGroup renderGroup)
     {
         foreach (var g in _renderGroups)
         {
-            if (g.ContainsObject(obj) && g.GetObjectTransform(obj, subIndex, out transform))
-                return g;
+            if (g.ContainsObject(obj) && g.TryGetObjectTransform(obj, subIndex, out transform))
+            {
+                renderGroup = g;
+                return true;
+            }
         }
 
-        transform = new Transform(new(0), new(0), new(1));
-        return null;
+        transform = Transform.Identity;
+        renderGroup = null;
+        return false;
     }
 
-    public bool SetObjectTransform(object obj, int subIndex, in Transform transform)
+    public bool TrySetObjectTransform(object obj, int subIndex, in Transform transform)
     {
         foreach (var g in _renderGroups)
         {
-            if (g.ContainsObject(obj) && g.SetObjectTransform(obj, subIndex, transform))
+            if (g.ContainsObject(obj) && g.TrySetObjectTransform(obj, subIndex, transform))
                 return true;
         }
 
+        return false;
+    }
+
+    public bool TryGetLocalObjectBounds(object obj, int subIndex, out Box3d bounds)
+    {
+        foreach (var g in _renderGroups)
+        {
+            if (g.ContainsObject(obj) && g.TryGetLocalObjectBounds(obj, subIndex, out bounds))
+                return true;
+        }
+
+        bounds = new Box3d();
         return false;
     }
 

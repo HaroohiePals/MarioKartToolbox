@@ -73,21 +73,27 @@ public sealed class MkdsArea : IMapDataEntry, IPoint
     [ListViewColumn(13, "?")]
     public byte Unknown11 { get; set; }
 
-    public MkdsArea() { }
+    public MkdsArea()
+    {
+        LengthVector = new(10, 10, 10);
+        XVector = Vector3d.UnitX;
+        YVector = Vector3d.UnitY;
+        ZVector = Vector3d.UnitZ;
+    }
 
     public MkdsArea(Binary.NkmdArea.AreaEntry areaEntry, bool isMgStage)
     {
-        Position     = areaEntry.Position;
+        Position = areaEntry.Position;
         LengthVector = areaEntry.LengthVector;
-        XVector      = areaEntry.XVector;
-        YVector      = areaEntry.YVector;
-        ZVector      = areaEntry.ZVector;
-        Param0       = areaEntry.Param0;
-        Param1       = areaEntry.Param1;
-        Shape        = areaEntry.Shape;
-        AreaType     = areaEntry.AreaType;
-        Unknown10    = areaEntry.Unknown10;
-        Unknown11    = areaEntry.Unknown11;
+        XVector = areaEntry.XVector;
+        YVector = areaEntry.YVector;
+        ZVector = areaEntry.ZVector;
+        Param0 = areaEntry.Param0;
+        Param1 = areaEntry.Param1;
+        Shape = areaEntry.Shape;
+        AreaType = areaEntry.AreaType;
+        Unknown10 = areaEntry.Unknown10;
+        Unknown11 = areaEntry.Unknown11;
 
         if (areaEntry.LinkedCame >= 0)
             Camera = new UnresolvedBinaryMapDataReference<MkdsCamera>(areaEntry.LinkedCame);
@@ -105,18 +111,18 @@ public sealed class MkdsArea : IMapDataEntry, IPoint
     {
         var entry = new Binary.NkmdArea.AreaEntry
         {
-            Position     = Position,
+            Position = Position,
             LengthVector = LengthVector,
-            XVector      = XVector,
-            YVector      = YVector,
-            ZVector      = ZVector,
-            Param0       = Param0,
-            Param1       = Param1,
-            Shape        = Shape,
-            AreaType     = AreaType,
-            Unknown10    = Unknown10,
-            Unknown11    = Unknown11,
-            LinkedCame   = (sbyte)serializerCollection.SerializeOrDefault(Camera, -1)
+            XVector = XVector,
+            YVector = YVector,
+            ZVector = ZVector,
+            Param0 = Param0,
+            Param1 = Param1,
+            Shape = Shape,
+            AreaType = AreaType,
+            Unknown10 = Unknown10,
+            Unknown11 = Unknown11,
+            LinkedCame = (sbyte)serializerCollection.SerializeOrDefault(Camera, -1)
         };
         if (AreaType == MkdsAreaType.EnemyRecalculation)
         {
