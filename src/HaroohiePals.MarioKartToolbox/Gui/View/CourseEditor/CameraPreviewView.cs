@@ -405,7 +405,7 @@ class CameraPreviewView : CourseViewportView
 
     private MkdsCamera GetSelectedCamera()
         => Context.SceneObjectHolder.GetSelection().OfType<MkdsCamera>()
-            .SingleOrDefault(x => x.Type is
+            .FirstOrDefault(x => x.Type is
                 MkdsCameraType.FixedLookAtTargets or
                 MkdsCameraType.RouteLookAtTargets);
 
