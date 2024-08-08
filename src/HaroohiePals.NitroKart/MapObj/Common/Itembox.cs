@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 namespace HaroohiePals.NitroKart.MapObj.Common;
 
 [MapObj(MkdsMapObjectId.Itembox, [typeof(ItemboxShadowRenderPart), 
-    typeof(ItemboxBoxRenderPart), typeof(ItemboxQuestionRenderPart)], typeof(ItemboxLogicPart))]
+    typeof(ItemboxQuestionRenderPart), typeof(ItemboxBoxRenderPart)], typeof(ItemboxLogicPart))]
 public class Itembox : MObjInstance
 {
     private const double POSITION_Y_OFFSET = 12;
