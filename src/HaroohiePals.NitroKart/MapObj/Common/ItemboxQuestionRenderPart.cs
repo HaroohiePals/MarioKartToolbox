@@ -1,5 +1,6 @@
 ﻿using HaroohiePals.Graphics;
 using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Model;
+using OpenTK.Mathematics;
 using System.IO;
 
 namespace HaroohiePals.NitroKart.MapObj.Common;

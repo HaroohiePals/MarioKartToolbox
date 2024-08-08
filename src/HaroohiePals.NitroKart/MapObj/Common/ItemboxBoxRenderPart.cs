@@ -45,6 +45,11 @@ class ItemboxBoxRenderPart : RenderPart<Itembox>
             Model.BbModel.PolygonAttr &= 0xFFFF7FFF;
     }
 
+    protected override void GlobalPreRender()
+    {
+        Model.BbModel.ApplyMaterial();
+    }
+
     protected override void Render(Itembox instance, in Matrix4x3d camMtx, ushort alpha)
     {
         Matrix4x3d boxMtx;
