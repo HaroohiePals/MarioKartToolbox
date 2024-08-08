@@ -22,12 +22,12 @@ public static class MObjUtil
     public static bool ExistsMapObjFile(IMkdsCourse course, string relPath)
         => course.ExistsMainFile($"MapObj/{relPath}");
 
-    public static MObjModel LoadModel(MkdsContext context, RenderPart renderPart, string fileName)
+    public static MObjModel LoadModel(MkdsContext context, RenderPart renderPart, Nsbmd nsbmd)
     {
         if (renderPart != null)
             renderPart.Type = RenderPart.RenderPartType.Normal;
         var model = new MObjModel(context);
-        model.Nsbmd = GetMapObjFile<Nsbmd>(context, fileName);
+        model.Nsbmd = nsbmd;
         model.Model = new Model(context, model.Nsbmd);
         model.Model.SetEmi(new Rgb555(10, 10, 10));
         model.Model.SetLightEnableFlag(0b0010);
@@ -35,29 +35,36 @@ public static class MObjUtil
         return model;
     }
 
-    public static MObjModel LoadShadowModel(MkdsContext context, RenderPart renderPart, string fileName)
+    public static MObjModel LoadModel(MkdsContext context, RenderPart renderPart, string fileName)
+        => LoadModel(context, renderPart, GetMapObjFile<Nsbmd>(context, fileName));
+
+    public static MObjModel LoadShadowModel(MkdsContext context, RenderPart renderPart, Nsbmd nsbmd)
     {
         if (renderPart != null)
             renderPart.Type = RenderPart.RenderPartType.Normal;
         var model = new MObjModel(context);
-        var nsbmd = GetMapObjFile<Nsbmd>(context, fileName);
         model.ShadowModel = new ShadowModel(context, nsbmd, 63);
         model.Scale       = Vector3d.One;
         return model;
     }
 
-    public static MObjModel LoadBillboardModel(MkdsContext context, RenderPart renderPart, string fileName)
+    public static MObjModel LoadShadowModel(MkdsContext context, RenderPart renderPart, string fileName)
+        => LoadShadowModel(context, renderPart, GetMapObjFile<Nsbmd>(context, fileName));
+
+    public static MObjModel LoadBillboardModel(MkdsContext context, RenderPart renderPart, Nsbmd nsbmd)
     {
         if (renderPart != null)
             renderPart.Type = RenderPart.RenderPartType.Billboard;
         var model = new MObjModel(context);
-        var nsbmd = GetMapObjFile<Nsbmd>(context, fileName);
         model.BbModel = new BillboardModel(context, nsbmd);
         model.BbModel.SetEmission(new Rgb555(10, 10, 10));
         model.BbModel.SetLightMask(1 << 1);
         model.Scale = Vector3d.One;
         return model;
     }
+
+    public static MObjModel LoadBillboardModel(MkdsContext context, RenderPart renderPart, string fileName)
+        => LoadBillboardModel(context, renderPart, GetMapObjFile<Nsbmd>(context, fileName));
 
     public static MObjModel LoadTexAnimBillboardModel(MkdsContext context, RenderPart renderPart,
         string nsbmdFileName, string nsbtpFileName)
