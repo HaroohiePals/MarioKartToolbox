@@ -22,7 +22,7 @@ public class Itembox : MObjInstance
     //objshadow_t _objShadow;
     public byte BoxAlpha { get; private set; }
     public byte QuestionAlpha { get; private set; }
-    public uint PolygonId { get; private set; }
+    public uint PolygonId { get; internal set; }
     public int PlayerItemSlotListId { get; private set; }
     public int EnemyItemSlotListId { get; private set; }
     public bool IsRuntime { get; private set; }

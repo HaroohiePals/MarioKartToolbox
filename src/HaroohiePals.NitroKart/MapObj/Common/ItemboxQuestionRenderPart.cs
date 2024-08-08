@@ -7,9 +7,17 @@ namespace HaroohiePals.NitroKart.MapObj.Common;
 
 class ItemboxQuestionRenderPart : RenderPart<Itembox>
 {
+    // temporary
+    private static readonly Nsbmd _nsbmd;
     public MObjModel Model { get; private set; }
 
     private ItemboxQuestionAnimationFrame[] _questionAnimation = new ItemboxQuestionAnimationFrame[130];
+
+    // temporary
+    static ItemboxQuestionRenderPart()
+    {
+        _nsbmd = new Nsbmd(File.ReadAllBytes("testmodels/question.nsbmd"));
+    }
 
     public ItemboxQuestionRenderPart(MkdsContext context)
         : base(context, RenderPartType.Billboard, false, false)
@@ -18,8 +26,7 @@ class ItemboxQuestionRenderPart : RenderPart<Itembox>
 
     protected override void GlobalInit()
     {
-        var nsbmd = new Nsbmd(File.ReadAllBytes("testmodels/question.nsbmd"));
-        Model = MObjUtil.LoadBillboardModel(_context, this, nsbmd);
+        Model = MObjUtil.LoadBillboardModel(_context, this, _nsbmd);
         Model.BbModel.SetDefaultMatParams();
         Model.BbModel.SetEmission(new Rgb555(20, 20, 20));
 
@@ -37,5 +44,39 @@ class ItemboxQuestionRenderPart : RenderPart<Itembox>
         //if (rconf_getCourse() == COURSE_RAINBOW_COURSE)
         if (_context.Course.MapData.StageInfo.CourseId == 44)
             Model.BbModel.PolygonAttr &= 0xFFFF7FFF;
+    }
+
+    protected override void GlobalPreRender()
+    {
+        Model.BbModel.ApplyMaterial();
+    }
+
+    protected override void Render(Itembox instance, in Matrix4x3d camMtx, ushort alpha)
+    {
+        instance.PolygonId = _context.MObjState.GetCyclicPolygonId();
+
+        if (instance.BoxAnimFunc is not null || instance.QuestionAlpha <= 1)
+            return;
+
+        var animEntry = _questionAnimation[instance.QuestionFrameCounter];
+
+        var questionMtx = new Matrix4x3d();
+
+        questionMtx[0, 0] = animEntry.Cos;
+        questionMtx[0, 1] = 0;
+        questionMtx[0, 2] = -animEntry.Sin;
+
+        questionMtx[1, 0] = 0;
+        questionMtx[1, 1] = 1;
+        questionMtx[1, 2] = 0;
+
+        questionMtx[2, 0] = -questionMtx[0, 2];
+        questionMtx[2, 1] = 0;
+        questionMtx[2, 2] = questionMtx[0, 0];
+
+        questionMtx.Row3 = instance.RenderPos / 16.0;
+        Model.BbModel.SetAlpha(instance.QuestionAlpha);
+        Model.BbModel.PolygonAttr.PolygonId = instance.PolygonId;
+        Model.BbModel.Render((byte)alpha, questionMtx, instance.Scale);
     }
 }
