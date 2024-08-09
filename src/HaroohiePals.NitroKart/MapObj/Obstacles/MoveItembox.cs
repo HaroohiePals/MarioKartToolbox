@@ -27,7 +27,7 @@ public class MoveItembox : Itembox
         }
         else
         {
-            _pathwalker = PathwalkerEx.FromPath(obji.Path.Target, MOVEMENT_SPEED, obji.Settings.Settings[0]);
+            _pathwalker = new PathwalkerEx(obji.Path.Target, MOVEMENT_SPEED, obji.Settings.Settings[0]);
             _pathwalker.Init(obji.Settings.Settings[4], true);
 
             Position = _pathwalker.CalcCurrentPointXYZ();
@@ -43,17 +43,9 @@ public class MoveItembox : Itembox
 
             Position = _pathwalker.CalcCurrentPointXYZ();
 
-            //if (instance->pathwalker.pathwalker.prevPoit->unknown1 && instance->pathwalker.pathwalker.curPoit->unknown1)
-            //    mobj_setMapIconTranslucent(&instance->itembox.mobj);
-            //else
-            //    mobj_resetMapIconTranslucent(&instance->itembox.mobj);
-
             Position.Y += offsetY;
             Position.Y += 16.0;
         }
-
-        //if (instance->itembox.shadowType == IBOX_SHADOW_TYPE_2D)
-        //    oshd_setPositionXZ(&instance->itembox.objShadow, &instance->itembox.mobj.position);
 
         Update();
     }

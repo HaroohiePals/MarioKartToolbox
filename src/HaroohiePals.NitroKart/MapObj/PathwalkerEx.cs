@@ -10,6 +10,11 @@ sealed class PathwalkerEx : Pathwalker
     private double _field30;
     private double _curSpeedDiv100;
 
+    public PathwalkerEx(MkdsPath path, double speed, short baseSpeed)
+    {
+        InitFromPath(path, speed, baseSpeed);
+    }
+
     public override void Init(int initialPoint, bool forwards)
     {
         double speedDiv100;
@@ -79,12 +84,5 @@ sealed class PathwalkerEx : Pathwalker
         _speedDiv100 = speed / 100;
         _defaultSpeedDiv100 = (speed * baseSpeed) / 100;
         Init(0, true);
-    }
-
-    public static PathwalkerEx FromPath(MkdsPath path, double speed, short baseSpeed)
-    {
-        var pw = new PathwalkerEx();
-        pw.InitFromPath(path, speed, baseSpeed);
-        return pw;
     }
 }
