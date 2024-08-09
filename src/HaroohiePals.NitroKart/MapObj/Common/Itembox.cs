@@ -11,7 +11,7 @@ namespace HaroohiePals.NitroKart.MapObj.Common;
 public class Itembox : MObjInstance
 {
     private const double POSITION_Y_OFFSET = 12;
-    private static readonly Vector3d DefaultScale = Vector3d.One * 10; //ibox_sItemBoxScale * grpConfScale
+    private static readonly Vector3d DefaultScale = Vector3d.One; //ibox_sItemBoxScale
 
     public int BoxFrameCounter { get; private set; }
     public int QuestionFrameCounter { get; private set; }
@@ -26,7 +26,7 @@ public class Itembox : MObjInstance
     public int PlayerItemSlotListId { get; private set; }
     public int EnemyItemSlotListId { get; private set; }
     public bool IsRuntime { get; private set; }
-    public Vector3d RenderPos { get; private set; }
+    public Vector3d RenderPos => Position;
     public Func<uint, Matrix4x3d> BoxAnimFunc { get; private set; }
     public uint BoxAnimFuncArg { get; private set; }
 
@@ -39,7 +39,6 @@ public class Itembox : MObjInstance
     public override void Init(MkdsMapObject obji, object arg)
     {
         Position.Y += POSITION_Y_OFFSET;
-        RenderPos = Position;
 
         BoxFrameCounter = _context.MObjState.Random.Next(300);
         QuestionFrameCounter = _context.MObjState.Random.Next(130);
@@ -101,7 +100,7 @@ public class Itembox : MObjInstance
         QuestionAlpha = 20;
     }
 
-    internal void Update()
+    public void Update()
     {
         if (++BoxFrameCounter >= 300)
             BoxFrameCounter = 0;
