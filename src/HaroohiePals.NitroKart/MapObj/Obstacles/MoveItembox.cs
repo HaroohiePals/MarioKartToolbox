@@ -8,7 +8,9 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles;
     typeof(ItemboxQuestionRenderPart), typeof(ItemboxBoxRenderPart)], typeof(MoveItemboxLogicPart))]
 public class MoveItembox : Itembox
 {
-    private Pathwalker _pathwalker;
+    private const double MOVEMENT_SPEED = 3.0;
+
+    private PathwalkerEx _pathwalker;
 
     public MoveItembox(MkdsContext context, RenderPart[] renderParts, LogicPart logicPart) 
         : base(context, renderParts, logicPart)
@@ -25,10 +27,7 @@ public class MoveItembox : Itembox
         }
         else
         {
-            //pwex_initFromObject(&instance->pathwalker.pathwalker, obji, dword_2158908, obji->settings[0]);
-            //pwex_init(&instance->pathwalker, (u16)obji->settings[4], TRUE);
-
-            _pathwalker = Pathwalker.FromPath(obji.Path.Target, 3.0);
+            _pathwalker = PathwalkerEx.FromPath(obji.Path.Target, MOVEMENT_SPEED, obji.Settings.Settings[0]);
             _pathwalker.Init(obji.Settings.Settings[4], true);
 
             Position = _pathwalker.CalcCurrentPointXYZ();
@@ -39,9 +38,8 @@ public class MoveItembox : Itembox
     {
         if (_pathwalker is not null)
         {
-            //if (pwex_update(&instance->pathwalker) && instance->pathwalker.pathwalker.prevPoit->unknown2_s16)
-            //    pwex_init(&instance->pathwalker, 0, 1);
-            _pathwalker.Update();
+            if (_pathwalker.Update() && _pathwalker.PrevPoit.Unknown2 != 0)
+                _pathwalker.Init(0, true);
 
             Position = _pathwalker.CalcCurrentPointXYZ();
 
