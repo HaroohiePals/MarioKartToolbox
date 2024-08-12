@@ -83,7 +83,7 @@ class ItemboxBoxRenderPart : RenderPart<Itembox>
                 Model.BbModel.PolygonAttr.PolygonId = instance.PolygonId;
             }
             
-            Model.BbModel.SetAlpha(instance.BoxAlpha);
+            Model.BbModel.SetAlpha((byte)instance.BoxAlpha);
             Model.BbModel.Render((byte)alpha, boxMtx, instance.Scale);
         }
     }

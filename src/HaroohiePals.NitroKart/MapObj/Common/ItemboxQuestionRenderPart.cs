@@ -75,7 +75,7 @@ class ItemboxQuestionRenderPart : RenderPart<Itembox>
         questionMtx[2, 2] = questionMtx[0, 0];
 
         questionMtx.Row3 = instance.RenderPos / 16.0;
-        Model.BbModel.SetAlpha(instance.QuestionAlpha);
+        Model.BbModel.SetAlpha((byte)instance.QuestionAlpha);
         Model.BbModel.PolygonAttr.PolygonId = instance.PolygonId;
         Model.BbModel.Render((byte)alpha, questionMtx, instance.Scale);
     }

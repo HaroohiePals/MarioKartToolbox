@@ -5,6 +5,8 @@ using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Animation.TextureSrtAnimation;
 using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Model;
 using HaroohiePals.NitroKart.Course;
 using OpenTK.Mathematics;
+using System;
+using System.Security.Cryptography;
 
 namespace HaroohiePals.NitroKart.MapObj;
 
@@ -16,7 +18,7 @@ public static class MObjUtil
     public static T GetMapObjFile<T>(MkdsContext context, string relPath)
         => context.Course.GetMainFileOrDefault<T>($"MapObj/{relPath}");
 
-    public static bool ExistsMapObjFile(MkdsContext context, string relPath) 
+    public static bool ExistsMapObjFile(MkdsContext context, string relPath)
         => ExistsMapObjFile(context.Course, relPath);
 
     public static bool ExistsMapObjFile(IMkdsCourse course, string relPath)
@@ -44,7 +46,7 @@ public static class MObjUtil
             renderPart.Type = RenderPart.RenderPartType.Normal;
         var model = new MObjModel(context);
         model.ShadowModel = new ShadowModel(context, nsbmd, 63);
-        model.Scale       = Vector3d.One;
+        model.Scale = Vector3d.One;
         return model;
     }
 
@@ -183,7 +185,7 @@ public static class MObjUtil
     public static void Model2RenderModel(MkdsContext context, Model model, in Matrix4x3d mtx, in Vector3d scale,
         byte alpha)
     {
-        var  resMdl   = model.RenderObj.ModelResource;
+        var resMdl = model.RenderObj.ModelResource;
         byte oldAlpha = (byte)resMdl.Materials.Materials[0].PolygonAttribute.Alpha;
         if (alpha >= oldAlpha)
         {
@@ -211,6 +213,17 @@ public static class MObjUtil
         }
         else
             model.Render(mtx, scale);
+    }
+
+    public static Quaterniond QtrnFromForwardVec(Vector3d forward)
+    {
+        double v4 = Math.Sqrt(2 * (forward.Y + 1.0));
+        return new Quaterniond(
+            forward.Z / v4,
+            0,
+            -forward.X / v4,
+            v4 / 2.0
+        );
     }
 
     public static Quaterniond QtrnFromXAngle(ushort angle)

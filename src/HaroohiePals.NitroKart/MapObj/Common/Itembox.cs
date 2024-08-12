@@ -18,10 +18,10 @@ public class Itembox : MObjInstance
     public int RespawnCounter { get; private set; }
     public bool IsMoving { get; private set; }
     public bool Setting6 { get; private set; }
-    public ItemboxShadowType ShadowType { get; private set; }
-    //objshadow_t _objShadow;
-    public byte BoxAlpha { get; private set; }
-    public byte QuestionAlpha { get; private set; }
+    public ItemboxShadowType ShadowType { get; internal set; }
+    public ObjectShadow ObjectShadow { get; private set; }
+    public int BoxAlpha { get; set; }
+    public int QuestionAlpha { get; set; }
     public uint PolygonId { get; internal set; }
     public int PlayerItemSlotListId { get; private set; }
     public int EnemyItemSlotListId { get; private set; }
@@ -33,7 +33,7 @@ public class Itembox : MObjInstance
     public Itembox(MkdsContext context, RenderPart[] renderParts, LogicPart logicPart) 
         : base(context, renderParts, logicPart)
     {
-
+        ObjectShadow = new ObjectShadow(context);
     }
 
     public override void Init(MkdsMapObject obji, object arg)
@@ -85,8 +85,8 @@ public class Itembox : MObjInstance
                 if (IsMoving)
                     shadowPos.Y += 0.5;
 
-                //if (!oshd_setParams(&_objShadow, &shadowPos, FX32_CONST(20), 13))
-                //    _shadowType = IBOX_SHADOW_TYPE_NONE;
+                if (!ObjectShadow.SetParams(shadowPos, 20.0, 13))
+                    ShadowType = ItemboxShadowType.None;
             }
         }
 
@@ -100,7 +100,7 @@ public class Itembox : MObjInstance
         QuestionAlpha = 20;
     }
 
-    public void Update()
+    public virtual void Update()
     {
         if (++BoxFrameCounter >= 300)
             BoxFrameCounter = 0;
