@@ -6,7 +6,6 @@ using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Model;
 using HaroohiePals.NitroKart.Course;
 using OpenTK.Mathematics;
 using System;
-using System.Security.Cryptography;
 
 namespace HaroohiePals.NitroKart.MapObj;
 
