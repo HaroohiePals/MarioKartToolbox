@@ -9,7 +9,7 @@ class ItemboxQuestionRenderPart : RenderPart<Itembox>
 {
     // temporary
     private static readonly Nsbmd _nsbmd;
-    public MObjModel Model { get; private set; }
+    private MObjModel _model;
 
     private ItemboxQuestionAnimationFrame[] _questionAnimation = new ItemboxQuestionAnimationFrame[130];
 
@@ -26,9 +26,9 @@ class ItemboxQuestionRenderPart : RenderPart<Itembox>
 
     protected override void GlobalInit()
     {
-        Model = MObjUtil.LoadBillboardModel(_context, this, _nsbmd);
-        Model.BbModel.SetDefaultMatParams();
-        Model.BbModel.SetEmission(new Rgb555(20, 20, 20));
+        _model = MObjUtil.LoadBillboardModel(_context, this, _nsbmd);
+        _model.BbModel.SetDefaultMatParams();
+        _model.BbModel.SetEmission(new Rgb555(20, 20, 20));
 
         for (int i = 0; i < _questionAnimation.Length; i++)
         {
@@ -43,12 +43,12 @@ class ItemboxQuestionRenderPart : RenderPart<Itembox>
 
         //if (rconf_getCourse() == COURSE_RAINBOW_COURSE)
         if (_context.Course.MapData.StageInfo.CourseId == 44)
-            Model.BbModel.PolygonAttr &= 0xFFFF7FFF;
+            _model.BbModel.PolygonAttr &= 0xFFFF7FFF;
     }
 
     protected override void GlobalPreRender()
     {
-        Model.BbModel.ApplyMaterial();
+        _model.BbModel.ApplyMaterial();
     }
 
     protected override void Render(Itembox instance, in Matrix4x3d camMtx, ushort alpha)
@@ -75,8 +75,8 @@ class ItemboxQuestionRenderPart : RenderPart<Itembox>
         questionMtx[2, 2] = questionMtx[0, 0];
 
         questionMtx.Row3 = instance.RenderPos / 16.0;
-        Model.BbModel.SetAlpha((byte)instance.QuestionAlpha);
-        Model.BbModel.PolygonAttr.PolygonId = instance.PolygonId;
-        Model.BbModel.Render((byte)alpha, questionMtx, instance.Scale);
+        _model.BbModel.SetAlpha((byte)instance.QuestionAlpha);
+        _model.BbModel.PolygonAttr.PolygonId = instance.PolygonId;
+        _model.BbModel.Render((byte)alpha, questionMtx, instance.Scale);
     }
 }

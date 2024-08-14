@@ -9,8 +9,8 @@ class ItemboxBoxRenderPart : RenderPart<Itembox>
 {
     // temporary
     private static readonly Nsbmd _nsbmd;
-    public MObjModel Model { get; private set; }
 
+    private MObjModel _model;
     private ItemboxBoxAnimationFrame[] _boxAnimation = new ItemboxBoxAnimationFrame[300];
 
     // temporary
@@ -25,9 +25,9 @@ class ItemboxBoxRenderPart : RenderPart<Itembox>
 
     protected override void GlobalInit()
     {
-        Model = MObjUtil.LoadBillboardModel(_context, this, _nsbmd);
-        Model.BbModel.SetDefaultMatParams();
-        Model.BbModel.SetEmission(new Rgb555(20, 20, 20));
+        _model = MObjUtil.LoadBillboardModel(_context, this, _nsbmd);
+        _model.BbModel.SetDefaultMatParams();
+        _model.BbModel.SetEmission(new Rgb555(20, 20, 20));
 
         for (int i = 0; i < _boxAnimation.Length; i++)
         {
@@ -42,12 +42,12 @@ class ItemboxBoxRenderPart : RenderPart<Itembox>
 
         //if (rconf_getCourse() == COURSE_RAINBOW_COURSE)
         if (_context.Course.MapData.StageInfo.CourseId == 44)
-            Model.BbModel.PolygonAttr &= 0xFFFF7FFF;
+            _model.BbModel.PolygonAttr &= 0xFFFF7FFF;
     }
 
     protected override void GlobalPreRender()
     {
-        Model.BbModel.ApplyMaterial();
+        _model.BbModel.ApplyMaterial();
     }
 
     protected override void Render(Itembox instance, in Matrix4x3d camMtx, ushort alpha)
@@ -59,7 +59,7 @@ class ItemboxBoxRenderPart : RenderPart<Itembox>
             if (instance.BoxAnimFunc is not null)
             {
                 boxMtx = instance.BoxAnimFunc(instance.BoxAnimFuncArg);
-                Model.BbModel.PolygonAttr.PolygonId = _context.MObjState.GetCyclicPolygonId();
+                _model.BbModel.PolygonAttr.PolygonId = _context.MObjState.GetCyclicPolygonId();
             }
             else
             {
@@ -80,11 +80,11 @@ class ItemboxBoxRenderPart : RenderPart<Itembox>
                 boxMtx[2, 2] = boxMtx[0, 0];
 
                 boxMtx.Row3 = instance.RenderPos / 16.0;
-                Model.BbModel.PolygonAttr.PolygonId = instance.PolygonId;
+                _model.BbModel.PolygonAttr.PolygonId = instance.PolygonId;
             }
             
-            Model.BbModel.SetAlpha((byte)instance.BoxAlpha);
-            Model.BbModel.Render((byte)alpha, boxMtx, instance.Scale);
+            _model.BbModel.SetAlpha((byte)instance.BoxAlpha);
+            _model.BbModel.Render((byte)alpha, boxMtx, instance.Scale);
         }
     }
 }
