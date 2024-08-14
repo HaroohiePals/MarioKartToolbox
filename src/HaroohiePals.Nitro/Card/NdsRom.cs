@@ -184,6 +184,34 @@ public sealed class NdsRom
         }
     }
 
+    public byte[] WriteArm9OverlayTable()
+    {
+        using (var m = new MemoryStream())
+        {
+            var ew = new EndianBinaryWriterEx(m, Endianness.LittleEndian);
+            foreach (var v in Arm9OverlayTable)
+            {
+                v.Write(ew);
+            }
+            ew.Close();
+            return m.ToArray();
+        }
+    }
+
+    public byte[] WriteArm7OverlayTable()
+    {
+        using (var m = new MemoryStream())
+        {
+            var ew = new EndianBinaryWriterEx(m, Endianness.LittleEndian);
+            foreach (var v in Arm7OverlayTable)
+            {
+                v.Write(ew);
+            }
+            ew.Close();
+            return m.ToArray();
+        }
+    }
+
     private void WriteBlowfish(EndianBinaryWriterEx er)
     {
         if (PTable is null || SBoxes is null || PTable.All(p => p == 0))

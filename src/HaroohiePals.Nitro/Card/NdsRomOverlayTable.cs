@@ -1,6 +1,7 @@
 ﻿using HaroohiePals.IO;
 using HaroohiePals.IO.Serialization;
 using System;
+using System.IO;
 using System.Xml.Serialization;
 
 namespace HaroohiePals.Nitro.Card;
@@ -29,6 +30,17 @@ public class NdsRomOverlayTable
     {
         er.WriteObject(this);
         er.Write(((uint)Flag & 0xFF) << 24 | (Compressed & 0xFFFFFF));
+    }
+
+    public byte[] Write()
+    {
+        using (var m = new MemoryStream())
+        {
+            var ew = new EndianBinaryWriterEx(m, Endianness.LittleEndian);
+            Write(ew);
+            ew.Close();
+            return m.ToArray();
+        }
     }
 
     [XmlAttribute]

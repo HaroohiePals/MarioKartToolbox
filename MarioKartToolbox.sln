@@ -93,7 +93,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HaroohiePals.MarioKart.Vali
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HaroohiePals.MarioKart.Actions", "src\HaroohiePals.MarioKart.Actions\HaroohiePals.MarioKart.Actions.csproj", "{45296F89-B57F-4462-961C-F846E44EFD9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HaroohiePals.Graphics3d.OpenGL.Renderers", "src\HaroohiePals.Graphics3d.OpenGL.Renderers\HaroohiePals.Graphics3d.OpenGL.Renderers.csproj", "{E181CF7A-32DD-49D0-8CF7-C991AE384541}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HaroohiePals.Graphics3d.OpenGL.Renderers", "src\HaroohiePals.Graphics3d.OpenGL.Renderers\HaroohiePals.Graphics3d.OpenGL.Renderers.csproj", "{E181CF7A-32DD-49D0-8CF7-C991AE384541}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HaroohiePals.MarioKartToolbox.CommandLineInterface", "src\HaroohiePals.MarioKartToolbox.CommandLineInterface\HaroohiePals.MarioKartToolbox.CommandLineInterface.csproj", "{E9455A63-91F8-4696-816C-7B304AABDF41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -249,6 +251,10 @@ Global
 		{E181CF7A-32DD-49D0-8CF7-C991AE384541}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E181CF7A-32DD-49D0-8CF7-C991AE384541}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E181CF7A-32DD-49D0-8CF7-C991AE384541}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9455A63-91F8-4696-816C-7B304AABDF41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9455A63-91F8-4696-816C-7B304AABDF41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9455A63-91F8-4696-816C-7B304AABDF41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9455A63-91F8-4696-816C-7B304AABDF41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -295,6 +301,7 @@ Global
 		{5F4EA7B8-ED9D-43E5-8BD4-ECE7A0905E3C} = {04C4810A-0C6D-4825-AB3C-F41E1BC70A08}
 		{45296F89-B57F-4462-961C-F846E44EFD9E} = {04C4810A-0C6D-4825-AB3C-F41E1BC70A08}
 		{E181CF7A-32DD-49D0-8CF7-C991AE384541} = {D9FEB33F-0E22-4557-9376-E4AF8C43751D}
+		{E9455A63-91F8-4696-816C-7B304AABDF41} = {9F09E1F9-1772-49B1-A66D-4E557C146A2E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5588E09D-06E0-4267-9F8D-9B2CF11117A8}
