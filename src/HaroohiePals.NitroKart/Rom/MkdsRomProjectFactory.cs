@@ -17,9 +17,9 @@ public class MkdsRomProjectFactory
 {
     public async Task<MkdsRomProject> CreateAsync(NdsRom rom, string projectName, string outputPath)
     {
-        string[] arm9OverlaysPaths = rom.Arm9OverlayTable
+        string[] arm9OverlaysPaths = rom.Arm9OverlayTable.Entries
             .Select(x => $"overlay9/overlay9_{x.Id}.bin").ToArray();
-        string[] arm7OverlaysPaths = rom.Arm7OverlayTable
+        string[] arm7OverlaysPaths = rom.Arm7OverlayTable.Entries
             .Select(x => $"overlay7/overlay7_{x.Id}.bin").ToArray();
 
         var romInfo = new NdsRomInfo
@@ -51,11 +51,11 @@ public class MkdsRomProjectFactory
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.RsaSignaturePath), rom.RsaSignature);
 
         await ExtractArm9BinaryAsync(rom, Path.Combine(outputPath, romInfo.Arm9Path));
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm9OvtPath), rom.WriteArm9OverlayTable());
+        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm9OvtPath), rom.Arm9OverlayTable.Write());
         await ExtractOverlaysAsync(rom, rom.Arm9OverlayTable, outputPath, romInfo.Arm9OverlaysPaths);
 
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm7Path), rom.Arm7Binary);
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm7OvtPath), rom.WriteArm7OverlayTable());
+        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm7OvtPath), rom.Arm7OverlayTable.Write());
         await ExtractOverlaysAsync(rom, rom.Arm7OverlayTable, outputPath, romInfo.Arm7OverlaysPaths);
 
         File.WriteAllText(Path.Combine(outputPath, $"{projectName}.json"), JsonConvert.SerializeObject(project, Formatting.Indented));
@@ -69,11 +69,11 @@ public class MkdsRomProjectFactory
         await File.WriteAllBytesAsync(outputPath, rom.Arm9Binary);
     }
 
-    private async Task ExtractOverlaysAsync(NdsRom rom, NdsRomOverlayTable[] table, string outputPath, string[] overlayPaths)
+    private async Task ExtractOverlaysAsync(NdsRom rom, NdsRomOverlayTable table, string outputPath, string[] overlayPaths)
     {
         int i = 0;
 
-        foreach (var entry in table)
+        foreach (var entry in table.Entries)
         {
             string overlayPath = overlayPaths[i++]; 
             string targetFilePath = Path.Combine(outputPath, overlayPath);
