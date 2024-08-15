@@ -63,7 +63,7 @@ public sealed class NdsRom
             if (Header.BannerOffset != 0)
             {
                 er.BaseStream.Position = Header.BannerOffset;
-                Banner = new NdsRomBanner(er);
+                Banner = er.Read<byte>(NdsRomBanner.SIZE);
             }
 
             FileData = new byte[Header.FatSize / 8][];
@@ -340,7 +340,7 @@ public sealed class NdsRom
         {
             er.WritePadding(0x200, 0xFF);
             Header.BannerOffset = (uint)er.BaseStream.Position;
-            Banner.Write(er);
+            er.Write(Banner);
         }
         else
         {
@@ -377,7 +377,8 @@ public sealed class NdsRom
     public NdsRomOverlayTable Arm7OverlayTable;
 
     public FatEntry[] Fat;
-    public NdsRomBanner Banner;
+    //public NdsRomBanner Banner;
+    public byte[] Banner;
 
     public byte[][] FileData;
 

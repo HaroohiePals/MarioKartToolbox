@@ -46,7 +46,7 @@ public class MkdsRomProjectFactory
 
         await ExtractArchiveAsync(rom.ToArchive(), Path.Combine(outputPath, romInfo.FsRootPath));
 
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.BannerPath), rom.Banner.Write());
+        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.BannerPath), rom.Banner);
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.HeaderPath), rom.Header.Write());
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.RsaSignaturePath), rom.RsaSignature);
 
