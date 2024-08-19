@@ -7,18 +7,29 @@ var romFactory = new MkdsRomFactory();
 
 string romFilePath = @"testfiles/rom.nds";
 string rebuiltRomFilePath = @"testfiles/rom_rebuilt.nds";
+string projectName = "MkdsTest";
 string outputPath = @"testfiles/project";
-string projectPath = @"testfiles/project/MkdsTest.json";
+string projectPath = @$"testfiles/project/{projectName}.json";
 
-Directory.Delete(outputPath, true);
+bool createProject = false;
+bool createRom = true;
 
-byte[] sourceRomBytes = File.ReadAllBytes(romFilePath);
-var rom = new NdsRom(sourceRomBytes);
+if (createProject)
+{
+    if (Directory.Exists(outputPath))
+        Directory.Delete(outputPath, true);
 
-await projectFactory.CreateAsync(rom, "MkdsTest", outputPath, false);
+    byte[] sourceRomBytes = File.ReadAllBytes(romFilePath);
+    var rom = new NdsRom(sourceRomBytes);
 
-var project = JsonConvert.DeserializeObject<MkdsRomProject>(File.ReadAllText(projectPath));
-var rebuiltRom = await romFactory.CreateAsync(project, outputPath);
+    await projectFactory.CreateAsync(rom, projectName, outputPath, true);
+}
 
-byte[] rebuiltRomBytes = rebuiltRom.Write(true);
-File.WriteAllBytes(rebuiltRomFilePath, rebuiltRomBytes);
+if (createRom)
+{
+    var project = JsonConvert.DeserializeObject<MkdsRomProject>(File.ReadAllText(projectPath));
+    var rebuiltRom = await romFactory.CreateAsync(project, outputPath);
+
+    byte[] rebuiltRomBytes = rebuiltRom.Write(true);
+    File.WriteAllBytes(rebuiltRomFilePath, rebuiltRomBytes);
+}

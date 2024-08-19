@@ -152,12 +152,17 @@ public class MkdsRomFactory
     private async Task<FileToAddInfo> PackDirectoryAsync(string sourcePath)
     {
         var dirInfo = new DirectoryInfo(sourcePath);
-        
+
         string fileName = dirInfo.Name.Replace("_arc", ".carc");
 
-        var archive = await CreateArchiveAsync(sourcePath);
-        var narc = new Narc(archive);
+        byte[] carc = null;
+        await Task.Run(() =>
+        {
+            var archive = new DiskArchive(sourcePath);
+            var narc = new Narc(archive);
+            carc = Lz77.Compress(narc.Write());
+        }).ConfigureAwait(false);
 
-        return new FileToAddInfo(fileName, Lz77.Compress(narc.Write()));
+        return new FileToAddInfo(fileName, carc);
     }
 }
