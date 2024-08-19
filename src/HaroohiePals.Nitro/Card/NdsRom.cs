@@ -40,7 +40,7 @@ public sealed class NdsRom
             if (er.Read<uint>() == 0xDEC00621) //Nitro Footer
             {
                 er.BaseStream.Position -= 4;
-                StaticFooter = new NitroFooter(er);
+                StaticFooter = new NdsRomNitroFooter(er);
             }
 
             er.BaseStream.Position = Header.SubRomOffset;
@@ -368,7 +368,7 @@ public sealed class NdsRom
     public byte[] KeyPadding2;
 
     public byte[] Arm9Binary;
-    public NitroFooter StaticFooter;
+    public NdsRomNitroFooter StaticFooter;
 
     public byte[] Arm7Binary;
     public NdsRomFileNameTable Fnt;

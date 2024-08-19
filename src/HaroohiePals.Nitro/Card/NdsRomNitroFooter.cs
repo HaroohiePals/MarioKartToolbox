@@ -4,14 +4,14 @@ using System;
 namespace HaroohiePals.Nitro.Card;
 
 [Serializable]
-public sealed class NitroFooter
+public sealed class NdsRomNitroFooter
 {
-    public NitroFooter() { }
+    public NdsRomNitroFooter() { }
 
-    public NitroFooter(EndianBinaryReaderEx er) => er.ReadObject(this);
+    public NdsRomNitroFooter(EndianBinaryReaderEx er) => er.ReadObject(this);
     public void Write(EndianBinaryWriterEx er) => er.WriteObject(this);
 
     public uint NitroCode;
-    public uint _start_ModuleParamsOffset;
+    public uint ModuleParamsOffset;
     public uint Unknown;
 }
