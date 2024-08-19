@@ -87,7 +87,7 @@ public class MkdsRomFactory
 
         int i = 0;
 
-        foreach (var vv in overlayTable.Entries)
+        foreach (var entry in overlayTable.Entries)
         {
             string overlayPath = overlayPaths[i++];
             string targetFilePath = Path.Combine(workingDirPath, overlayPath);
@@ -101,7 +101,7 @@ public class MkdsRomFactory
 
     private async Task<Archive> CreateArchiveAsync(string rootPath)
     {
-        var rootDir = new ArcDirectory("/", null);
+        var rootDir = new ArcDirectory(Archive.RootPath, null);
         await AddDirectoriesAsync(rootDir, rootPath);
         return new MemoryArchive(rootDir);
     }

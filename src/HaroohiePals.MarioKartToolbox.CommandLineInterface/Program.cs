@@ -15,10 +15,10 @@ Directory.Delete(outputPath, true);
 byte[] sourceRomBytes = File.ReadAllBytes(romFilePath);
 var rom = new NdsRom(sourceRomBytes);
 
-await projectFactory.CreateAsync(rom, "MkdsTest", outputPath);
+await projectFactory.CreateAsync(rom, "MkdsTest", outputPath, false);
 
 var project = JsonConvert.DeserializeObject<MkdsRomProject>(File.ReadAllText(projectPath));
 var rebuiltRom = await romFactory.CreateAsync(project, outputPath);
 
-byte[] rebuiltRomBytes = rebuiltRom.Write(false);
+byte[] rebuiltRomBytes = rebuiltRom.Write(true);
 File.WriteAllBytes(rebuiltRomFilePath, rebuiltRomBytes);

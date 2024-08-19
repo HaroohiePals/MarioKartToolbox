@@ -15,7 +15,7 @@ namespace HaroohiePals.NitroKart.Rom;
 
 public class MkdsRomProjectFactory
 {
-    public async Task<MkdsRomProject> CreateAsync(NdsRom rom, string projectName, string outputPath)
+    public async Task<MkdsRomProject> CreateAsync(NdsRom rom, string projectName, string outputPath, bool unpackArc = true)
     {
         string[] arm9OverlaysPaths = rom.Arm9OverlayTable.Entries
             .Select(x => $"overlay9/overlay9_{x.Id}.bin").ToArray();
@@ -44,7 +44,7 @@ public class MkdsRomProjectFactory
 
         Directory.CreateDirectory(outputPath);
 
-        await ExtractArchiveAsync(rom.ToArchive(), Path.Combine(outputPath, romInfo.FsRootPath)).ConfigureAwait(false);
+        await ExtractArchiveAsync(rom.ToArchive(), Path.Combine(outputPath, romInfo.FsRootPath), unpackArc).ConfigureAwait(false);
 
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.BannerPath), rom.Banner).ConfigureAwait(false);
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.HeaderPath), rom.Header.Write()).ConfigureAwait(false);
@@ -83,24 +83,24 @@ public class MkdsRomProjectFactory
         }
     }
 
-    private async Task ExtractArchiveAsync(NitroFsArchive archive, string outputPath, string sourcePath = Archive.RootPath)
+    private async Task ExtractArchiveAsync(NitroFsArchive archive, string outputPath, bool unpackArc, string sourcePath = Archive.RootPath)
     {
         var tasks = new List<Task>();
         
         foreach (string fileName in archive.EnumerateFiles(sourcePath, false))
         {
-            tasks.Add(ExtractFileAsync(archive, outputPath, sourcePath, fileName));
+            tasks.Add(ExtractFileAsync(archive, outputPath, sourcePath, fileName, unpackArc));
         }
 
         foreach (string dir in archive.EnumerateDirectories(sourcePath, false))
         {
-            tasks.Add(ExtractArchiveAsync(archive, outputPath, Archive.JoinPath(sourcePath, dir)));
+            tasks.Add(ExtractArchiveAsync(archive, outputPath, unpackArc, Archive.JoinPath(sourcePath, dir)));
         }
 
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
-    private async Task ExtractFileAsync(NitroFsArchive archive, string outputPath, string parentDir, string fileName)
+    private async Task ExtractFileAsync(NitroFsArchive archive, string outputPath, string parentDir, string fileName, bool unpackArc)
     {
         string sourceFilePath = Archive.JoinPath(parentDir, fileName);
         string targetDir = Path.Combine(outputPath, parentDir.Remove(0, 1));
@@ -108,11 +108,11 @@ public class MkdsRomProjectFactory
 
         var data = archive.GetFileData(sourceFilePath);
 
-        if (fileName.EndsWith(".carc"))
+        if (unpackArc && fileName.EndsWith(".carc"))
         {
             targetFilePath = targetFilePath.Replace(".carc", "_arc");
             var narc = new Narc(Lz77.Decompress(data)).ToArchive();
-            await ExtractArchiveAsync(narc, targetFilePath).ConfigureAwait(false);
+            await ExtractArchiveAsync(narc, targetFilePath, false).ConfigureAwait(false);
         }
         else
         {
