@@ -44,19 +44,19 @@ public class MkdsRomProjectFactory
 
         Directory.CreateDirectory(outputPath);
 
-        await ExtractArchiveAsync(rom.ToArchive(), Path.Combine(outputPath, romInfo.FsRootPath));
+        await ExtractArchiveAsync(rom.ToArchive(), Path.Combine(outputPath, romInfo.FsRootPath)).ConfigureAwait(false);
 
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.BannerPath), rom.Banner);
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.HeaderPath), rom.Header.Write());
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.RsaSignaturePath), rom.RsaSignature);
+        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.BannerPath), rom.Banner).ConfigureAwait(false);
+        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.HeaderPath), rom.Header.Write()).ConfigureAwait(false);
+        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.RsaSignaturePath), rom.RsaSignature).ConfigureAwait(false);
 
-        await ExtractArm9BinaryAsync(rom, Path.Combine(outputPath, romInfo.Arm9Path));
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm9OvtPath), rom.Arm9OverlayTable.Write());
-        await ExtractOverlaysAsync(rom, rom.Arm9OverlayTable, outputPath, romInfo.Arm9OverlaysPaths);
+        await ExtractArm9BinaryAsync(rom, Path.Combine(outputPath, romInfo.Arm9Path)).ConfigureAwait(false);
+        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm9OvtPath), rom.Arm9OverlayTable.Write()).ConfigureAwait(false);
+        await ExtractOverlaysAsync(rom, rom.Arm9OverlayTable, outputPath, romInfo.Arm9OverlaysPaths).ConfigureAwait(false);
 
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm7Path), rom.Arm7Binary);
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm7OvtPath), rom.Arm7OverlayTable.Write());
-        await ExtractOverlaysAsync(rom, rom.Arm7OverlayTable, outputPath, romInfo.Arm7OverlaysPaths);
+        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm7Path), rom.Arm7Binary).ConfigureAwait(false);
+        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm7OvtPath), rom.Arm7OverlayTable.Write()).ConfigureAwait(false);
+        await ExtractOverlaysAsync(rom, rom.Arm7OverlayTable, outputPath, romInfo.Arm7OverlaysPaths).ConfigureAwait(false);
 
         File.WriteAllText(Path.Combine(outputPath, $"{projectName}.json"), JsonConvert.SerializeObject(project, Formatting.Indented));
 
@@ -79,7 +79,7 @@ public class MkdsRomProjectFactory
             string targetFilePath = Path.Combine(outputPath, overlayPath);
 
             new FileInfo(targetFilePath).Directory.Create();
-            await File.WriteAllBytesAsync(targetFilePath, rom.FileData[entry.Id]);
+            await File.WriteAllBytesAsync(targetFilePath, rom.FileData[entry.Id]).ConfigureAwait(false);
         }
     }
 
@@ -97,7 +97,7 @@ public class MkdsRomProjectFactory
             tasks.Add(ExtractArchiveAsync(archive, outputPath, Archive.JoinPath(sourcePath, dir)));
         }
 
-        await Task.WhenAll(tasks);
+        await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
     private async Task ExtractFileAsync(NitroFsArchive archive, string outputPath, string parentDir, string fileName)
@@ -112,12 +112,12 @@ public class MkdsRomProjectFactory
         {
             targetFilePath = targetFilePath.Replace(".carc", "_arc");
             var narc = new Narc(Lz77.Decompress(data)).ToArchive();
-            await ExtractArchiveAsync(narc, targetFilePath);
+            await ExtractArchiveAsync(narc, targetFilePath).ConfigureAwait(false);
         }
         else
         {
             Directory.CreateDirectory(targetDir);
-            await File.WriteAllBytesAsync(targetFilePath, data);
+            await File.WriteAllBytesAsync(targetFilePath, data).ConfigureAwait(false);
         }
     }
 }

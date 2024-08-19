@@ -10,12 +10,12 @@ string rebuiltRomFilePath = @"testfiles/rom_rebuilt.nds";
 string outputPath = @"testfiles/project";
 string projectPath = @"testfiles/project/MkdsTest.json";
 
-//Directory.Delete(outputPath, true);
+Directory.Delete(outputPath, true);
 
 byte[] sourceRomBytes = File.ReadAllBytes(romFilePath);
 var rom = new NdsRom(sourceRomBytes);
 
-//await projectFactory.CreateAsync(rom, "MkdsTest", outputPath);
+await projectFactory.CreateAsync(rom, "MkdsTest", outputPath);
 
 var project = JsonConvert.DeserializeObject<MkdsRomProject>(File.ReadAllText(projectPath));
 var rebuiltRom = await romFactory.CreateAsync(project, outputPath);

@@ -25,17 +25,17 @@ public class MkdsRomFactory
 
     public async Task<NdsRom> CreateAsync(MkdsRomProject project, string workingDirPath)
     {
-        var header = await ReadHeaderAsync(Path.Combine(workingDirPath, project.RomInfo.HeaderPath));
-        var arm9OverlayTable = await ReadOverlayTableAsync(Path.Combine(workingDirPath, project.RomInfo.Arm9OvtPath), header.MainOvtSize);
-        var arm7OverlayTable = await ReadOverlayTableAsync(Path.Combine(workingDirPath, project.RomInfo.Arm7OvtPath), header.SubOvtSize);
+        var header = await ReadHeaderAsync(Path.Combine(workingDirPath, project.RomInfo.HeaderPath)).ConfigureAwait(false);
+        var arm9OverlayTable = await ReadOverlayTableAsync(Path.Combine(workingDirPath, project.RomInfo.Arm9OvtPath), header.MainOvtSize).ConfigureAwait(false);
+        var arm7OverlayTable = await ReadOverlayTableAsync(Path.Combine(workingDirPath, project.RomInfo.Arm7OvtPath), header.SubOvtSize).ConfigureAwait(false);
 
-        byte[] banner = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.BannerPath));
-        byte[] rsaSignature = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.RsaSignaturePath));
-        byte[] arm9Binary = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.Arm9Path));
-        byte[] arm7Binary = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.Arm7Path));
+        byte[] banner = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.BannerPath)).ConfigureAwait(false);
+        byte[] rsaSignature = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.RsaSignaturePath)).ConfigureAwait(false);
+        byte[] arm9Binary = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.Arm9Path)).ConfigureAwait(false);
+        byte[] arm7Binary = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.Arm7Path)).ConfigureAwait(false);
 
-        var arm9Overlays = await ReadOverlayFilesAsync(arm9OverlayTable, project.RomInfo.Arm9OverlaysPaths, workingDirPath);
-        var arm7Overlays = await ReadOverlayFilesAsync(arm7OverlayTable, project.RomInfo.Arm7OverlaysPaths, workingDirPath);
+        var arm9Overlays = await ReadOverlayFilesAsync(arm9OverlayTable, project.RomInfo.Arm9OverlaysPaths, workingDirPath).ConfigureAwait(false);
+        var arm7Overlays = await ReadOverlayFilesAsync(arm7OverlayTable, project.RomInfo.Arm7OverlaysPaths, workingDirPath).ConfigureAwait(false);
 
         var fatEntries = arm9Overlays.FatEntries.Concat(arm7Overlays.FatEntries).ToArray();
         var fileData = arm9Overlays.FileData.Concat(arm7Overlays.FileData).ToArray();
@@ -57,11 +57,7 @@ public class MkdsRomFactory
             FileData = fileData
         };
 
-        //string romFilePath = @"testfiles/rom.nds";
-        //var testRom = new NdsRom(File.ReadAllBytes(romFilePath));
-        //rom.FromArchive(testRom.ToArchive());
-
-        rom.FromArchive(await CreateArchiveAsync(Path.Combine(workingDirPath, project.RomInfo.FsRootPath)));
+        rom.FromArchive(await CreateArchiveAsync(Path.Combine(workingDirPath, project.RomInfo.FsRootPath)).ConfigureAwait(false));
 
         return rom;
     }
@@ -143,12 +139,12 @@ public class MkdsRomFactory
         }
 
         var arcDirPaths = Directory.EnumerateDirectories(sourcePath, "*", SearchOption.TopDirectoryOnly).Where(IsArchiveDirectory);
-        
-        //files.AddRange(await Task.WhenAll(arcDirPaths.Select(PackDirectoryAsync)));
-        foreach (var arcDirPath in arcDirPaths)
-        {
-            files.Add(await PackDirectoryAsync(arcDirPath));
-        }
+
+        files.AddRange(await Task.WhenAll(arcDirPaths.Select(PackDirectoryAsync)).ConfigureAwait(false));
+        //foreach (var arcDirPath in arcDirPaths)
+        //{
+        //    files.Add(await PackDirectoryAsync(arcDirPath).ConfigureAwait(false));
+        //}
 
         return files.OrderBy(x => x.Name);
     }
