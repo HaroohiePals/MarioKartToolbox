@@ -1,5 +1,7 @@
 ﻿using HaroohiePals.Graphics;
 using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Model;
+using HaroohiePals.Nitro.NitroSystem.G3d.Intermediate.Model;
+using HaroohiePals.NitroKart.Resources;
 using OpenTK.Mathematics;
 using System.IO;
 
@@ -16,7 +18,9 @@ class ItemboxBoxRenderPart : RenderPart<Itembox>
     // temporary
     static ItemboxBoxRenderPart()
     {
-        _nsbmd = new Nsbmd(File.ReadAllBytes("testmodels/box.nsbmd"));
+        var imd = new Imd(MapObjPlaceholderModels.Box);
+        _nsbmd = imd.ToNsbmd("box");
+        _nsbmd.TextureSet = imd.ToNsbtx().TextureSet;
     }
 
     public ItemboxBoxRenderPart(MkdsContext context) 

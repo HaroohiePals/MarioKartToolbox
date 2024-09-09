@@ -13,4 +13,19 @@
     <ProjectReference Include="..\HaroohiePals.Nitro\HaroohiePals.Nitro.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Resources\MapObjPlaceholderModels.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MapObjPlaceholderModels.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\MapObjPlaceholderModels.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MapObjPlaceholderModels.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

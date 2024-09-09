@@ -1,5 +1,7 @@
 ﻿using HaroohiePals.Graphics;
 using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Model;
+using HaroohiePals.Nitro.NitroSystem.G3d.Intermediate.Model;
+using HaroohiePals.NitroKart.Resources;
 using OpenTK.Mathematics;
 using System.IO;
 
@@ -16,7 +18,9 @@ class ItemboxQuestionRenderPart : RenderPart<Itembox>
     // temporary
     static ItemboxQuestionRenderPart()
     {
-        _nsbmd = new Nsbmd(File.ReadAllBytes("testmodels/question.nsbmd"));
+        var imd = new Imd(MapObjPlaceholderModels.Exclamation);
+        _nsbmd = imd.ToNsbmd("question");
+        _nsbmd.TextureSet = imd.ToNsbtx().TextureSet;
     }
 
     public ItemboxQuestionRenderPart(MkdsContext context)

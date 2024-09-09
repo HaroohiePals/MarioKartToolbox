@@ -1,5 +1,7 @@
 ﻿using HaroohiePals.Nitro.G3;
 using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Model;
+using HaroohiePals.Nitro.NitroSystem.G3d.Intermediate.Model;
+using HaroohiePals.NitroKart.Resources;
 using OpenTK.Mathematics;
 using System.IO;
 using System.Runtime.ConstrainedExecution;
@@ -26,8 +28,12 @@ public class ObjectShadow
     // temporary
     static ObjectShadow()
     {
-        _objShadowNsbmd = new Nsbmd(File.ReadAllBytes("testmodels/obj_shadow.nsbmd"));
-        _jgShadowNsbmd = new Nsbmd(File.ReadAllBytes("testmodels/jg_shadow.nsbmd")); //found in Race.carc
+        var imd = new Imd(MapObjPlaceholderModels.ObjShadow);
+        _objShadowNsbmd = imd.ToNsbmd("obj_shadow");
+        _objShadowNsbmd.TextureSet = imd.ToNsbtx().TextureSet;
+
+        imd = new Imd(MapObjPlaceholderModels.JgShadow);
+        _jgShadowNsbmd = imd.ToNsbmd("jg_shadow"); //found in Race.carc
     }
 
     public ObjectShadow(MkdsContext context)
