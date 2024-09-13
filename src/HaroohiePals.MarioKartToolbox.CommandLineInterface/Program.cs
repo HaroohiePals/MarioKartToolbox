@@ -1,6 +1,7 @@
 ﻿using HaroohiePals.Nitro.Card;
 using HaroohiePals.NitroKart.Rom;
 using Newtonsoft.Json;
+using System.Reflection;
 
 var projectFactory = new MkdsRomProjectFactory();
 var romFactory = new MkdsRomFactory();
@@ -13,6 +14,12 @@ string projectPath = @$"testfiles/project/{projectName}.json";
 
 bool createProject = true;
 bool createRom = true;
+
+string? informationalVersion = Assembly.GetExecutingAssembly()?
+    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+if (informationalVersion is not null)
+    Console.WriteLine($"Mario Kart Toolbox {informationalVersion}");
 
 if (createProject)
 {
