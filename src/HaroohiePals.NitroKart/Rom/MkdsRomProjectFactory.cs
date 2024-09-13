@@ -110,8 +110,10 @@ public class MkdsRomProjectFactory
 
         if (unpackArc && fileName.EndsWith(".carc"))
         {
+            var compressionAlgo = new Lz77CompressionAlgorithm();
+
             targetFilePath = targetFilePath.Replace(".carc", "_arc");
-            var narc = new Narc(Lz77.Decompress(data)).ToArchive();
+            var narc = new Narc(compressionAlgo.Decompress(data)).ToArchive();
             await ExtractArchiveAsync(narc, targetFilePath, false).ConfigureAwait(false);
         }
         else

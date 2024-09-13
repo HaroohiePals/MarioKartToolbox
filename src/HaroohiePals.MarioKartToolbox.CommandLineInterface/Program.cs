@@ -11,7 +11,7 @@ string projectName = "MkdsTest";
 string outputPath = @"testfiles/project";
 string projectPath = @$"testfiles/project/{projectName}.json";
 
-bool createProject = false;
+bool createProject = true;
 bool createRom = true;
 
 if (createProject)

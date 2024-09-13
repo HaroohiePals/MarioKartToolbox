@@ -158,9 +158,11 @@ public class MkdsRomFactory
         byte[] carc = null;
         await Task.Run(() =>
         {
+            var compressionAlgo = new Lz77CompressionAlgorithm();
+
             var archive = new DiskArchive(sourcePath);
             var narc = new Narc(archive);
-            carc = Lz77.Compress(narc.Write());
+            carc = compressionAlgo.Compress(narc.Write());
         }).ConfigureAwait(false);
 
         return new FileToAddInfo(fileName, carc);
