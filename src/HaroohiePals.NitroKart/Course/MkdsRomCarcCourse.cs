@@ -15,7 +15,7 @@ public class MkdsRomCarcCourse : MkdsBinaryCourse
     private static MemoryArchive LoadCarc(NitroFsArchive romFs, string path)
     {
         var carcData = romFs.GetFileData(path);
-        var narcData = Lz77.Decompress(carcData);
+        var narcData = new Lz77CompressionAlgorithm().Decompress(carcData);
         var narc = new Narc(narcData);
         return new MemoryArchive(narc.ToArchive());
     }
@@ -34,9 +34,12 @@ public class MkdsRomCarcCourse : MkdsBinaryCourse
 
         if (result)
         {
-            _romFs.SetFileData(MainPath, Lz77.Compress(new Narc(_mainArchive).Write()));
+            var lz77 = new Lz77CompressionAlgorithm();
+            _romFs.SetFileData(MainPath, lz77.Compress(new Narc(_mainArchive).Write()));
             if (TexPath != null)
-                _romFs.SetFileData(TexPath, Lz77.Compress(new Narc(_texArchive).Write()));
+            {
+                _romFs.SetFileData(TexPath, lz77.Compress(new Narc(_texArchive).Write()));
+            }
         }
 
         return true;
