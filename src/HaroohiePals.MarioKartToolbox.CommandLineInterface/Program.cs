@@ -1,42 +1,19 @@
-﻿using HaroohiePals.Nitro.Card;
-using HaroohiePals.NitroKart.Rom;
-using Newtonsoft.Json;
-using System.Reflection;
+﻿using HaroohiePals.MarioKartToolbox.CommandLineInterface.Commands;
+using System.CommandLine;
 
-var projectFactory = new MkdsRomProjectFactory();
-var romFactory = new MkdsRomFactory();
+namespace HaroohiePals.MarioKartToolbox.CommandLineInterface;
 
-string romFilePath = @"testfiles/rom.nds";
-string rebuiltRomFilePath = @"testfiles/rom_rebuilt.nds";
-string projectName = "MkdsTest";
-string outputPath = @"testfiles/project";
-string projectPath = @$"testfiles/project/{projectName}.json";
-
-bool createProject = true;
-bool createRom = true;
-
-string? informationalVersion = Assembly.GetExecutingAssembly()?
-    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-
-if (informationalVersion is not null)
-    Console.WriteLine($"Mario Kart Toolbox {informationalVersion}");
-
-if (createProject)
+class Program
 {
-    if (Directory.Exists(outputPath))
-        Directory.Delete(outputPath, true);
+    private const string ROOT_COMMAND_DESCRIPTION = "Mario Kart Toolbox";
 
-    byte[] sourceRomBytes = File.ReadAllBytes(romFilePath);
-    var rom = new NdsRom(sourceRomBytes);
+    static async Task<int> Main(string[] args)
+    {
+        var rootCommand = new RootCommand(ROOT_COMMAND_DESCRIPTION);
 
-    await projectFactory.CreateAsync(rom, projectName, outputPath, true);
-}
+        rootCommand.AddCommand(new CreateMkdsRomProjectCommand());
+        rootCommand.AddCommand(new BuildMkdsRomCommand());
 
-if (createRom)
-{
-    var project = JsonConvert.DeserializeObject<MkdsRomProject>(File.ReadAllText(projectPath));
-    var rebuiltRom = await romFactory.CreateAsync(project, outputPath);
-
-    byte[] rebuiltRomBytes = rebuiltRom.Write(true);
-    File.WriteAllBytes(rebuiltRomFilePath, rebuiltRomBytes);
+        return await rootCommand.InvokeAsync(args);
+    }
 }
