@@ -107,6 +107,7 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
             _lineRenderer.Thickness = 3;
             _lineRenderer.Loop = false;
             _lineRenderer.Render2d = true;
+            _lineRenderer.PickingId = ViewportContext.InvalidPickingId;
 
             for (int i = 0; i < _paths.Count; i++)
             {

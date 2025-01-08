@@ -188,6 +188,7 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
         _mainToolbar.Draw();
         _dockSpaceView.Draw();
 
+#if DEBUG
         //Test Window
         if (ImGui.Begin("Test Window"))
         {
@@ -251,6 +252,8 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
 
         if (_showDemoWindow)
             ImGui.ShowDemoWindow();
+
+#endif
 
         _views.ForEach(x => x.Draw());
 

@@ -55,6 +55,7 @@ class RenderGroupVisibilityManager
     private readonly string _preferencesKey;
     private bool _kclTranslucent = false;
     private bool _areaShapeShowAll = false;
+    private bool _mobjEditMode = true;
 
     private bool _updateSettings = true;
 
@@ -128,14 +129,14 @@ class RenderGroupVisibilityManager
 
             switch (r)
             {
-                case PlaneGridRenderGroup grid:
+                case PlaneGridRenderGroup gridRenderGroup:
                     entity = VisibleEntity.Grid;
                     break;
-                case CourseModelRenderGroup nsbmd:
-                    nsbmd.EnableCourseModel = _visibility[VisibleEntity.Course] != VisibilityType.Hidden;
-                    nsbmd.EnableCourseModelV = _visibility[VisibleEntity.Skybox] != VisibilityType.Hidden;
-                    nsbmd.WireframeCourseModel = _visibility[VisibleEntity.Course] == VisibilityType.Wireframe;
-                    nsbmd.WireframeCourseModelV = _visibility[VisibleEntity.Skybox] == VisibilityType.Wireframe;
+                case CourseModelRenderGroup nsbmdRenderGroup:
+                    nsbmdRenderGroup.EnableCourseModel = _visibility[VisibleEntity.Course] != VisibilityType.Hidden;
+                    nsbmdRenderGroup.EnableCourseModelV = _visibility[VisibleEntity.Skybox] != VisibilityType.Hidden;
+                    nsbmdRenderGroup.WireframeCourseModel = _visibility[VisibleEntity.Course] == VisibilityType.Wireframe;
+                    nsbmdRenderGroup.WireframeCourseModelV = _visibility[VisibleEntity.Skybox] == VisibilityType.Wireframe;
                     continue;
                 case KclPrismRenderGroup kcl:
                     kcl.Enabled = _visibility[VisibleEntity.Collision] != VisibilityType.Hidden;
@@ -145,8 +146,9 @@ class RenderGroupVisibilityManager
                     kcl.Wireframe = _visibility[VisibleEntity.Collision] == VisibilityType.Wireframe;
                     kcl.Seethrough = _kclTranslucent;
                     continue;
-                case MkdsMObjRenderGroup:
+                case MkdsMObjRenderGroup mobjRenderGroup:
                     entity = VisibleEntity.MapObjectModels;
+                    mobjRenderGroup.EditMode = _mobjEditMode;
                     break;
                 case MapDataCollectionRenderGroup<MkdsMapObject>:
                     entity = VisibleEntity.MapObjects;
@@ -172,9 +174,9 @@ class RenderGroupVisibilityManager
                 case MapDataCollectionRenderGroup<MkdsArea>:
                     entity = VisibleEntity.Areas;
                     break;
-                case AreaShapeRenderGroup areaShape:
+                case AreaShapeRenderGroup areaShapeRenderGroup:
                     entity = VisibleEntity.AreaShapes;
-                    areaShape.ShowAll = _areaShapeShowAll;
+                    areaShapeRenderGroup.ShowAll = _areaShapeShowAll;
                     break;
                 case MapDataCollectionRenderGroup<MkdsCamera>:
                     entity = VisibleEntity.Cameras;
@@ -339,6 +341,23 @@ class RenderGroupVisibilityManager
                 }
 
                 if (wasAll)
+                    ImGui.PopStyleColor();
+            }
+
+            if (item == VisibleEntity.MapObjectModels)
+            {
+                // all
+                ImGui.SameLine();
+                ImGui.SetCursorPosX(controlWidth - btnSize * itemCount-- - (10f * scale));
+                bool wasEditMode = _mobjEditMode;
+                ImGui.Button(wasEditMode ? $"{FontAwesome6.Play}" : $"{FontAwesome6.Stop}", new(btnSize));
+                if (ImGui.IsItemClicked())
+                {
+                    _mobjEditMode = !_mobjEditMode;
+                    _updateSettings = true;
+                }
+
+                if (wasEditMode)
                     ImGui.PopStyleColor();
             }
 
