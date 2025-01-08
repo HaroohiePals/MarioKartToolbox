@@ -12,4 +12,7 @@ class TrafficLogicPart : LogicPart<Traffic>
         : base(context, LogicPartType.Type0)
     {
     }
+
+    protected override void Update(Traffic instance)
+        => instance.Update();
 }
