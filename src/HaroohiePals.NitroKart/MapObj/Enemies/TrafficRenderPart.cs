@@ -3,6 +3,7 @@ using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Animation.TexturePatternAnimatio
 using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Model;
 using HaroohiePals.NitroKart.MapData;
 using OpenTK.Mathematics;
+using System;
 
 namespace HaroohiePals.NitroKart.MapObj.Enemies;
 
@@ -100,20 +101,25 @@ class TrafficRenderPart : RenderPart<Traffic>
 
         if (!v7)
         {
-            //MTX_RotX43(&tireMtx,
-            //           FX_Mul(instance->field110, FX_SinIdx(instance->field10C)),
-            //           FX_Mul(instance->field110, FX_CosIdx(instance->field10C)));
+            double sinIdx = instance.Field110 * MObjUtil.SinIdx(instance.Field10C);
+            double cosIdx = instance.Field110 * MObjUtil.CosIdx(instance.Field10C);
+            var tireMtx = Matrix4x3d.CreateRotationX(Math.Atan2(sinIdx, cosIdx));
 
-            //tireMtx._00 = instance->field100;
-            //tireMtx._31 = instance->field104;
-            //tireMtx._32 = instance->field108;
-            //NNS_G3dGePushMtx();
-            //NNS_G3dGeMultMtx43(&tireMtx);
-            //model_render(sCarTireModel);
-            //NNS_G3dGePopMtx(1);
-            //tireMtx._32 = -tireMtx._32;
-            //NNS_G3dGeMultMtx43(&tireMtx);
-            //model_render(sCarTireModel);
+            tireMtx.Row0.X = instance.Field100;
+            tireMtx.Row3.Y = instance.Field104;
+            tireMtx.Row3.Z = instance.Field108;
+
+            // this was PushMatrix
+            _context.RenderContext.GeState.StoreMatrix(1);
+            _context.RenderContext.GeState.MultMatrix(tireMtx);
+            _carTireModel.Render();
+
+            // this was PopMatrix
+            _context.RenderContext.GeState.RestoreMatrix(1);
+
+            tireMtx.Row3.Z = -tireMtx.Row3.Z;
+            _context.RenderContext.GeState.MultMatrix(tireMtx);
+            _carTireModel.Render();
         }
     }
 
