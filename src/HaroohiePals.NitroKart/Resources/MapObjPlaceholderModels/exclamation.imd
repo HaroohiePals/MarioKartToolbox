@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="Shift_JIS"?>
+
+<imd version="1.6.0">
+
+<head>
+	<title>Model Data for NINTENDO NITRO-System</title>
+</head>
+
+<body>
+
+<model_info
+	pos_scale="0"
+	scaling_rule="standard"
+	vertex_style="direct"
+	magnify="1.000000"
+	tool_start_frame="1"
+	tex_matrix_mode="maya"
+	compress_node="unite_combine" node_size="2 1"
+	compress_material="off" material_size="1 1"
+	output_texture="all"
+	force_full_weight="on"
+	use_primitive_strip="on"
+/>
+
+<box_test pos_scale="0" xyz="-0.373047 -0.373047 0.000000" whd="0.746094 0.746094 0.000000"/>
+
+<tex_image_array size="1">
+	<tex_image index="0" name="exclamation"
+		width="32" height="32" original_width="32" original_height="32"
+		format="palette16"
+		color0_mode="transparency"
+		palette_name="exclamation_pl"
+	>
+		<bitmap size="256">
+			0000 0000 1100 1111 1111 0011 0000 0000
+			0000 0000 1110 1111 1111 0111 0000 0000
+			0000 0000 2111 2222 2222 1113 0000 0000
+			0000 0000 2211 2222 2222 1133 0000 0000
+			0000 0000 2211 2222 2222 1133 0000 0000
+			0000 0000 2211 4444 4444 1155 0000 0000
+			0000 0000 2211 4444 4444 1155 0000 0000
+			0000 0000 2211 4444 4444 1155 0000 0000
+			0000 0000 2211 4444 4444 1155 0000 0000
+			0000 0000 2211 4444 4444 1155 0000 0000
+			0000 0000 2110 3332 6333 0116 0000 0000
+			0000 0000 2110 3332 6333 0116 0000 0000
+			0000 0000 2110 3332 6333 0116 0000 0000
+			0000 0000 2110 3332 6333 0116 0000 0000
+			0000 0000 2110 3332 6333 0116 0000 0000
+			0000 0000 2110 3332 6333 0116 0000 0000
+			0000 0000 1100 5544 7755 0011 0000 0000
+			0000 0000 1100 5544 7755 0011 0000 0000
+			0000 0000 1100 5544 7755 0011 0000 0000
+			0000 0000 1100 5544 7755 0011 0000 0000
+			0000 0000 1100 6633 7766 0011 0000 0000
+			0000 0000 1100 6633 7766 0011 0000 0000
+			0000 0000 1100 1111 1111 0011 0000 0000
+			0000 0000 1000 1111 1111 0001 0000 0000
+			0000 0000 1100 1111 1111 0011 0000 0000
+			0000 0000 1100 7755 7777 0011 0000 0000
+			0000 0000 1100 7755 7777 0011 0000 0000
+			0000 0000 1100 7755 7777 0011 0000 0000
+			0000 0000 1100 7755 7777 0011 0000 0000
+			0000 0000 1100 7755 7777 0011 0000 0000
+			0000 0000 1100 1111 1111 0011 0000 0000
+			0000 0000 1000 1111 1111 0001 0000 0000
+		</bitmap>
+	</tex_image>
+</tex_image_array>
+
+<tex_palette_array size="1">
+	<tex_palette index="0" name="exclamation_pl" color_size="8">
+		5ae0 0000 7fff 56b5 6739 4a52 35ad 1ce7
+	</tex_palette>
+</tex_palette_array>
+
+<material_array size="1">
+	<material index="0" name="question_mat"
+		light0="off" light1="off" light2="off" light3="off"
+		face="both"
+		alpha="31"
+		wire_mode="off"
+		polygon_mode="modulate"
+		polygon_id="0"
+		fog_flag="on"
+		depth_test_decal="off"
+		translucent_update_depth="off"
+		render_1_pixel="off"
+		far_clipping="off"
+		diffuse="31 31 31"
+		ambient="0 0 0"
+		specular="0 0 0"
+		emission="0 0 0"
+		shininess_table_flag="off"
+		tex_image_idx="0" tex_palette_idx="0"
+		tex_tiling="clamp clamp"
+		tex_scale="1.000000 1.000000"
+		tex_rotate="0.000000"
+		tex_translate="0.000000 0.000000"
+		tex_gen_mode="none"
+	/>
+</material_array>
+
+<matrix_array size="1">
+	<matrix index="0" mtx_weight="1" node_idx="0"/>
+</matrix_array>
+
+<polygon_array size="1">
+	<polygon index="0" name="polygon0"
+		vertex_size="4" polygon_size="1"
+		triangle_size="0" quad_size="1"
+		volume_min="-0.373047 -0.373047 0.000000"
+		volume_max="0.373047 0.373047 0.000000"
+		volume_r="0.527588"
+		mtx_prim_size="1"
+		nrm_flag="off" clr_flag="off" tex_flag="on"
+	>
+		<mtx_prim index="0">
+			<mtx_list size="1">0</mtx_list>
+			<primitive_array size="1">
+				<primitive index="0" type="quads" vertex_size="4">
+					<mtx idx="0"/>
+					<tex st="0.000000 32.000000"/>
+					<pos_xyz xyz="-0.373047 -0.373047 0.000000"/>
+					<tex st="32.000000 32.000000"/>
+					<pos_xy xy="0.373047 -0.373047"/>
+					<tex st="32.000000 0.000000"/>
+					<pos_xy xy="0.373047 0.373047"/>
+					<tex st="0.000000 0.000000"/>
+					<pos_xy xy="-0.373047 0.373047"/>
+				</primitive>
+			</primitive_array>
+		</mtx_prim>
+	</polygon>
+</polygon_array>
+
+<node_array size="1">
+	<node index="0" name="world_root" kind="mesh"
+		parent="-1"
+		child="-1"
+		brother_next="-1"
+		brother_prev="-1"
+		draw_mtx="on"
+		billboard="off"
+		scale="1.000000 1.000000 1.000000"
+		rotate="0.000000 0.000000 0.000000"
+		translate="0.000000 0.000000 0.000000"
+		visibility="on"
+		display_size="1"
+		vertex_size="4" polygon_size="1"
+		triangle_size="0" quad_size="1"
+		volume_min="-0.373047 -0.373047 0.000000"
+		volume_max="0.373047 0.373047 0.000000"
+		volume_r="0.527588"
+	>
+		<display index="0" material="0" polygon="0" priority="0"/>
+	</node>
+</node_array>
+
+<output_info vertex_size="4" polygon_size="1"
+	triangle_size="0" quad_size="1"/>
+
+<ex_nns_3dme>
+	<ex_model_info scene_name="New Scene" disp_pos="0.000000 60.000000"/>
+	<ex_tex_image_array size="1">
+		<ex_tex_image index="0" disp_pos="0.000000 300.000000"/>
+	</ex_tex_image_array>
+	<ex_tex_palette_array size="1">
+		<ex_tex_palette index="0" disp_pos="0.000000 360.000000"/>
+	</ex_tex_palette_array>
+	<ex_material_array size="1">
+		<ex_material index="0" disp_pos="0.000000 240.000000"/>
+	</ex_material_array>
+	<ex_polygon_array size="1">
+		<ex_polygon index="0" disp_pos="0.000000 180.000000"/>
+	</ex_polygon_array>
+	<ex_node_array size="1">
+		<ex_node index="0" disp_pos="0.000000 120.000000"/>
+	</ex_node_array>
+</ex_nns_3dme>
+
+</body>
+
+</imd>
