@@ -24,6 +24,7 @@ internal class CollisionCheatSheetModalView : ModalView
             ImGui.BulletText("Color and Shadow can be put in any order or omitted");
             ImGui.BulletText("Light Colors: C, Col, Color + ID. Valid examples: Color2, C1, Col3");
             ImGui.BulletText("Shadow on map: S, Shd, Shadow");
+            ImGui.BulletText("Trickable surface: trick");
             ImGui.Text("Examples: Road_Dirt_Shadow_Color3, Wall_Color1, OutOfBounds");
         }
 

@@ -5,55 +5,55 @@ public static class MkdsCollisionConsts
     public static readonly MkdsColTypeInfo[] ColTypes =
     {
         new(MkdsCollisionType.Road, true, false, false, false, new[]
-            { "Asphalt", "Dirt", "Stone", "Concrete", "Wood Board", "Snow/Grass", "Metal Grid", "Iron Plate" }),
+            { "Asphalt", "Dirt", "Stone", "Concrete", "Wood Board", "Snow/Grass", "Metal Grid", "Iron Plate" }, false),
         new(MkdsCollisionType.SlipperyRoad, true, false, false, false, new[]
-            { "Sand", "Dirt", "Grass", "Water", "Snow" }),
+            { "Sand", "Dirt", "Grass", "Water", "Snow" }, false),
         new(MkdsCollisionType.WeakOffRoad, true, false, false, false, new[]
-            { "Sand", "Water", "Snow", "Dirt" }),
+            { "Sand", "Water", "Snow", "Dirt" }, false),
         new(MkdsCollisionType.OffRoad, true, false, false, false, new[]
-            { "Dirt", "Mud", "Grass", "Sand", "Cloud", "Snow" }),
+            { "Dirt", "Mud", "Grass", "Sand", "Cloud", "Snow" }, false),
         new(MkdsCollisionType.SoundTrigger, false, false, false, true, new[]
-            { "Trigger 0", "Trigger 1", "Trigger 2", "Trigger 3", "Trigger 4" }),
+            { "Trigger 0", "Trigger 1", "Trigger 2", "Trigger 3", "Trigger 4" }, false),
         new(MkdsCollisionType.HeavyOffRoad, true, false, false, false, new[]
-            { "Dirt", "Mud", "Grass", "Sand", "Flowerbed" }),
+            { "Dirt", "Mud", "Grass", "Sand", "Flowerbed" }, false),
         new(MkdsCollisionType.SlipperyRoad2, true, false, false, false, new[]
-            { "Ice", "Mud" }),
+            { "Ice", "Mud" }, false),
         new(MkdsCollisionType.BoostPad, true, false, false, false, new[]
-            { "Normal", "Rainbow", "Pinball Normal", "Dirt + Pinball Cannon Enter" }),
+            { "Normal", "Rainbow", "Pinball Normal", "Dirt + Pinball Cannon Enter" }, false),
         new(MkdsCollisionType.Wall, false, true, false, false, new[]
-            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }),
+            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }, false),
         new(MkdsCollisionType.InvisibleWall, false, true, false, true, new[]
-            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }),
+            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }, false),
         new(MkdsCollisionType.OutOfBounds, true, false, false, false, new[]
-            { "Dirt", "Sand", "Dirt (No Effects)", "Snow", "Water" }),
+            { "Dirt", "Sand", "Dirt (No Effects)", "Snow", "Water" }, false),
         new(MkdsCollisionType.FallBoundary, false, false, false, true, new[]
-            { "Air Fall", "Water", "Lava" }),
+            { "Air Fall", "Water", "Lava" }, false),
         new(MkdsCollisionType.JumpPad, true, false, false, false, new[]
         {
             "Low Jump", "Medium Jump", "High Jump", "No Jump (Dirt Sound Effect)", "Highest Jump",
             "Extremely High Jump (Lose control)", "Higher Extreme Jump (Lose control)",
             "Highest Extreme Jump (Lose control)"
-        }),
+        }, false),
         new(MkdsCollisionType.RoadNoDrivers, true, false, true, false, new[]
-            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }),
+            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }, false),
         new(MkdsCollisionType.WallNoDrivers, false, true, true, false, new[]
-            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }),
+            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }, false),
         new(MkdsCollisionType.CannonActivator, false, false, false, false, new[]
-            { "Cannon 0", "Cannon 1", "Cannon 2", "Cannon 3", "Cannon 4", "Cannon 5", "Cannon 6", "Cannon 7" }),
+            { "Cannon 0", "Cannon 1", "Cannon 2", "Cannon 3", "Cannon 4", "Cannon 5", "Cannon 6", "Cannon 7" }, false),
         new(MkdsCollisionType.EdgeWall, false, true, false, false, new[]
-            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }),
+            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }, false),
         new(MkdsCollisionType.FallsWater, true, false, false, false, new[]
-            { "Id 0", "Id 1", "Id 2" }),
+            { "Id 0", "Id 1", "Id 2" }, false),
         new(MkdsCollisionType.BoostPadMinSpeed, true, false, false, false, new[]
-            { "Normal", "Rainbow", "Pinball Normal", "Dirt + Pinball Cannon Enter" }),
+            { "Normal", "Rainbow", "Pinball Normal", "Dirt + Pinball Cannon Enter" }, false),
         new(MkdsCollisionType.Loop, true, false, false, false, new[]
-            { "Rainbow/Boost Pad", "Rainbow/Boost Pad" }),
+            { "Rainbow/Boost Pad", "Rainbow/Boost Pad" }, false),
         new(MkdsCollisionType.SpecialRoad, true, false, false, false, new[]
-            { "Dirt/Sand", "Carpet", "Rainbow", "Grass", "Stairs", "Sand", "Dirt" }),
+            { "Dirt/Sand", "Carpet", "Rainbow", "Grass", "Stairs", "Sand", "Dirt" }, false),
         new(MkdsCollisionType.Wall3, false, true, false, false, new[]
-            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }),
+            { "Concrete", "Rock", "Metal", "Wood", "Bush", "No Sound", "Rope", "Ice/Metal Grid" }, false),
         new(MkdsCollisionType.ForceRecalculateRoute, false, false, false, true, new[]
-            { "Id 0", "Id 1", "Id 2", "Id 3", "Id 4", "Id 5", "Id 6", "Id 7" })
+            { "Id 0", "Id 1", "Id 2", "Id 3", "Id 4", "Id 5", "Id 6", "Id 7" }, false)
     };
 
     public static string GetVariantName(MkdsKclPrismAttribute attribute)

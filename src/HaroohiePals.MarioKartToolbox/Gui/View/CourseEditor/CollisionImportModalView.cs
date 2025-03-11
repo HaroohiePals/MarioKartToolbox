@@ -342,6 +342,7 @@ class CollisionImportModalView : ModalView
             bool variantParsed = false;
             bool colorParsed = false;
             bool shadowParsed = false;
+            bool trickParsed = false;
 
             var colorRegex = new Regex("color[0-9]|col[0-9]|c[0-9]");
 
@@ -367,6 +368,10 @@ class CollisionImportModalView : ModalView
                 {
                     attribute.Variant = parseVariant(attribute.Type, part);
                     variantParsed = true;
+                }
+                else if (!trickParsed && (part == "trick"))
+                {
+                    attribute.IsTrickable = true;
                 }
             }
         }
@@ -462,6 +467,7 @@ public class MaterialAttribute
             Attribute.IsWall = info.IsWall;
             Attribute.IgnoreDrivers = info.IgnoreDrivers;
             Attribute.IgnoreItems = info.IgnoreItems;
+            //Attribute.IsTrickable = info.IsTrickable;
         }
     }
 
@@ -484,6 +490,13 @@ public class MaterialAttribute
     {
         get => Attribute.LightId;
         set => Attribute.LightId = value;
+    }
+
+    [Category("Flags"), DisplayName("Trickable Surface"), Description("Requires Tricks ASM")]
+    public bool IsTrickable
+    {
+        get => Attribute.IsTrickable;
+        set => Attribute.IsTrickable = value;
     }
 
     public override string ToString()
