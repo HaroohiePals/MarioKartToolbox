@@ -369,9 +369,10 @@ class CollisionImportModalView : ModalView
                     attribute.Variant = parseVariant(attribute.Type, part);
                     variantParsed = true;
                 }
-                else if (!unusedParsed && (part == "unused" || part == "u" || part == "uf"))
+                else if (!unusedParsed && (part == "u" || part == "uf" || part == "unused"))
                 {
                     attribute.UnusedFlag = true;
+                    unusedParsed = true;
                 }
             }
         }
@@ -467,7 +468,6 @@ public class MaterialAttribute
             Attribute.IsWall = info.IsWall;
             Attribute.IgnoreDrivers = info.IgnoreDrivers;
             Attribute.IgnoreItems = info.IgnoreItems;
-            Attribute.UnusedFlag = info.UnusedFlag;
         }
     }
 
