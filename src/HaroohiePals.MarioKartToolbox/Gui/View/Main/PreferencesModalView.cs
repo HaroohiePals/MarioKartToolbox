@@ -89,8 +89,9 @@ internal class PreferencesModalView : ModalView
 
             ImGui.EndChild();
         }
-
-        ImGui.SetCursorPosX(ImGui.GetWindowContentRegionMax().X - 1 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
+        
+        var windowContentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+        ImGui.SetCursorPosX(windowContentRegionMax.X - 1 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
 
         if (!_isDirty)
             ImGui.BeginDisabled();

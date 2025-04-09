@@ -35,7 +35,7 @@ public class LoadingModalView : ModalView
 
     protected override void DrawContent()
     {
-        var avail = ImGui.GetContentRegionMax();
+        var avail = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
 
         float x = avail.X / 2 - GetSpinnerAndTextWidth() / 2;
         float y = avail.Y / 2;

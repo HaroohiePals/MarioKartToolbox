@@ -246,8 +246,8 @@ class RenderGroupVisibilityManager
             ImGui.SetCursorPosY(y);
 
             ImGui.Text(item.ToString());
-
-            var controlWidth = ImGui.GetContentRegionMax().X;
+            var contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+            var controlWidth = contentRegionMax.X;
 
             ImGui.SameLine();
             ImGui.SetCursorPosX(controlWidth - btnSize * itemCount-- - (10f * scale));

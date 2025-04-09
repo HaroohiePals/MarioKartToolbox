@@ -23,9 +23,11 @@ internal class ViewportSideToolbar
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
         var targetTool = gizmo.Tool;
 
-        ImGui.SetNextWindowPos(ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin() + padding);
-        if (ImGui.BeginChildFrame(ImGui.GetID("Tools"), new(btnSize + spacing, (btnSize + spacing) * items),
-                ImGuiWindowFlags.NoBackground))
+        // imgui upgrade check GetWindowContentRegionMin
+        var windowContentRegionMin = ImGui.GetContentRegionAvail();
+        ImGui.SetNextWindowPos(ImGui.GetWindowPos() + windowContentRegionMin + padding);
+        if (ImGui.BeginChild(ImGui.GetID("Tools"), new(btnSize + spacing, (btnSize + spacing) * items),
+                ImGuiChildFlags.FrameStyle))
         {
             ImGui.SetCursorPosX(0);
             ImGui.SetCursorPosY(0);
@@ -65,7 +67,7 @@ internal class ViewportSideToolbar
             if (gizmo.Tool == GizmoTool.Scale)
                 ImGui.PopStyleColor();
 
-            ImGui.EndChildFrame();
+            ImGui.EndChild();
         }
 
         ImGui.PopStyleVar();

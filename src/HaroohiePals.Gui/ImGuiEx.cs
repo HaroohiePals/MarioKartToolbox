@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -174,20 +175,7 @@ public static class ImGuiEx
     }
 
     public static bool AreKeysDown(params ImGuiKey[] keys)
-    {
-        var keysDown = ImGui.GetIO().KeysDown;
-
-        if (keys.Length == 0)
-            return false;
-
-        foreach (ImGuiKey key in keys)
-        {
-            if (!keysDown[(int)key])
-                return false;
-        }    
-
-        return true;
-    }
+        => keys.All(ImGui.IsKeyDown);
 
     // https://github.com/ocornut/imgui/issues/1901
     public static bool Spinner(string label, float radius, int thickness, uint color)

@@ -90,7 +90,8 @@ class CollisionImportModalView : ModalView
             ImGui.EndChild();
         }
 
-        ImGui.SetCursorPosX(ImGui.GetWindowContentRegionMax().X - 2 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
+        var contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+        ImGui.SetCursorPosX(contentRegionMax.X - 2 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
 
         if (_curStep == CollisionImportSteps.Step1)
             ImGui.BeginDisabled();
@@ -208,7 +209,7 @@ class CollisionImportModalView : ModalView
     {
         var avail = ImGui.GetContentRegionAvail();
 
-        if (ImGui.BeginChildFrame(ImGui.GetID("DrawPropertyGrid"), avail, ImGuiWindowFlags.NoBackground))
+        if (ImGui.BeginChild(ImGui.GetID("DrawPropertyGrid"), avail, ImGuiChildFlags.FrameStyle))
         {
             if (_selectionChanged)
             {
@@ -218,7 +219,7 @@ class CollisionImportModalView : ModalView
 
             _propertyGridWidget.Draw();
 
-            ImGui.EndChildFrame();
+            ImGui.EndChild();
         }
     }
 

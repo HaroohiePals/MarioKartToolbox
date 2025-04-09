@@ -30,7 +30,8 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.Main
                 ImGui.EndChild();
             }
 
-            ImGui.SetCursorPosX(ImGui.GetWindowContentRegionMax().X - 1 * 80 - ImGui.GetStyle().ItemSpacing.X);
+            var contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+            ImGui.SetCursorPosX(contentRegionMax.X - 1 * 80 - ImGui.GetStyle().ItemSpacing.X);
 
 
             if (string.IsNullOrEmpty(_projectPath))

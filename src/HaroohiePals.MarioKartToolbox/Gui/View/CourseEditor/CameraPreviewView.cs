@@ -241,7 +241,7 @@ internal class CameraPreviewView : CourseViewportView
             var frameSize = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? new Vector2(screenX, screenY * 2 + 10) : new Vector2(0);
 
             ImGui.SetCursorPosX(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? availableSpace.X / 2f - screenX / 2f : 0f);
-            if (ImGui.BeginChild(ImGui.GetID("TestFrames"), frameSize, false, ImGuiWindowFlags.None))
+            if (ImGui.BeginChild(ImGui.GetID("TestFrames"), frameSize, ImGuiChildFlags.FrameStyle))
             {
                 _viewportPanel.Size = new Vector2(screenX, screenY);
                 _bottomViewportPanel.Size = new Vector2(screenX, screenY);

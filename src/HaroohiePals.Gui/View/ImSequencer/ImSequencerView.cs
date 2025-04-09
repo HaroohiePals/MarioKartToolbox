@@ -135,7 +135,7 @@ public class ImSequencerView : IView
 
 
             ImGui.PushStyleColor(ImGuiCol.FrameBg, 0);
-            ImGui.BeginChildFrame(ImGui.GetID(GetHashCode()), childFrameSize);
+            ImGui.BeginChild(ImGui.GetID(GetHashCode()), childFrameSize, ImGuiChildFlags.FrameStyle);
             Sequence.Focused = ImGui.IsWindowFocused();
             ImGui.InvisibleButton("contentBar", new Vector2(canvasSize.X, controlHeight));
             var contentMin = ImGui.GetItemRectMin();
@@ -483,7 +483,7 @@ public class ImSequencerView : IView
             }
             //
 
-            ImGui.EndChildFrame();
+            ImGui.EndChild();
             ImGui.PopStyleColor();
             if (hasScrollBar)
             {
