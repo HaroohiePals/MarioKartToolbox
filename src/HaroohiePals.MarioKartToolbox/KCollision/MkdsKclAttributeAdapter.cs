@@ -102,14 +102,14 @@ public abstract class MkdsKclAttributeAdapter
         }
     }
 
-    [Category("Flags"), DisplayName("Trickable Surface"), Description("Requires Tricks ASM")]
-    public bool IsTrickable
+    [Category("Flags"), DisplayName("Unused Flag")]
+    public bool UnusedFlag
     {
-        get => Attribute.IsTrickable;
+        get => Attribute.UnusedFlag;
         set
         {
             var x = Attribute;
-            x.IsTrickable = value;
+            x.UnusedFlag = value;
             Attribute = x;
         }
     }

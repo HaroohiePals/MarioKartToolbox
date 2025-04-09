@@ -68,7 +68,7 @@ public struct MkdsKclPrismAttribute
         set => SetBits(value ? 1 : 0, 15, 1);
     }
 
-    public bool IsTrickable
+    public bool UnusedFlag
     {
         get => GetBits(0, 1) == 1;
         set => SetBits(value ? 1 : 0, 0, 1);

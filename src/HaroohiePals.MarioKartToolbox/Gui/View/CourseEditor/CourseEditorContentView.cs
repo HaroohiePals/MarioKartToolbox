@@ -5,7 +5,7 @@ using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.Gui.View.Toolbar;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
 using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
-using HaroohiePals.MarioKartToolbox.NKCT;
+//using HaroohiePals.MarioKartToolbox.NKCT;
 using HaroohiePals.NitroKart.Course;
 using HaroohiePals.NitroKart.MapData;
 using ImGuiNET;
@@ -20,7 +20,7 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
     private readonly IModalService _modalService;
     private readonly CourseEditorViewModel _viewModel;
     private readonly ICourseEditorViewFactory _subWindowFactory;
-    private readonly NitroKartCT _nitroKartCT;
+    //private readonly NitroKartCT _nitroKartCT;
     private bool _showDemoWindow = false;
     private bool _debugAreaCheck = false;
 
@@ -59,8 +59,8 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
                     }
                 },
                 new() { Separator = true },
-                new("Close Editor", Close),
-                new("Save CT Info", () => { _nitroKartCT?.saveFile(); })
+                new("Close Editor", Close)
+                //new("Save CT Info", () => { _nitroKartCT?.saveFile(); })
             }
         },
         new("Edit")
