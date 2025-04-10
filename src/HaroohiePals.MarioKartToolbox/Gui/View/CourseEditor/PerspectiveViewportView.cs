@@ -188,9 +188,9 @@ internal class PerspectiveViewportView : CourseViewportView
             ImGui.SetWindowSize(new Vector2(600, 400), ImGuiCond.Once);
 
             _viewportPanel.Draw();
-
-            ImGui.End();
         }
+
+        ImGui.End();
 
         ImGui.PopStyleVar();
 

@@ -260,9 +260,9 @@ class MapDataExplorerView : IView
             HandlePaste();
             HandleInsert();
             HandleSelectAll();
-
-            ImGui.End();
         }
+
+        ImGui.End();
 
         ImGui.PopStyleVar();
 
@@ -278,12 +278,12 @@ class MapDataExplorerView : IView
     {
         _nodes = CreateNodes();
 
-        ImGui.BeginChild("Map Data Tree");
+        if (ImGui.BeginChild("Map Data Tree"))
         {
             foreach (var node in _nodes)
                 DrawNode(node);
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
     }
 
     private void DrawNodeLabel(string icon, string text, bool transparent = false)

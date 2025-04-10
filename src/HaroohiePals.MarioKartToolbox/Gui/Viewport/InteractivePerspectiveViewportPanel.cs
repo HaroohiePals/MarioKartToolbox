@@ -43,14 +43,13 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
         var padding = new Vector2(36, 8) * scale;
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+
         // imgui check GetWindowContentRegionMin
-        var windowContentRegionMin = ImGui.GetContentRegionAvail();
+        var windowContentRegionMin = ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
         ImGui.SetNextWindowPos(ImGui.GetWindowPos() + windowContentRegionMin + padding);
         if (ImGui.BeginChild(ImGui.GetID("TopTools"), new Vector2(200f * scale, btnSize + spacing),
-                ImGuiChildFlags.FrameStyle))
+                ImGuiChildFlags.None))
         {
-            ImGui.PopStyleVar();
-
             int i = 0;
 
             ImGui.SetCursorPosX((btnSize + spacing) * i++);
@@ -156,14 +155,14 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                     y += btnSize;
 
                     _visibilityManager.Draw(x, y);
-
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
 
                 ImGui.EndPopup();
             }
-
-            ImGui.EndChild();
         }
+        ImGui.PopStyleVar();
+
+        ImGui.EndChild();
     }
 }

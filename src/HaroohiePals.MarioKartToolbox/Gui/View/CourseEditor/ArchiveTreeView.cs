@@ -49,9 +49,8 @@ class ArchiveTreeView : IView
 
             _archiveToolbar.Draw();
             _archiveTree.Draw();
-
-            ImGui.End();
         }
+        ImGui.End();
 
         ImGui.PopStyleVar();
 

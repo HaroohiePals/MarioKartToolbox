@@ -66,9 +66,8 @@ internal class ViewportSideToolbar
                 targetTool = GizmoTool.Scale;
             if (gizmo.Tool == GizmoTool.Scale)
                 ImGui.PopStyleColor();
-
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
 
         ImGui.PopStyleVar();
 

@@ -115,9 +115,8 @@ internal class KclViewerContentView : WindowContentView, IDisposable
             bool octreeEnabled = _octreeRenderGroup.Enabled;
             ImGui.Checkbox("Show octree", ref octreeEnabled);
             _octreeRenderGroup.Enabled = octreeEnabled;
-
-            ImGui.End();
         }
+        ImGui.End();
 
         if (_viewportPanel is not null)
         {
@@ -158,9 +157,9 @@ internal class KclViewerContentView : WindowContentView, IDisposable
 
                     ImGui.EndTooltip();
                 }
-
-                ImGui.End();
             }
+
+            ImGui.End();
         }
     }
 
@@ -178,9 +177,8 @@ internal class KclViewerContentView : WindowContentView, IDisposable
 
             ImGui.Text("Min cube size: " + _context.MinCubeSize);
             ImGui.Text("Max cube size: " + _context.Collision.OctreeRootCubeSize);
-
-            ImGui.End();
         }
+        ImGui.End();
     }
 
     public override bool Draw()

@@ -78,9 +78,8 @@ public class ViewportPanel : IView
                 DoubleClick?.Invoke();
 
             RenderControls();
-
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
 
         return true;
     }

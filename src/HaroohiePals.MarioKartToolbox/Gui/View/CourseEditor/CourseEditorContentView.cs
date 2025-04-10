@@ -246,9 +246,9 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
 
             if (ImGui.Button("Toggle Edit Mode"))
                 _perspectiveViewPane?.ToggleEditMode();
-
-            ImGui.End();
         }
+
+        ImGui.End();
 
         if (_showDemoWindow)
             ImGui.ShowDemoWindow();

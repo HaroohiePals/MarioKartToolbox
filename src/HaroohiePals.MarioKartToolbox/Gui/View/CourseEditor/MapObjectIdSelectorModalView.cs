@@ -112,11 +112,11 @@ internal class MapObjectIdSelectorModalView : ModalView
         ImGui.Text(mobjInfo is not null ? mobjInfo.Name : "Unused");
 
         var avail = ImGui.GetContentRegionAvail();
-        ImGui.BeginChild("MobjIdSelectTreeChild", new(avail.X, avail.Y - ImGuiEx.CalcUiScaledValue(25)));
+        if (ImGui.BeginChild("MobjIdSelectTreeChild", new(avail.X, avail.Y - ImGuiEx.CalcUiScaledValue(25))))
         {
             _tree.Draw();
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
 
         if (ImGui.Button("Confirm##ConfirmMobjIdSelection"))
         {

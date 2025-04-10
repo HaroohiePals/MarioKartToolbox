@@ -226,7 +226,6 @@ internal class CameraPreviewView : CourseViewportView
                 ImGui.SetWindowFocus(_title);
             }
 
-            ImGui.PopStyleVar();
             RenderControls();
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
 
@@ -263,12 +262,13 @@ internal class CameraPreviewView : CourseViewportView
                         isEdit ? _viewportPanel.Context.ViewMatrix : _bottomView, _bottomProj, null);
                     _bottomViewportPanel.Draw();
                 }
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
 
-            ImGui.End();
+            ImGui.PopStyleVar();
         }
+        ImGui.End();
+
         ImGui.PopStyleVar();
 
         return true;

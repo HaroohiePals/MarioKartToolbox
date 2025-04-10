@@ -119,9 +119,8 @@ class ValidationPaneView : PaneView
 
                 ImGui.EndTable();
             }
-
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
     }
 
     public override void DrawContent()

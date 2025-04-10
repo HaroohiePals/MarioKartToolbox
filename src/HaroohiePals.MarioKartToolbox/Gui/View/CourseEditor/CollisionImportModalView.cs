@@ -83,12 +83,10 @@ class CollisionImportModalView : ModalView
                         canContinue = DrawImportSettings();
                         break;
                 }
-
-                ImGui.EndChild();
             }
-
             ImGui.EndChild();
         }
+        ImGui.EndChild();
 
         var contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
         ImGui.SetCursorPosX(contentRegionMax.X - 2 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
@@ -218,9 +216,8 @@ class CollisionImportModalView : ModalView
             }
 
             _propertyGridWidget.Draw();
-
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
     }
 
     private bool DrawImportSettings()

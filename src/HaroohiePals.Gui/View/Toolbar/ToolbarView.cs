@@ -40,8 +40,8 @@ public class ToolbarView : IView
                 ImGui.SetWindowPos(ImGui.GetMainViewport().WorkPos);
 
                 DrawToolbar();
-                ImGui.End();
             }
+            ImGui.End();
 
             ImGui.PopStyleVar(4);
 

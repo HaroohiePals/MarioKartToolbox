@@ -60,9 +60,8 @@ internal class PreferencesModalView : ModalView
             if (ImGui.Begin("Theme Editor"))
             {
                 ImGui.ShowStyleEditor();
-
-                ImGui.End();
             }
+            ImGui.End();
         }
 
         PreferencesTab selectedTab = null;
@@ -86,10 +85,9 @@ internal class PreferencesModalView : ModalView
         if (ImGui.BeginChild("##TabContent_Preferences", new Vector2(region.X, region.Y - ImGuiEx.CalcUiScaledValue(30))))
         {
             selectedTab?.Draw();
-
-            ImGui.EndChild();
         }
-        
+        ImGui.EndChild();
+
         var windowContentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
         ImGui.SetCursorPosX(windowContentRegionMax.X - 1 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
 

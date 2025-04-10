@@ -27,8 +27,8 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.Main
             if (ImGui.BeginChild("##ChildContent", new Vector2(region.X, region.Y - 30)))
             {
                 DrawChildContent();
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
 
             var contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
             ImGui.SetCursorPosX(contentRegionMax.X - 1 * 80 - ImGui.GetStyle().ItemSpacing.X);

@@ -133,7 +133,6 @@ public class ImSequencerView : IView
             var childFramePos = ImGui.GetCursorScreenPos();
             var childFrameSize = new Vector2(canvasSize.X, canvasSize.Y - ImGuiEx.CalcUiScaledValue(8f) - headerSize.Y - (hasScrollBar ? scrollBarSize.Y : 0));
 
-
             ImGui.PushStyleColor(ImGuiCol.FrameBg, 0);
             ImGui.BeginChild(ImGui.GetID(GetHashCode()), childFrameSize, ImGuiChildFlags.FrameStyle);
             Sequence.Focused = ImGui.IsWindowFocused();
