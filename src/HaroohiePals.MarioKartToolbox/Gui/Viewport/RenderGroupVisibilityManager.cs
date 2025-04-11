@@ -256,7 +256,7 @@ class RenderGroupVisibilityManager
 
             if (_visibility[item] == VisibilityType.Hidden)
                 ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-            ImGui.Button($"{FontAwesome6.EyeSlash}", new(btnSize));
+            ImGui.Button($"{FontAwesome6.EyeSlash}##{item}", new(btnSize));
             if (ImGui.IsItemClicked())
             {
                 targetVisibilityType = VisibilityType.Hidden;
@@ -269,7 +269,7 @@ class RenderGroupVisibilityManager
             ImGui.SetCursorPosX(controlWidth - btnSize * itemCount-- - (10f * scale));
             if (_visibility[item] == VisibilityType.Solid)
                 ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-            ImGui.Button($"{(hasWireframeMode ? FontAwesome6.Circle : FontAwesome6.Eye)}",
+            ImGui.Button($"{(hasWireframeMode ? FontAwesome6.Circle : FontAwesome6.Eye)}##{item}",
                 new(btnSize));
             if (ImGui.IsItemClicked())
             {
@@ -285,7 +285,7 @@ class RenderGroupVisibilityManager
                 ImGui.SetCursorPosX(controlWidth - btnSize * itemCount-- - (10f * scale));
                 if (_visibility[item] == VisibilityType.Wireframe)
                     ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-                ImGui.Button($"{FontAwesome6.Globe}", new(btnSize));
+                ImGui.Button($"{FontAwesome6.Globe}##{item}", new(btnSize));
                 if (ImGui.IsItemClicked())
                 {
                     targetVisibilityType = VisibilityType.Wireframe;
@@ -302,7 +302,7 @@ class RenderGroupVisibilityManager
                 ImGui.SetCursorPosX(controlWidth - btnSize * itemCount-- - (10f * scale));
                 if (_visibility[item] == VisibilityType.Light)
                     ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-                ImGui.Button($"{FontAwesome6.Lightbulb}", new(btnSize));
+                ImGui.Button($"{FontAwesome6.Lightbulb}##{item}", new(btnSize));
                 if (ImGui.IsItemClicked())
                     targetVisibilityType = VisibilityType.Light;
                 if (_visibility[item] == VisibilityType.Light)
@@ -314,7 +314,7 @@ class RenderGroupVisibilityManager
                 bool wasTranslucent = _kclTranslucent;
                 if (wasTranslucent)
                     ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-                ImGui.Button($"{FontAwesome6.CircleHalfStroke}", new(btnSize));
+                ImGui.Button($"{FontAwesome6.CircleHalfStroke}##{item}", new(btnSize));
                 if (ImGui.IsItemClicked())
                 {
                     _kclTranslucent = !_kclTranslucent;
@@ -333,7 +333,7 @@ class RenderGroupVisibilityManager
                 bool wasAll = _areaShapeShowAll;
                 if (wasAll)
                     ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-                ImGui.Button($"{FontAwesome6.ListCheck}", new(btnSize));
+                ImGui.Button($"{FontAwesome6.ListCheck}##{item}", new(btnSize));
                 if (ImGui.IsItemClicked())
                 {
                     _areaShapeShowAll = !_areaShapeShowAll;
@@ -350,15 +350,12 @@ class RenderGroupVisibilityManager
                 ImGui.SameLine();
                 ImGui.SetCursorPosX(controlWidth - btnSize * itemCount-- - (10f * scale));
                 bool wasEditMode = _mobjEditMode;
-                ImGui.Button(wasEditMode ? $"{FontAwesome6.Play}" : $"{FontAwesome6.Stop}", new(btnSize));
+                ImGui.Button(wasEditMode ? $"{FontAwesome6.Play}##{item}" : $"{FontAwesome6.Stop}##{item}", new(btnSize));
                 if (ImGui.IsItemClicked())
                 {
                     _mobjEditMode = !_mobjEditMode;
                     _updateSettings = true;
                 }
-
-                if (wasEditMode)
-                    ImGui.PopStyleColor();
             }
 
             if (_visibility[item] != targetVisibilityType)

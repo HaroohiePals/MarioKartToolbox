@@ -40,15 +40,26 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
             float near = _topDownScene.OrthographicProjection.Near;
             var cursor = ImGui.GetCursorPos();
             float padding = ImGui.GetStyle().ItemSpacing.X;
+
+            // Extend parents boundary (workaround)
+            ImGui.Dummy(Vector2.Zero);
+
             ImGui.SetCursorPosX(Context.ViewportSize.X - 12 - padding);
             ImGui.SetCursorPosY(padding * 2);
+
             var bgCol = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg];
             bgCol.W = 0.5f;
             ImGui.PushStyleColor(ImGuiCol.FrameBg, bgCol);
+
             if (ImGui.VSliderFloat($"##NearSlider_{GetHashCode()}", new System.Numerics.Vector2(12, Context.ViewportSize.Y - padding * 4), ref near,
                     MaximumNear,
                     10, ""))
+            {
                 _topDownScene.OrthographicProjection.Near = near;
+            }
+
+            _canUseSelectionRectangle = !ImGui.IsItemActive();
+
             ImGui.PopStyleColor();
             ImGui.SetCursorPos(cursor);
         }
@@ -62,13 +73,11 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
         float spacing = 2 * scale;
         var padding = new Vector2(36, 8) * scale;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        // Make child frame transparent
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
 
-        // imgui check GetWindowContentRegionMin
-        var windowContentRegionMin = ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
-        ImGui.SetNextWindowPos(ImGui.GetWindowPos() + windowContentRegionMin + padding);
-        if (ImGui.BeginChild(ImGui.GetID("TopTools"), new Vector2(200f * scale, btnSize + spacing),
-                ImGuiChildFlags.FrameStyle))
+        ImGui.SetCursorPos(padding);
+        if (ImGui.BeginChild(ImGui.GetID("TopTools"), new Vector2((btnSize + 3) * scale, btnSize + spacing)))
         {
             int i = 0;
 
@@ -83,14 +92,13 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
                 float x = 4 * scale;
                 float y = 4 * scale;
 
-                int visibilityTypeCount = 5; //Enum.GetValues(typeof(VisibilityType)).Length;
+                int visibilityTypeCount = 5;
 
                 int fieldCount = _visibilityManager.EntityCount + 1;
 
                 float frameHeight = btnSize + y * 2 + btnSize * fieldCount;
                 frameHeight = Math.Min(500 * scale, frameHeight);
                 float frameWidth = 300 * scale;
-
                 if (ImGui.BeginChild(ImGui.GetID("TopTools"),
                         new Vector2(frameWidth, frameHeight), ImGuiChildFlags.FrameStyle))
                 {
@@ -145,7 +153,7 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
             }
         }
 
-        ImGui.PopStyleVar();
+        ImGui.PopStyleColor();
 
         ImGui.EndChild();
     }

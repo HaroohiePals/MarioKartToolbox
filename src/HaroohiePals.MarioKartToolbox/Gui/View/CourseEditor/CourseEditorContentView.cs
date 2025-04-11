@@ -26,7 +26,6 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
     private DockSpaceView _dockSpaceView = new();
     private List<IView> _views = new();
     private PropertyGridPaneView _propertyGridPane;
-    private PerspectiveViewportView _perspectiveViewPane;
 
     private readonly ToolbarView _mainToolbar = new("MainToolbar");
     private readonly ToolbarItem _undoButton;
@@ -133,8 +132,7 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
         _views.Add(_subWindowFactory.CreateMapDataExplorerView(_viewModel.Context));
         _views.Add(_subWindowFactory.CreateCameraPreviewView(_viewModel.Context));
         _views.Add(_subWindowFactory.CreateTopDownViewportView(_viewModel.Context));
-        _perspectiveViewPane = _subWindowFactory.CreatePerspectiveViewportView(_viewModel.Context);
-        _views.Add(_perspectiveViewPane);
+        _views.Add(_subWindowFactory.CreatePerspectiveViewportView(_viewModel.Context));
         _views.Add(_subWindowFactory.CreateTimelinePaneView(_viewModel.Context));
         _views.Add(_subWindowFactory.CreateValidationPaneView(_viewModel.Context));
     }
@@ -243,9 +241,6 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
             ImGui.Text($"Next: {_viewModel.Context.ActionStack.RedoActionsCount}");
             ImGui.SameLine();
             ImGui.Text($"Prev: {_viewModel.Context.ActionStack.UndoActionsCount}");
-
-            if (ImGui.Button("Toggle Edit Mode"))
-                _perspectiveViewPane?.ToggleEditMode();
         }
 
         ImGui.End();

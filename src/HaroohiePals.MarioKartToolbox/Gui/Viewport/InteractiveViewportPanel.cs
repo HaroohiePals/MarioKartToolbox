@@ -12,6 +12,9 @@ abstract class InteractiveViewportPanel : ViewportPanel
     protected readonly IApplicationSettingsService _applicationSettings;
     protected readonly Gizmo _gizmo;
     protected readonly RenderGroupVisibilityManager _visibilityManager;
+
+    protected bool _canUseSelectionRectangle = true;
+
     private readonly SelectionRectangle _selectionRect = new();
     private readonly RenderGroupScene _renderGroupScene;
     private readonly ViewportSideToolbar _sideToolbar = new();
@@ -83,6 +86,9 @@ abstract class InteractiveViewportPanel : ViewportPanel
 
     private void HandleSelectionRectangle()
     {
+        if (!_canUseSelectionRectangle)
+            return;
+
         if (_renderGroupScene.FramebufferProvider is not IPickableFramebufferProvider pickableFramebufferProvider)
             return;
 

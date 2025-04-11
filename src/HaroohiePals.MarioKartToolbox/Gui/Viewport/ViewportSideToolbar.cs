@@ -20,14 +20,13 @@ internal class ViewportSideToolbar
 
         uint selectedColor = ImGui.GetColorU32(ImGuiCol.ButtonHovered) | 0xFF000000;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        // Make child frame transparent
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
         var targetTool = gizmo.Tool;
 
-        // imgui upgrade check GetWindowContentRegionMin
-        var windowContentRegionMin = ImGui.GetContentRegionAvail();
-        ImGui.SetNextWindowPos(ImGui.GetWindowPos() + windowContentRegionMin + padding);
-        if (ImGui.BeginChild(ImGui.GetID("Tools"), new(btnSize + spacing, (btnSize + spacing) * items),
-                ImGuiChildFlags.FrameStyle))
+        var oldCursor = ImGui.GetCursorPos();
+        ImGui.SetCursorPos(padding);
+        if (ImGui.BeginChild(ImGui.GetID("Tools"), new(btnSize + spacing, (btnSize + spacing) * items)))
         {
             ImGui.SetCursorPosX(0);
             ImGui.SetCursorPosY(0);
@@ -69,7 +68,8 @@ internal class ViewportSideToolbar
         }
         ImGui.EndChild();
 
-        ImGui.PopStyleVar();
+        ImGui.PopStyleColor();
+        ImGui.SetCursorPos(oldCursor);
 
         gizmo.Tool = targetTool;
     }

@@ -91,7 +91,9 @@ internal class PreferencesModalView : ModalView
         var windowContentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
         ImGui.SetCursorPosX(windowContentRegionMax.X - 1 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
 
-        if (!_isDirty)
+        bool wasDirty = _isDirty;
+
+        if (!wasDirty)
             ImGui.BeginDisabled();
 
         if (ImGui.Button("Apply", new Vector2(ImGuiEx.CalcUiScaledValue(80), 0)))
@@ -106,7 +108,7 @@ internal class PreferencesModalView : ModalView
             _isDirty = false;
         }
 
-        if (!_isDirty)
+        if (!wasDirty)
             ImGui.EndDisabled();
     }
 
@@ -315,7 +317,7 @@ internal class PreferencesModalView : ModalView
     {
         if (ImGui.CollapsingHeader("Shortcuts##KeyBindings_Preferences", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##Columns_KeyBindings_Shortcuts");
             DrawKeyBindingInput("Undo last action", ref _prefs.KeyBindings.Shortcuts.Undo);
             DrawKeyBindingInput("Redo last action", ref _prefs.KeyBindings.Shortcuts.Redo);
             ImGui.Columns(1);
@@ -323,7 +325,7 @@ internal class PreferencesModalView : ModalView
 
         if (ImGui.CollapsingHeader("Viewport Camera##KeyBindings_Preferences", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##Columns_KeyBindings_ViewportCamera");
             DrawKeyBindingInput("Forward", ref _prefs.KeyBindings.Viewport.Forward);
             DrawKeyBindingInput("Left", ref _prefs.KeyBindings.Viewport.Left);
             DrawKeyBindingInput("Back", ref _prefs.KeyBindings.Viewport.Backward);
@@ -335,7 +337,7 @@ internal class PreferencesModalView : ModalView
 
         if (ImGui.CollapsingHeader("Gizmo##KeyBindings_Preferences", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##Columns_KeyBindings_Gizmo");
 
             DrawKeyBindingInput("Collision Snapping", ref _prefs.KeyBindings.Gizmo.SnapToCollision);
 

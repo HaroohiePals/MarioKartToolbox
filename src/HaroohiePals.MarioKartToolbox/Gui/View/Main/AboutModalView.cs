@@ -60,7 +60,7 @@ class AboutModalView : ModalView
         string caption = "Mario Kart Toolbox";
         string githubLink = "https://github.com/HaroohiePals/MarioKartToolbox";
         string buildInfo = $"Version: {informationalVersion}";
-        string madeByInfo = "© 2015-2023 HaroohiePals";
+        string madeByInfo = "© 2015-2025 HaroohiePals";
 
         float availX = ImGui.GetWindowSize().X;
 

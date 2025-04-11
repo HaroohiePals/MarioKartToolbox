@@ -59,7 +59,10 @@ public class ToolbarView : IView
     private void DrawToolbar()
     {
         if (!ImGui.BeginChild(Id, new Vector2(0, ImGuiEx.CalcUiScaledValue(Height))))
+        {
+            ImGui.EndChild();
             return;
+        }
 
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImGui.GetStyle().ItemInnerSpacing);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(FramePadding.X, FramePadding.Y));

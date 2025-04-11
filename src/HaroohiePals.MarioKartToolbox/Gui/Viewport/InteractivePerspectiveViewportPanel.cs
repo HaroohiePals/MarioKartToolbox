@@ -42,13 +42,13 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
         float spacing = 2 * scale;
         var padding = new Vector2(36, 8) * scale;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        var defaultFramePadding = ImGui.GetStyle().FramePadding;
+        
+        // Make child frame transparent
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
 
-        // imgui check GetWindowContentRegionMin
-        var windowContentRegionMin = ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
-        ImGui.SetNextWindowPos(ImGui.GetWindowPos() + windowContentRegionMin + padding);
-        if (ImGui.BeginChild(ImGui.GetID("TopTools"), new Vector2(200f * scale, btnSize + spacing),
-                ImGuiChildFlags.None))
+        ImGui.SetCursorPos(padding);
+        if (ImGui.BeginChild(ImGui.GetID("TopTools"), new Vector2((btnSize + 3) * scale, btnSize + spacing)))
         {
             int i = 0;
 
@@ -63,7 +63,7 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                 float x = 4 * scale;
                 float y = 4 * scale;
 
-                int visibilityTypeCount = 5; //Enum.GetValues(typeof(VisibilityType)).Length;
+                int visibilityTypeCount = 5;
 
                 int fieldCount = _visibilityManager.EntityCount + 3;
 
@@ -161,7 +161,8 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                 ImGui.EndPopup();
             }
         }
-        ImGui.PopStyleVar();
+
+        ImGui.PopStyleColor();
 
         ImGui.EndChild();
     }
