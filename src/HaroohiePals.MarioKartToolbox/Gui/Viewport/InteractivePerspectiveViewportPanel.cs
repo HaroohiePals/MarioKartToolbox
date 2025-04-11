@@ -80,10 +80,7 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                     ImGui.SetCursorPosX(x);
                     ImGui.SetCursorPosY(y);
 
-                    ImGui.BeginDisabled();
-                    ImGui.Text("Settings");
-                    ImGui.EndDisabled();
-                    ImGui.Separator();
+                    ImGui.SeparatorText("Settings");
 
                     y += btnSize;
 

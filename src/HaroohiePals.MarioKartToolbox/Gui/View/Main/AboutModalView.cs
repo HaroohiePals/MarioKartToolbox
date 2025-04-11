@@ -5,22 +5,22 @@ using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.Main;
 
 class AboutModalView : ModalView
 {
     private const string WINDOW_TITLE = "About Mario Kart Toolbox";
-
+    private const string CAPTION = "Mario Kart Toolbox";
+    private const string GITHUB_LINK = "https://github.com/HaroohiePals/MarioKartToolbox";
+    private const string COPYRIGHT_INFO = "© 2015-2025 HaroohiePals";
+    
     private GLTexture _iconTexture;
     private bool _autoResized = false;
 
     public AboutModalView()
-        : base(WINDOW_TITLE, new System.Numerics.Vector2(ImGuiEx.CalcUiScaledValue(400), ImGuiEx.CalcUiScaledValue(430)))
+        : base(WINDOW_TITLE, new System.Numerics.Vector2(ImGuiEx.CalcUiScaledValue(400), ImGuiEx.CalcUiScaledValue(470)))
     {
         LoadIconTexture();
     }
@@ -55,12 +55,10 @@ class AboutModalView : ModalView
         }
 
         string informationalVersion = Assembly.GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion ?? "No version";
 
-        string caption = "Mario Kart Toolbox";
-        string githubLink = "https://github.com/HaroohiePals/MarioKartToolbox";
         string buildInfo = $"Version: {informationalVersion}";
-        string madeByInfo = "© 2015-2025 HaroohiePals";
 
         float availX = ImGui.GetWindowSize().X;
 
@@ -70,108 +68,61 @@ class AboutModalView : ModalView
         ImGui.SetCursorPosX((availX - imageSize.X) / 2);
         ImGui.Image(_iconTexture.Handle, imageSize);
 
-        ImGui.SetCursorPosX((availX - ImGui.CalcTextSize(caption).X) / 2);
-        ImGui.TextUnformatted(caption);
+        ImGui.SetCursorPosX((availX - ImGui.CalcTextSize(CAPTION).X) / 2);
+        ImGui.TextUnformatted(CAPTION);
 
-        ImGui.SetCursorPosX((availX - ImGui.CalcTextSize(madeByInfo).X) / 2);
-        ImGui.TextUnformatted(madeByInfo);
+        ImGui.SetCursorPosX((availX - ImGui.CalcTextSize(COPYRIGHT_INFO).X) / 2);
+        ImGui.TextUnformatted(COPYRIGHT_INFO);
 
         ImGui.SetCursorPosX((availX - ImGui.CalcTextSize(buildInfo).X) / 2);
         ImGui.TextUnformatted(buildInfo);
 
-        ImGui.SetCursorPosX((availX - ImGui.CalcTextSize(githubLink).X) / 2);
-        RenderLink(githubLink);
+        ImGui.SetCursorPosX((availX - ImGui.CalcTextSize(GITHUB_LINK).X) / 2);
+        ImGui.TextLinkOpenURL(GITHUB_LINK);
 
-        if (ImGui.CollapsingHeader("Staff", ImGuiTreeNodeFlags.DefaultOpen))
+        ImGui.SeparatorText("Staff");
         {
-            ImGui.BulletText($"Gericom - Programming");
-
-            ImGui.BulletText($"Ermelber - Programming");
-
-            ImGui.BulletText($"Daniel (");
-            ImGui.SameLine(0, 0);
-            RenderLink("https://twitter.com/kaasiand", "@kaasiand");
-            ImGui.SameLine(0, 0);
-            ImGui.Text(") - Icons");
-
-            ImGui.BulletText($"SuperGameCube - Testing");
-
+            DrawSocialMediaBulletText("Gericom", "@gericom", "https://github.com/Gericom", 
+                "Programming");
+            DrawSocialMediaBulletText("Ermelber", "@ermiisoft.net", "https://bsky.app/profile/ermiisoft.net",
+                "Programming");
+            DrawSocialMediaBulletText("Rocoloco", "@rocoloco321", "https://bsky.app/profile/rocoloco321.bsky.social",
+                "Programming");
+            DrawSocialMediaBulletText("SuperGameCube", "@supergamecube", "https://bsky.app/profile/supergamecube.bsky.social",
+                "Ideas");
+            DrawSocialMediaBulletText("Daniel", "@kaasiand.cool", "https://bsky.app/profile/kaasiand.cool",
+                "Icons");
+            DrawSocialMediaBulletText("Jacanapes", "@jacanapes_", "https://x.com/jacanapes_",
+                "Item Box Models");
             ImGui.BulletText($"Mario Kart DS Modding Discord - Testing");
         }
 
-        if (ImGui.CollapsingHeader("Software Credits", ImGuiTreeNodeFlags.DefaultOpen))
+        ImGui.SeparatorText("Software Credits");
         {
             ImGui.BulletText($"dear imgui ({ImGui.GetVersion()}): ");
             ImGui.SameLine(0, 0);
-            RenderLink("https://github.com/ocornut/imgui");
+            ImGui.TextLinkOpenURL("https://github.com/ocornut/imgui");
 
             ImGui.BulletText($"ImGuizmo: ");
             ImGui.SameLine(0, 0);
-            RenderLink("https://github.com/CedricGuillemet/ImGuizmo");
+            ImGui.TextLinkOpenURL("https://github.com/CedricGuillemet/ImGuizmo");
 
 
             ImGui.BulletText($"RiiStudio: ");
             ImGui.SameLine(0, 0);
-            RenderLink("https://github.com/riidefi/RiiStudio");
-        }
-
-
-        //ImGui.SetCursorPosX((availX - ImGui.CalcTextSize(" GitHub ").X) / 2);
-        //if (ImGui.Button("GitHub##MKTB"))
-        //    OpenBrowser("https://github.com/HaroohiePals/MarioKartToolbox");
-    }
-
-    private void OpenLink(string url)
-    {
-        try
-        {
-            Process.Start(url);
-        }
-        catch
-        {
-            // hack because of this: https://github.com/dotnet/corefx/issues/10361
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                url = url.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Process.Start("xdg-open", url);
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                Process.Start("open", url);
-            }
-            else
-            {
-                throw;
-            }
+            ImGui.TextLinkOpenURL("https://github.com/riidefi/RiiStudio");
+            
+            ImGui.BulletText($"A complete Credits list can be found on the GitHub page.");
         }
     }
 
-    private HashSet<string> _hoveredLinks = new HashSet<string>();
-
-    private void RenderLink(string url, string text = null)
+    private void DrawSocialMediaBulletText(string name, string socialMediaName, string socialMediaUrl, string role)
     {
-        if (text == null)
-            text = url;
-        ImGui.PushStyleColor(ImGuiCol.Text, _hoveredLinks.Contains(url) ? ImGui.GetColorU32(ImGuiCol.ButtonHovered) : ImGui.GetColorU32(ImGuiCol.ButtonActive));
-        ImGui.TextUnformatted(text);
-
-        if (ImGui.IsItemHovered())
-        {
-            _hoveredLinks.Add(url);
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-        }
-        else
-        {
-            _hoveredLinks.Remove(url);
-        }
-
-        if (ImGui.IsItemClicked())
-            OpenLink(url);
-        ImGui.PopStyleColor();
+        ImGui.BulletText($"{name} (");
+        ImGui.SameLine(0, 0);
+        ImGui.TextLinkOpenURL(socialMediaName, socialMediaUrl);
+        ImGui.SameLine(0, 0);
+        ImGui.Text($") - {role}");
     }
 
     protected override void OnClose()
