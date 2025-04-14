@@ -64,11 +64,10 @@ class MapDataExplorerView : IView
         string childrenName = null, object data = null, MapDataTreeNode parent = null)
         where T : IMapDataEntry
     {
-        if (data == null)
-            data = collection;
+        data ??= collection;
 
         if (collection == null)
-            return new MapDataTreeNode("", FontAwesome6.Folder, name, false) { Data = name };
+            return new MapDataTreeNode($"##{name}", FontAwesome6.Folder, name, false) { Data = name };
 
         var root = new MapDataTreeNode($"##{collection.GetHashCode()}", FontAwesome6.Folder, name, false)
         {

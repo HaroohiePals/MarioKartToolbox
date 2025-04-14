@@ -169,7 +169,7 @@ internal class KclViewerContentView : WindowContentView, IDisposable
         {
             ImGui.Text("Prisms per leaf");
             ImGui.PushItemWidth(-1);
-            ImGui.PlotHistogram("", ref _context.LeafHistogram[0], _context.LeafHistogram.Length, 0,
+            ImGui.PlotHistogram("##PlotHistogram", ref _context.LeafHistogram[0], _context.LeafHistogram.Length, 0,
                 null, float.MaxValue, float.MaxValue, new Vector2(0, 100));
             ImGui.PopItemWidth();
 
