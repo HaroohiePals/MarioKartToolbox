@@ -101,4 +101,16 @@ public abstract class MkdsKclAttributeAdapter
             Attribute = x;
         }
     }
+
+    [Category("Flags"), DisplayName("Unused Flag")]
+    public bool UnusedFlag
+    {
+        get => Attribute.UnusedFlag;
+        set
+        {
+            var x = Attribute;
+            x.UnusedFlag = value;
+            Attribute = x;
+        }
+    }
 }
