@@ -5,7 +5,6 @@ using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.Gui.View.Toolbar;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
 using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
-//using HaroohiePals.MarioKartToolbox.NKCT;
 using HaroohiePals.NitroKart.Course;
 using HaroohiePals.NitroKart.MapData;
 using ImGuiNET;
