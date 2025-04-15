@@ -8,7 +8,6 @@ public class LoadingModalView : ModalView
     private const float SPINNER_TEXT_MARGIN = 16f;
     private const float SPINNER_RADIUS = 12f;
     private const int SPINNER_THICKNESS = 2;
-    private const string SPINNER_LABEL = "##loading_spinner";
 
     private const float SIZE_X_MARGIN = 30f;
 
@@ -41,7 +40,7 @@ public class LoadingModalView : ModalView
         float y = avail.Y / 2;
 
         ImGui.SetCursorPos(new Vector2(x, y));
-        ImGuiEx.Spinner(SPINNER_LABEL, SPINNER_RADIUS, SPINNER_THICKNESS, ImGui.GetColorU32(ImGuiCol.ButtonHovered));
+        ImGuiEx.Spinner(SPINNER_RADIUS, SPINNER_THICKNESS, ImGui.GetColorU32(ImGuiCol.ButtonHovered));
 
         x += SPINNER_RADIUS * 2 + SPINNER_TEXT_MARGIN;
         y = avail.Y / 2 + ImGui.CalcTextSize(_description).Y / 2;

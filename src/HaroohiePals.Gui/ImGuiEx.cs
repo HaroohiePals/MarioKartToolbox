@@ -178,35 +178,30 @@ public static class ImGuiEx
         => keys.All(ImGui.IsKeyDown);
 
     // https://github.com/ocornut/imgui/issues/1901
-    public static bool Spinner(string label, float radius, int thickness, uint color)
+    public static bool Spinner(float radius, int thickness, uint color)
     {
         var style = ImGui.GetStyle();
-        var id = ImGui.GetID(label);
-
         var pos = ImGui.GetCursorPos() + ImGui.GetWindowPos();
         var size = new Vector2(radius * 2, (radius + style.FramePadding.Y) * 2);
 
-        //Rectangle
-        var bb = new ImRect { Min = pos, Max = pos + size };
-        igItemSize_Rect(bb, style.FramePadding.Y);
-        if (!igItemAdd(bb, id))
-            return false;
-
+        ImGui.Dummy(size);
+        
         // Render
         ImGui.GetWindowDrawList().PathClear();
 
-        int numSegments = 30;
+        const int numSegments = 30;
         int start = (int)Math.Abs(Math.Sin(ImGui.GetTime() * 1.8f) * (numSegments - 5));
 
-        float a_min = (float)(Math.PI * 2.0f * ((float)start) / (float)numSegments);
-        float a_max = (float)(Math.PI * 2.0f * ((float)numSegments - 3) / (float)numSegments);
+        float aMin = (float)(Math.PI * 2.0f * ((float)start) / (float)numSegments);
+        float aMax = (float)(Math.PI * 2.0f * ((float)numSegments - 3) / (float)numSegments);
 
         var centre = new Vector2(pos.X + radius, pos.Y + radius + style.FramePadding.Y);
 
         for (int i = 0; i < numSegments; i++)
         {
-            float a = a_min + ((float)i / (float)numSegments) * (a_max - a_min);
-            ImGui.GetWindowDrawList().PathLineTo(new Vector2((float)(centre.X + Math.Cos(a + ImGui.GetTime() * 8) * radius), (float)(centre.Y + Math.Sin(a + ImGui.GetTime() * 8) * radius)));
+            float a = aMin + ((float)i / (float)numSegments) * (aMax - aMin);
+            ImGui.GetWindowDrawList().PathLineTo(
+                new Vector2((float)(centre.X + Math.Cos(a + ImGui.GetTime() * 8) * radius), (float)(centre.Y + Math.Sin(a + ImGui.GetTime() * 8) * radius)));
         }
 
         ImGui.GetWindowDrawList().PathStroke(color, ImDrawFlags.None, thickness);
@@ -250,11 +245,4 @@ public static class ImGuiEx
     };
 
     private static ImGuiDataType ToImGuiDataType(Type type) => ToImGuiDataType(Type.GetTypeCode(type));
-
-    [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
-    private static extern void igItemSize_Rect(ImRect bb, float textBaselineY);
-
-    [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
-    private static extern bool igItemAdd(ImRect bb, uint id);
-
 }
