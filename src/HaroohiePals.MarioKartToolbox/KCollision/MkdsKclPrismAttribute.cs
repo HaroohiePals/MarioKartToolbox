@@ -73,6 +73,7 @@ public struct MkdsKclPrismAttribute
         get => GetBits(0, 1) == 1;
         set => SetBits(value ? 1 : 0, 0, 1);
     }
+    
     public static implicit operator ushort(MkdsKclPrismAttribute value) => value._value;
     public static implicit operator MkdsKclPrismAttribute(ushort value) => new(value);
 }
