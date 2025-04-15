@@ -59,7 +59,6 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
                 },
                 new() { Separator = true },
                 new("Close Editor", Close)
-                //new("Save CT Info", () => { _nitroKartCT?.saveFile(); })
             }
         },
         new("Edit")
