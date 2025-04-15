@@ -349,15 +349,20 @@ class CollisionImportModalView : ModalView
             foreach (string part in parts)
             {
                 if (!colorParsed && colorRegex.IsMatch(part) &&
-                    int.TryParse(part[part.Length - 1].ToString(), out int lightId))
+                    int.TryParse(part[^1].ToString(), out int lightId))
                 {
                     attribute.LightId = lightId < 4 ? (MkdsCollisionLightId)lightId : MkdsCollisionLightId.Light0;
                     colorParsed = true;
                 }
-                else if (!shadowParsed && (part == "s" || part == "shd" || part == "shadow"))
+                else if (!shadowParsed && part is "s" or "shd" or "shadow")
                 {
                     attribute.Map2dShadow = true;
                     shadowParsed = true;
+                }
+                else if (!unusedParsed && part is "u" or "uf" or "unused")
+                {
+                    attribute.UnusedFlag = true;
+                    unusedParsed = true;
                 }
                 else if (!typeParsed)
                 {
@@ -368,11 +373,6 @@ class CollisionImportModalView : ModalView
                 {
                     attribute.Variant = parseVariant(attribute.Type, part);
                     variantParsed = true;
-                }
-                else if (!unusedParsed && (part == "u" || part == "uf" || part == "unused"))
-                {
-                    attribute.UnusedFlag = true;
-                    unusedParsed = true;
                 }
             }
         }

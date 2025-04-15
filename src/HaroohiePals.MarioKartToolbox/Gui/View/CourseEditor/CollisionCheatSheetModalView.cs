@@ -21,7 +21,7 @@ internal class CollisionCheatSheetModalView : ModalView
             ImGui.BulletText("The Type must be put before the Variant name");
             ImGui.BulletText("The Variant name can be omitted");
             ImGui.BulletText("Both Type and Variant can be referred using an integer. Example 0_1");
-            ImGui.BulletText("Color and Shadow can be put in any order or omitted");
+            ImGui.BulletText("Color, Shadow and Unused Flag can be put in any order or omitted");
             ImGui.BulletText("Light Colors: C, Col, Color + ID. Valid examples: Color2, C1, Col3");
             ImGui.BulletText("Shadow on map: S, Shd, Shadow");
             ImGui.BulletText("Unused Flag: U, Uf, Unused");
