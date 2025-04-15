@@ -342,21 +342,27 @@ class CollisionImportModalView : ModalView
             bool variantParsed = false;
             bool colorParsed = false;
             bool shadowParsed = false;
+            bool unusedParsed = false;
 
             var colorRegex = new Regex("color[0-9]|col[0-9]|c[0-9]");
 
             foreach (string part in parts)
             {
                 if (!colorParsed && colorRegex.IsMatch(part) &&
-                    int.TryParse(part[part.Length - 1].ToString(), out int lightId))
+                    int.TryParse(part[^1].ToString(), out int lightId))
                 {
                     attribute.LightId = lightId < 4 ? (MkdsCollisionLightId)lightId : MkdsCollisionLightId.Light0;
                     colorParsed = true;
                 }
-                else if (!shadowParsed && (part == "s" || part == "shd" || part == "shadow"))
+                else if (!shadowParsed && part is "s" or "shd" or "shadow")
                 {
                     attribute.Map2dShadow = true;
                     shadowParsed = true;
+                }
+                else if (!unusedParsed && part is "u" or "uf" or "unused")
+                {
+                    attribute.UnusedFlag = true;
+                    unusedParsed = true;
                 }
                 else if (!typeParsed)
                 {
@@ -484,6 +490,13 @@ public class MaterialAttribute
     {
         get => Attribute.LightId;
         set => Attribute.LightId = value;
+    }
+
+    [Category("Flags"), DisplayName("Unused Flag")]
+    public bool UnusedFlag
+    {
+        get => Attribute.UnusedFlag;
+        set => Attribute.UnusedFlag = value;
     }
 
     public override string ToString()
