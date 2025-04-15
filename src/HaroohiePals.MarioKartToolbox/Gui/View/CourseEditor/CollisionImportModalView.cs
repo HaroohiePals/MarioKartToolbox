@@ -207,7 +207,8 @@ class CollisionImportModalView : ModalView
     {
         var avail = ImGui.GetContentRegionAvail();
 
-        if (ImGui.BeginChild(ImGui.GetID("DrawPropertyGrid"), avail, ImGuiChildFlags.FrameStyle))
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
+        if (ImGui.BeginChild(ImGui.GetID("DrawPropertyGrid"), avail))
         {
             if (_selectionChanged)
             {
@@ -218,6 +219,7 @@ class CollisionImportModalView : ModalView
             _propertyGridWidget.Draw();
         }
         ImGui.EndChild();
+        ImGui.PopStyleColor();
     }
 
     private bool DrawImportSettings()
@@ -271,7 +273,7 @@ class CollisionImportModalView : ModalView
 
         ImGui.PushItemWidth(100);
         int compressionMethod = (int)_compressionMethod;
-        ImGui.Combo("Octree compression", ref compressionMethod, new[] { "Equal", "Merge" }, 2);
+        ImGui.Combo("Octree compression", ref compressionMethod, ["Equal", "Merge"], 2);
         _compressionMethod = (KclOctree.CompressionMethod)compressionMethod;
         ImGui.PopItemWidth();
 
