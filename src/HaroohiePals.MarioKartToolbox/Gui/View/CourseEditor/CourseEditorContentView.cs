@@ -20,7 +20,6 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
     private readonly IModalService _modalService;
     private readonly CourseEditorViewModel _viewModel;
     private readonly ICourseEditorViewFactory _subWindowFactory;
-    //private readonly NitroKartCT _nitroKartCT;
     private bool _showDemoWindow = false;
     private bool _debugAreaCheck = false;
 
