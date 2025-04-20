@@ -132,6 +132,7 @@ public sealed class NdsRomHeader
         {
             var ew = new EndianBinaryWriterEx(m, Endianness.LittleEndian);
             Write(ew);
+            ew.WritePadding(512, 0);
             ew.Close();
             return m.ToArray();
         }
