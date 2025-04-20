@@ -11,5 +11,6 @@ interface IMainWindowFactory
     NitroKartRomExplorerContentView CreateNitroKartRomExplorerContentView(string fileName);
     ModalView CreatePreferencesModal();
     ModalView CreateAboutModal();
+    ModalView CreateRomProjectModal();
     NitroKartCourseProjectModalView CreateNitroKartCourseProjectModal();
 }

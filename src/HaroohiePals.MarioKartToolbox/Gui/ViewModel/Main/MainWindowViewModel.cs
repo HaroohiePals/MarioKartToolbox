@@ -43,14 +43,13 @@ class MainWindowViewModel
     public Action<WindowContentView> SetMainWindowContent;
 
     public void ShowPreferences()
-    {
-        _modalService.ShowModal(_windowFactory.CreatePreferencesModal());
-    }
+        => _modalService.ShowModal(_windowFactory.CreatePreferencesModal());
 
     public void ShowAbout()
-    {
-        _modalService.ShowModal(_windowFactory.CreateAboutModal());
-    }
+        => _modalService.ShowModal(_windowFactory.CreateAboutModal());
+
+    public void ShowRomProjectModal()
+        => _modalService.ShowModal(_windowFactory.CreateRomProjectModal());
 
     public void NewNitroKartCourse()
     {
@@ -64,44 +63,46 @@ class MainWindowViewModel
         var fileInfo = new FileInfo(fileName);
         string ext = fileInfo.Extension.ToLower();
 
-        if (ext == ".nkm")
+        switch (ext)
         {
-            LoadBinaryCourseEditor(fileName);
-        }
-        else if (ext == ".inkm")
-        {
-            LoadIntermediateCourseEditor(fileName);
-        }
-        else if (ext == ".nds" || ext == ".xml" || ext == ".nkproj")
-        {
-            //try
-            //{
-            //    LoadCourseProject(result.Path);
-            //    return;
-            //}
-            //catch { }
+            case ".nkm":
+                LoadBinaryCourseEditor(fileName);
+                break;
+            case ".inkm":
+                LoadIntermediateCourseEditor(fileName);
+                break;
+            case ".nds":
+            case ".xml":
+            case ".nkproj":
+                //try
+                //{
+                //    LoadCourseProject(result.Path);
+                //    return;
+                //}
+                //catch { }
 
-            try
-            {
-                CloseAllWindows();
+                try
+                {
+                    CloseAllWindows();
 
-                _romExplorer = _windowFactory.CreateNitroKartRomExplorerContentView(fileName);
-                _romExplorer.CloseCallback = () => CloseRomExplorer(false);
+                    _romExplorer = _windowFactory.CreateNitroKartRomExplorerContentView(fileName);
+                    _romExplorer.CloseCallback = () => CloseRomExplorer(false);
 
-                _romExplorer.OnNkmOpen += LoadBinaryCourseEditor;
-                _romExplorer.OnCarcOpen += ext == ".nds" ? LoadRomCarcCourseEditor : LoadCarcCourseEditor;
+                    _romExplorer.OnNkmOpen += LoadBinaryCourseEditor;
+                    _romExplorer.OnCarcOpen += ext == ".nds" ? LoadRomCarcCourseEditor : LoadCarcCourseEditor;
 
-                // todo: Open rom explorer through the state machine
-                //_modalService.OpenWindow(_romExplorer);
-                SetMainWindowContent.Invoke(_romExplorer);
+                    // todo: Open rom explorer through the state machine
+                    //_modalService.OpenWindow(_romExplorer);
+                    SetMainWindowContent.Invoke(_romExplorer);
 
-                _discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.RomExplorer);
-            }
-            catch { }
-        }
-        else if (ext == ".carc")
-        {
-            LoadCarcCourseEditor(fileName);
+                    _discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.RomExplorer);
+                }
+                catch { }
+
+                break;
+            case ".carc":
+                LoadCarcCourseEditor(fileName);
+                break;
         }
     }
 

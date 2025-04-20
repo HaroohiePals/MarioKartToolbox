@@ -45,6 +45,9 @@ class MainWindowFactory : IMainWindowFactory
     public ModalView CreateAboutModal()
         => new AboutModalView();
 
+    public ModalView CreateRomProjectModal()
+        => new RomProjectModalView();
+
     public NitroKartCourseProjectModalView CreateNitroKartCourseProjectModal()
         => new NitroKartCourseProjectModalView();
 }

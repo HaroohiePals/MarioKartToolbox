@@ -58,7 +58,7 @@ public class MkdsRomProjectFactory
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm7OvtPath), rom.Arm7OverlayTable.Write()).ConfigureAwait(false);
         await ExtractOverlaysAsync(rom, rom.Arm7OverlayTable, outputPath, romInfo.Arm7OverlaysPaths).ConfigureAwait(false);
 
-        File.WriteAllText(Path.Combine(outputPath, $"{projectName}.json"), JsonConvert.SerializeObject(project, Formatting.Indented));
+        await File.WriteAllTextAsync(Path.Combine(outputPath, $"{projectName}.json"), JsonConvert.SerializeObject(project, Formatting.Indented));
 
         return project;
     }
@@ -78,7 +78,7 @@ public class MkdsRomProjectFactory
             string overlayPath = overlayPaths[i++]; 
             string targetFilePath = Path.Combine(outputPath, overlayPath);
 
-            new FileInfo(targetFilePath).Directory.Create();
+            new FileInfo(targetFilePath).Directory?.Create();
             await File.WriteAllBytesAsync(targetFilePath, rom.FileData[entry.Id]).ConfigureAwait(false);
         }
     }
@@ -106,7 +106,7 @@ public class MkdsRomProjectFactory
         string targetDir = Path.Combine(outputPath, parentDir.Remove(0, 1));
         string targetFilePath = Path.Combine(targetDir, fileName);
 
-        var data = archive.GetFileData(sourceFilePath);
+        byte[] data = archive.GetFileData(sourceFilePath);
 
         if (unpackArc && fileName.EndsWith(".carc"))
         {
