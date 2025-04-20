@@ -465,31 +465,27 @@ void main()
 
         for (int i = 0; i < drawData.CmdListsCount; i++)
         {
-            ImDrawListPtr cmd_list = drawData.CmdListsRange[i];
+            var cmdList = drawData.CmdLists[i];
 
-            int vertexSize = cmd_list.VtxBuffer.Size;
+            int vertexSize = cmdList.VtxBuffer.Size;
             if (vertexSize > _vertexBufferSize)
             {
                 int newSize = (int)System.Math.Max(_vertexBufferSize * 1.5f, vertexSize);
                 _vertexBuffer.BufferData(newSize, BufferUsageHint.DynamicDraw);
                 _vertexBufferSize = newSize;
-
-                //Console.WriteLine($"Resized dear imgui vertex buffer to new size {_vertexBufferSize}");
             }
 
-            int indexSize = cmd_list.IdxBuffer.Size;
+            int indexSize = cmdList.IdxBuffer.Size;
             if (indexSize > _indexBufferSize)
             {
                 int newSize = (int)System.Math.Max(_indexBufferSize * 1.5f, indexSize);
                 _indexBuffer.BufferData(newSize, BufferUsageHint.DynamicDraw);
                 _indexBufferSize = newSize;
-
-                //Console.WriteLine($"Resized dear imgui index buffer to new size {_indexBufferSize}");
             }
         }
 
         // Setup orthographic projection matrix into our constant buffer
-        ImGuiIOPtr io = ImGui.GetIO();
+        var io = ImGui.GetIO();
         var mvp = Matrix4.CreateOrthographicOffCenter(
             0.0f, io.DisplaySize.X,
             io.DisplaySize.Y, 0.0f,
@@ -515,7 +511,7 @@ void main()
         // Render command lists
         for (int n = 0; n < drawData.CmdListsCount; n++)
         {
-            var cmdList = drawData.CmdListsRange[n];
+            var cmdList = drawData.CmdLists[n];
 
             _vertexBuffer.BufferSubData(0, cmdList.VtxBuffer.Data, cmdList.VtxBuffer.Size);
             Util.CheckGLError($"Data Vert {n}");

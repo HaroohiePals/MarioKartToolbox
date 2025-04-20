@@ -26,7 +26,7 @@ public abstract class ImGuiGameWindow : GameWindow
         : base(GameWindowSettings.Default, new NativeWindowSettings
     {
         Title = settings.Title,
-        Size = settings.Size,
+        ClientSize = settings.Size,
         APIVersion = new Version(4, 0),
         Profile = ContextProfile.Core,
         Flags = ContextFlags.ForwardCompatible
@@ -168,22 +168,23 @@ public abstract class ImGuiGameWindow : GameWindow
                 Cursor = MouseCursor.Crosshair;
                 break;
             case ImGuiMouseCursor.ResizeNS:
-                Cursor = MouseCursor.VResize;
+                Cursor = MouseCursor.ResizeNS;
                 break;
             case ImGuiMouseCursor.ResizeEW:
-                Cursor = MouseCursor.HResize;
+                Cursor = MouseCursor.ResizeEW;
                 break;
-            // case ImGuiMouseCursor.ResizeNESW:
-            //     break;
-            // case ImGuiMouseCursor.ResizeNWSE:
-            //     break;
+            case ImGuiMouseCursor.ResizeNESW:
+                Cursor = MouseCursor.ResizeNESW;
+                break;
+            case ImGuiMouseCursor.ResizeNWSE:
+                Cursor = MouseCursor.ResizeNWSE;
+                break;
             case ImGuiMouseCursor.Hand:
-                Cursor = MouseCursor.Hand;
+                Cursor = MouseCursor.PointingHand;
                 break;
-            // case ImGuiMouseCursor.NotAllowed:
-            // break;
-            // case ImGuiMouseCursor.COUNT:
-            // break;
+            case ImGuiMouseCursor.NotAllowed:
+                Cursor = MouseCursor.NotAllowed;
+                break;
             default:
                 Cursor = MouseCursor.Default;
                 break;

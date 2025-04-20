@@ -24,10 +24,9 @@ public abstract class PaneView(string title, Vector2? size = null) : IView
 
             DrawContent();
 
-            ImGui.End();
-
             result = true;
         }
+        ImGui.End();
 
         if (NoPadding)
             ImGui.PopStyleVar();

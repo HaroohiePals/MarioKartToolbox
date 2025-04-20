@@ -78,7 +78,8 @@ class ViewportCameraToolInfo
         }
 
         var textHeight = ImGui.CalcTextSize(info).Y;
-        var pos = new Vector2(8, ImGui.GetContentRegionMax().Y - textHeight - 8);
+        var contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+        var pos = new Vector2(8, contentRegionMax.Y - textHeight - 8);
 
         //Outline hack
         ImGui.PushStyleColor(ImGuiCol.Text, 0xFF000000);
