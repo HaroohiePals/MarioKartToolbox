@@ -53,10 +53,8 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
                     ImGui.PushStyleColor(ImGuiCol.FrameBg, color);
                     ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1);
                     ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 0);
-                    if (ImGui.BeginChildFrame(ImGui.GetID("SelectionRect"), new System.Numerics.Vector2(Size.X, Size.Y)))
-                    {
-                        ImGui.EndChildFrame();
-                    }
+                    ImGui.BeginChild(ImGui.GetID("SelectionRect"), new System.Numerics.Vector2(Size.X, Size.Y), ImGuiChildFlags.FrameStyle);
+                    ImGui.EndChild();
                     ImGui.PopStyleVar();
                     ImGui.PopStyleVar();
                     ImGui.PopStyleColor();

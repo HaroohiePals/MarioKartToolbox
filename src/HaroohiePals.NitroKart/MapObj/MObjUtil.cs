@@ -5,6 +5,7 @@ using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Animation.TextureSrtAnimation;
 using HaroohiePals.Nitro.NitroSystem.G3d.Binary.Model;
 using HaroohiePals.NitroKart.Course;
 using OpenTK.Mathematics;
+using System;
 
 namespace HaroohiePals.NitroKart.MapObj;
 
@@ -16,18 +17,18 @@ public static class MObjUtil
     public static T GetMapObjFile<T>(MkdsContext context, string relPath)
         => context.Course.GetMainFileOrDefault<T>($"MapObj/{relPath}");
 
-    public static bool ExistsMapObjFile(MkdsContext context, string relPath) 
+    public static bool ExistsMapObjFile(MkdsContext context, string relPath)
         => ExistsMapObjFile(context.Course, relPath);
 
     public static bool ExistsMapObjFile(IMkdsCourse course, string relPath)
         => course.ExistsMainFile($"MapObj/{relPath}");
 
-    public static MObjModel LoadModel(MkdsContext context, RenderPart renderPart, string fileName)
+    public static MObjModel LoadModel(MkdsContext context, RenderPart renderPart, Nsbmd nsbmd)
     {
         if (renderPart != null)
             renderPart.Type = RenderPart.RenderPartType.Normal;
         var model = new MObjModel(context);
-        model.Nsbmd = GetMapObjFile<Nsbmd>(context, fileName);
+        model.Nsbmd = nsbmd;
         model.Model = new Model(context, model.Nsbmd);
         model.Model.SetEmi(new Rgb555(10, 10, 10));
         model.Model.SetLightEnableFlag(0b0010);
@@ -35,29 +36,36 @@ public static class MObjUtil
         return model;
     }
 
-    public static MObjModel LoadShadowModel(MkdsContext context, RenderPart renderPart, string fileName)
+    public static MObjModel LoadModel(MkdsContext context, RenderPart renderPart, string fileName)
+        => LoadModel(context, renderPart, GetMapObjFile<Nsbmd>(context, fileName));
+
+    public static MObjModel LoadShadowModel(MkdsContext context, RenderPart renderPart, Nsbmd nsbmd)
     {
         if (renderPart != null)
             renderPart.Type = RenderPart.RenderPartType.Normal;
         var model = new MObjModel(context);
-        var nsbmd = GetMapObjFile<Nsbmd>(context, fileName);
         model.ShadowModel = new ShadowModel(context, nsbmd, 63);
-        model.Scale       = Vector3d.One;
+        model.Scale = Vector3d.One;
         return model;
     }
 
-    public static MObjModel LoadBillboardModel(MkdsContext context, RenderPart renderPart, string fileName)
+    public static MObjModel LoadShadowModel(MkdsContext context, RenderPart renderPart, string fileName)
+        => LoadShadowModel(context, renderPart, GetMapObjFile<Nsbmd>(context, fileName));
+
+    public static MObjModel LoadBillboardModel(MkdsContext context, RenderPart renderPart, Nsbmd nsbmd)
     {
         if (renderPart != null)
             renderPart.Type = RenderPart.RenderPartType.Billboard;
         var model = new MObjModel(context);
-        var nsbmd = GetMapObjFile<Nsbmd>(context, fileName);
         model.BbModel = new BillboardModel(context, nsbmd);
         model.BbModel.SetEmission(new Rgb555(10, 10, 10));
         model.BbModel.SetLightMask(1 << 1);
         model.Scale = Vector3d.One;
         return model;
     }
+
+    public static MObjModel LoadBillboardModel(MkdsContext context, RenderPart renderPart, string fileName)
+        => LoadBillboardModel(context, renderPart, GetMapObjFile<Nsbmd>(context, fileName));
 
     public static MObjModel LoadTexAnimBillboardModel(MkdsContext context, RenderPart renderPart,
         string nsbmdFileName, string nsbtpFileName)
@@ -176,7 +184,7 @@ public static class MObjUtil
     public static void Model2RenderModel(MkdsContext context, Model model, in Matrix4x3d mtx, in Vector3d scale,
         byte alpha)
     {
-        var  resMdl   = model.RenderObj.ModelResource;
+        var resMdl = model.RenderObj.ModelResource;
         byte oldAlpha = (byte)resMdl.Materials.Materials[0].PolygonAttribute.Alpha;
         if (alpha >= oldAlpha)
         {
@@ -204,6 +212,17 @@ public static class MObjUtil
         }
         else
             model.Render(mtx, scale);
+    }
+
+    public static Quaterniond QtrnFromForwardVec(Vector3d forward)
+    {
+        double v4 = Math.Sqrt(2 * (forward.Y + 1.0));
+        return new Quaterniond(
+            forward.Z / v4,
+            0,
+            -forward.X / v4,
+            v4 / 2.0
+        );
     }
 
     public static Quaterniond QtrnFromXAngle(ushort angle)

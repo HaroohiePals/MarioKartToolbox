@@ -56,7 +56,10 @@ internal class MkdsMObjRenderGroup : RenderGroup, IDisposable
             return;
 
         // Validate the course to check if there are any mobj errors and exclude rendering the ones that generate an error.
-        var errors = _courseEditorContext.CourseValidator.Validate(_courseEditorContext.Course);
+        var errors = _courseEditorContext.CourseValidator
+            .Validate(_courseEditorContext.Course)
+            .Where(x => x.Level != Validation.ErrorLevel.Warning);
+
         _excludeObji = new HashSet<MkdsMapObject>(errors.Select(x => x.Source).OfType<MkdsMapObject>());
         _shouldCheckErrors = false;
     }

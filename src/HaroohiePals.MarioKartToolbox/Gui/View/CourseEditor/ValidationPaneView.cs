@@ -72,7 +72,7 @@ class ValidationPaneView : PaneView
     {
         var avail = ImGui.GetContentRegionAvail();
 
-        if (ImGui.BeginChildFrame(ImGui.GetID("##ErrorListTableContainer"), avail))
+        if (ImGui.BeginChild(ImGui.GetID("##ErrorListTableContainer"), avail, ImGuiChildFlags.FrameStyle))
         {
             ImGuiTableFlags tableFlags = ImGuiTableFlags.Resizable | ImGuiTableFlags.BordersOuter | ImGuiTableFlags.SizingFixedFit;
 
@@ -119,9 +119,8 @@ class ValidationPaneView : PaneView
 
                 ImGui.EndTable();
             }
-
-            ImGui.EndChildFrame();
         }
+        ImGui.EndChild();
     }
 
     public override void DrawContent()

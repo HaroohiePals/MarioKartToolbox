@@ -42,13 +42,14 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
         float spacing = 2 * scale;
         var padding = new Vector2(36, 8) * scale;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
-        ImGui.SetNextWindowPos(ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin() + padding);
-        if (ImGui.BeginChildFrame(ImGui.GetID("TopTools"), new Vector2(200f * scale, btnSize + spacing),
-                ImGuiWindowFlags.NoBackground))
-        {
-            ImGui.PopStyleVar();
+        var defaultFramePadding = ImGui.GetStyle().FramePadding;
+        
+        // Make child frame transparent
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
 
+        ImGui.SetCursorPos(padding);
+        if (ImGui.BeginChild(ImGui.GetID("TopTools"), new Vector2((btnSize + 3) * scale, btnSize + spacing)))
+        {
             int i = 0;
 
             ImGui.SetCursorPosX((btnSize + spacing) * i++);
@@ -62,7 +63,7 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                 float x = 4 * scale;
                 float y = 4 * scale;
 
-                int visibilityTypeCount = 5; //Enum.GetValues(typeof(VisibilityType)).Length;
+                int visibilityTypeCount = 5;
 
                 int fieldCount = _visibilityManager.EntityCount + 3;
 
@@ -70,8 +71,8 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                 frameHeight = Math.Min(500 * scale, frameHeight);
                 float frameWidth = 300 * scale;
 
-                if (ImGui.BeginChildFrame(ImGui.GetID("TopTools"),
-                        new Vector2(frameWidth, frameHeight), ImGuiWindowFlags.NoBackground))
+                if (ImGui.BeginChild(ImGui.GetID("TopTools"),
+                        new Vector2(frameWidth, frameHeight), ImGuiChildFlags.FrameStyle))
                 {
                     var inputWidth = btnSize * visibilityTypeCount;
 
@@ -79,10 +80,7 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                     ImGui.SetCursorPosX(x);
                     ImGui.SetCursorPosY(y);
 
-                    ImGui.BeginDisabled();
-                    ImGui.Text("Settings");
-                    ImGui.EndDisabled();
-                    ImGui.Separator();
+                    ImGui.SeparatorText("Settings");
 
                     y += btnSize;
 
@@ -93,7 +91,8 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                     ImGui.Text("Gizmo Mode");
 
                     ImGui.SameLine();
-                    ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - inputWidth - 10f);
+                    var contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+                    ImGui.SetCursorPosX(contentRegionMax.X - inputWidth - 10f);
 
                     ImGui.PushItemWidth(inputWidth);
                     ImGuiEx.ComboEnum("##GizmoMode", ref _gizmo.Mode);
@@ -106,7 +105,8 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                     ImGui.Text("Rotate/Scale Mode");
 
                     ImGui.SameLine();
-                    ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - inputWidth - (10f * scale));
+                    contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+                    ImGui.SetCursorPosX(contentRegionMax.X - inputWidth - (10f * scale));
 
                     ImGui.PushItemWidth(inputWidth);
                     ImGuiEx.ComboEnum("##RotateScaleMode", ref _gizmo.RotateScaleMode);
@@ -120,7 +120,8 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                     ImGui.Text("Camera Speed");
 
                     ImGui.SameLine();
-                    ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - inputWidth - (10f * scale));
+                    contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+                    ImGui.SetCursorPosX(contentRegionMax.X - inputWidth - (10f * scale));
 
                     ImGui.PushItemWidth(inputWidth);
                     float controlSpeed = _cameraControls.ControlSpeed;
@@ -139,7 +140,8 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                     ImGui.Text("Field of view");
 
                     ImGui.SameLine();
-                    ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - inputWidth - (10f * scale));
+                    contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+                    ImGui.SetCursorPosX(contentRegionMax.X - inputWidth - (10f * scale));
 
                     ImGui.PushItemWidth(inputWidth);
                     float fov = _perspectiveScene.Projection.Fov;
@@ -150,14 +152,15 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
                     y += btnSize;
 
                     _visibilityManager.Draw(x, y);
-
-                    ImGui.EndChildFrame();
                 }
+                ImGui.EndChild();
 
                 ImGui.EndPopup();
             }
-
-            ImGui.EndChildFrame();
         }
+
+        ImGui.PopStyleColor();
+
+        ImGui.EndChild();
     }
 }

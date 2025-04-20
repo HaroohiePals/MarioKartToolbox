@@ -123,9 +123,8 @@ class NitroKartRomExplorerContentView : WindowContentView
 
                 ImGui.EndTabBar();
             }
-
-            ImGui.End();
         }
+        ImGui.End();
 
         return true;
     }

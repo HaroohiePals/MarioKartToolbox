@@ -144,7 +144,7 @@ public class PerspectiveCameraControls
 
     private void RenderViewCube(ViewportContext context)
     {
-        var   contentPos          = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
+        var contentPos = ImGui.GetWindowPos(); // + ImGui.GetWindowContentRegionMin();
         float viewManipulateRight = contentPos.X + context.ViewportSize.X;
         float viewManipulateTop   = contentPos.Y;
 

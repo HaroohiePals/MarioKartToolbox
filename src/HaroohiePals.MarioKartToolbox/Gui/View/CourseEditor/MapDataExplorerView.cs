@@ -15,10 +15,6 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
 class MapDataExplorerView : IView
 {
-    private ToolbarView _toolbar = new("MapDataToolbar");
-    private ToolbarItem _moveUpButton;
-    private ToolbarItem _moveDownButton;
-
     private MapDataExplorerViewModel _viewModel;
 
     private string _lastSelectedNodeId;
@@ -62,23 +58,16 @@ class MapDataExplorerView : IView
     public MapDataExplorerView(MapDataExplorerViewModel viewModel)
     {
         _viewModel = viewModel;
-
-        _moveUpButton = new ToolbarItem(FontAwesome6.ArrowUp[0], "Move up", null /*PerformMoveUp*/);
-        _moveDownButton = new ToolbarItem(FontAwesome6.ArrowDown[0], "Move down", null /*PerformMoveDown*/);
-
-        _toolbar.Items.Add(_moveUpButton);
-        _toolbar.Items.Add(_moveDownButton);
     }
 
     private MapDataTreeNode CreateFromMapDataCollection<T>(MapDataCollection<T> collection, string name,
         string childrenName = null, object data = null, MapDataTreeNode parent = null)
         where T : IMapDataEntry
     {
-        if (data == null)
-            data = collection;
+        data ??= collection;
 
         if (collection == null)
-            return new MapDataTreeNode("", FontAwesome6.Folder, name, false) { Data = name };
+            return new MapDataTreeNode($"##{name}", FontAwesome6.Folder, name, false) { Data = name };
 
         var root = new MapDataTreeNode($"##{collection.GetHashCode()}", FontAwesome6.Folder, name, false)
         {
@@ -150,79 +139,29 @@ class MapDataExplorerView : IView
 
     private List<MapDataTreeNode> CreateNodes()
     {
-        List<MapDataTreeNode> nodes = new();
-
-        nodes.Add(new MapDataTreeNode($"##{_viewModel.Context.Course.MapData.StageInfo.GetHashCode()}", FontAwesome6.Info,
-            "Stage Information", true)
-        { Data = _viewModel.Context.Course.MapData.StageInfo });
-
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.MapObjects, "Map Objects"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.Paths, "Paths"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.StartPoints, "Start Points"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.RespawnPoints, "Respawn Points"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.KartPoint2D, "Kart Point 2D"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.CannonPoints, "Cannon Points"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.KartPointMission, "Mission Points"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.CheckPointPaths, "Checkpoint Paths"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.ItemPaths, "Item Paths"));
-        if (_viewModel.Context.Course.MapData.IsMgStage)
-            nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.MgEnemyPaths, "Battle Enemy Paths"));
-        else
-            nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.EnemyPaths, "Enemy Paths"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.Areas, "Areas"));
-        nodes.Add(CreateFromMapDataCollection(_viewModel.Context.Course.MapData.Cameras, "Cameras"));
+        List<MapDataTreeNode> nodes =
+        [
+            new MapDataTreeNode($"##{_viewModel.Context.Course.MapData.StageInfo.GetHashCode()}", FontAwesome6.Info,
+                "Stage Information", true)
+            { Data = _viewModel.Context.Course.MapData.StageInfo },
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.MapObjects, "Map Objects"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.Paths, "Paths"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.StartPoints, "Start Points"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.RespawnPoints, "Respawn Points"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.KartPoint2D, "Kart Point 2D"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.CannonPoints, "Cannon Points"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.KartPointMission, "Mission Points"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.CheckPointPaths, "Checkpoint Paths"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.ItemPaths, "Item Paths"),
+            _viewModel.Context.Course.MapData.IsMgStage ? 
+                CreateFromMapDataCollection(_viewModel.Context.Course.MapData.MgEnemyPaths, "Battle Enemy Paths") : 
+                CreateFromMapDataCollection(_viewModel.Context.Course.MapData.EnemyPaths, "Enemy Paths"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.Areas, "Areas"),
+            CreateFromMapDataCollection(_viewModel.Context.Course.MapData.Cameras, "Cameras"),
+        ];
 
         return nodes;
     }
-
-    //private List<MapDataTreeNode> GetAdjacentSelectedNodes()
-    //{
-    //    var result = new List<MapDataTreeNode>();
-
-    //    var selectedNodes = _selectedNodes;
-
-    //    if (_lastSelectedNode == null)
-    //    {
-    //        if (selectedNodes != null && selectedNodes.Count > 0)
-    //            _lastSelectedNodeId = _selectedNodes[^1].UniqueId;
-    //        else
-    //            return result;
-    //    }
-
-    //    var lastSelectedNode = _lastSelectedNode;
-
-    //    var candidates = selectedNodes.Where(x => x.Parent?.Collection == lastSelectedNode.Parent?.Collection)
-    //        .ToList();
-
-    //    result.Add(lastSelectedNode);
-
-    //    // Traverse down
-    //    for (int i = lastSelectedNode.Index + 1; ; i++)
-    //    {
-    //        var candidate = candidates.FirstOrDefault(x => x.Index == i);
-
-    //        if (candidate == null)
-    //            break;
-
-    //        result.Add(candidate);
-    //    }
-
-    //    if (result.Count <= 1)
-    //    {
-    //        // Traverse up
-    //        for (int i = lastSelectedNode.Index - 1; ; i--)
-    //        {
-    //            var candidate = candidates.FirstOrDefault(x => x.Index == i);
-
-    //            if (candidate == null)
-    //                break;
-
-    //            result.Add(candidate);
-    //        }
-    //    }
-
-    //    return result;
-    //}
 
     private MapDataTreeNode[] GetSelectedNodes(IEnumerable<MapDataTreeNode> nodes)
     {
@@ -246,23 +185,18 @@ class MapDataExplorerView : IView
         if (_suspendSelectionClick)
             _suspendSelectionClick = false;
 
-        //_moveDownButton.Enabled = CanMoveDown();
-        //_moveUpButton.Enabled = CanMoveUp();
-
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4));
         if (ImGui.Begin("Map Data Explorer"))
         {
             ImGui.SetWindowSize(new Vector2(400, 600), ImGuiCond.Once);
 
-            _toolbar.Draw();
             DrawTree();
 
             HandlePaste();
             HandleInsert();
             HandleSelectAll();
-
-            ImGui.End();
         }
+        ImGui.End();
 
         ImGui.PopStyleVar();
 
@@ -278,12 +212,12 @@ class MapDataExplorerView : IView
     {
         _nodes = CreateNodes();
 
-        ImGui.BeginChild("Map Data Tree");
+        if (ImGui.BeginChild("Map Data Tree"))
         {
             foreach (var node in _nodes)
                 DrawNode(node);
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
     }
 
     private void DrawNodeLabel(string icon, string text, bool transparent = false)
@@ -547,7 +481,7 @@ class MapDataExplorerView : IView
 
     private void HandlePaste()
     {
-        if (/*!ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows) || */_lastSelectedNode == null)
+        if (_lastSelectedNode == null)
             return;
 
         if (_lastSelectedNode.Data is IMapDataEntry entry)
@@ -558,7 +492,7 @@ class MapDataExplorerView : IView
 
     private void HandleInsert()
     {
-        if (/*!ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows) || */_lastSelectedNode == null)
+        if (_lastSelectedNode == null)
             return;
 
         if (_lastSelectedNode.Data is IMapDataEntry entry)
