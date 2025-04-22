@@ -71,16 +71,14 @@ class MainWindowViewModel
             case ".inkm":
                 LoadIntermediateCourseEditor(fileName);
                 break;
+            case ".carc":
+                LoadCarcCourseEditor(fileName);
+                break;
             case ".nds":
+            case ".srl":
+            case ".json":
             case ".xml":
             case ".nkproj":
-                //try
-                //{
-                //    LoadCourseProject(result.Path);
-                //    return;
-                //}
-                //catch { }
-
                 try
                 {
                     CloseAllWindows();
@@ -89,39 +87,48 @@ class MainWindowViewModel
                     _romExplorer.CloseCallback = () => CloseRomExplorer(false);
 
                     _romExplorer.OnNkmOpen += LoadBinaryCourseEditor;
-                    _romExplorer.OnCarcOpen += ext == ".nds" ? LoadRomCarcCourseEditor : LoadCarcCourseEditor;
+                    _romExplorer.OnCarcOpen +=
+                        (ext is ".nds" or ".srl") ? LoadRomCarcCourseEditor : LoadCarcCourseEditor;
 
-                    // todo: Open rom explorer through the state machine
-                    //_modalService.OpenWindow(_romExplorer);
                     SetMainWindowContent.Invoke(_romExplorer);
 
                     _discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.RomExplorer);
                 }
-                catch { }
-
-                break;
-            case ".carc":
-                LoadCarcCourseEditor(fileName);
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error Opening ROM: {ex.Message}");
+                }
                 break;
         }
     }
 
-    public void OpenFile()
+    public void OpenCourseFile()
     {
         var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
         {
-            { "All compatible files", "nkm,inkm,carc,nds,nkproj" },
+            { "All compatible files", "nkm,carc" },
             { "Nitro Kart Map Data", "nkm" },
-            { "Intermediate Nitro Kart Map Data", "inkm" },
-            { "Compressed Nitro Archive", "carc" },
-            { "Nintendo DS ROM File", "nds" },
-            { "Nitro Kart Project", "nkproj" }
+            { "Compressed Nitro Archive", "carc" }
         });
 
         if (result == NfdStatus.Ok)
             OpenFile(outPath);
     }
+    
+    public void OpenRomFile()
+    {
+        var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
+        {
+            { "All compatible files", "json,nds,srl,nkproj" },
+            { "Mario Kart Toolbox 2.0 ROM Project", "json" },
+            { "Nintendo DS ROM File", "nds,srl" },
+            { "Nitro Kart Project (Legacy)", "nkproj" }
+        });
 
+        if (result == NfdStatus.Ok)
+            OpenFile(outPath);
+    }
+    
     private void LoadBinaryCourseEditor(string path)
     {
         CloseRomExplorer();

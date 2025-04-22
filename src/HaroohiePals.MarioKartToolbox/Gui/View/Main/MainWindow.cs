@@ -34,7 +34,14 @@ class MainWindow : ImGuiViewWindow
                         new("Nitro ROM Project", _viewModel.ShowRomProjectModal)
                     ]
                 },
-                new("Open", _viewModel.OpenFile)
+                new("Open")
+                {
+                    Items =
+                    [
+                        new("Open Course", _viewModel.OpenCourseFile),
+                        new("Open ROM", _viewModel.OpenRomFile),
+                    ]
+                }
             }
         },
         new("Edit"),
@@ -89,7 +96,8 @@ class MainWindow : ImGuiViewWindow
         Console.WriteLine($"OpenGL Version: {GL.GetString(StringName.Version)}");
 
         string informationalVersion = Assembly.GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
 
         Title = $"{WINDOW_TITLE} {informationalVersion}";
 

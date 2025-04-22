@@ -8,80 +8,102 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Threading.Tasks;
+using HaroohiePals.Gui.View.Modal;
+using HaroohiePals.NitroKart.Rom;
+using NativeFileDialogs.Net;
+using Newtonsoft.Json;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.RomExplorer;
 
 class NitroKartRomExplorerContentView : WindowContentView
 {
-    public readonly string FileName;
+    private readonly string _fileName;
     private readonly NdsRom _rom;
-    public readonly NitroFsArchive NitroFsArchive;
+    private readonly MkdsRomProject _project = null;
+    private readonly LoadingModalView _loadingModal = new("Building ROM... Please wait.");
+    private readonly MkdsRomFactory _romFactory = new();
 
+    private Task _createProjectTask;
     private ArchiveTreeView _tree;
 
     internal Action<string> OnNkmOpen;
     internal Action<string> OnCarcOpen;
 
     public Action CloseCallback;
+    public readonly NitroFsArchive NitroFsArchive;
 
-    public override IReadOnlyCollection<MenuItem> MenuItems =>
-    [
-        new("File")
+    public override IReadOnlyCollection<MenuItem> MenuItems
+    {
+        get
         {
-            Items = new()
+            var fileMenu = new MenuItem("File")
             {
-                new() { Separator = true },
-                new("Close ROM", CloseCallback)
+                Items =
+                [
+                    new() { Separator = true },
+                    new("Close ROM", CloseCallback)
+                ]
+            };
+
+            if (_project is not null)
+            {
+                fileMenu.Items.Insert(0, new("Save As...")
+                {
+                    Items =
+                    [
+                        new("Nintendo DS ROM", BuildRom)
+                    ]
+                });
             }
+
+            return
+            [
+                fileMenu
+            ];
         }
-    ];
+    }
 
     public NitroKartRomExplorerContentView(string fileName)
     {
-        FileName = fileName;
+        _fileName = fileName;
 
-        if (fileName.ToLower().EndsWith(".nds"))
+        var fileInfo = new FileInfo(fileName);
+        string ext = fileInfo.Extension.ToLower();
+
+        switch (ext)
         {
-            _rom = new NdsRom(File.ReadAllBytes(fileName));
-            NitroFsArchive = _rom.ToArchive();
+            case ".nds":
+            case ".srl":
+                _rom = new NdsRom(File.ReadAllBytes(fileName));
+                NitroFsArchive = _rom.ToArchive();
 
-            _tree = new("RomTree", IconConsts.FileExtIcons);
+                _tree = new("RomTree", IconConsts.FileExtIcons);
 
-            _tree.Archive = NitroFsArchive;
-            _tree.Activate += (view, path, item2) =>
-            {
-                if (path.EndsWith("carc") && !path.EndsWith("Tex.carc") && path.StartsWith("/data/Course/"))
+                _tree.Archive = NitroFsArchive;
+                _tree.Activate += (view, path, item2) =>
                 {
+                    if (!path.EndsWith("carc") || path.EndsWith("Tex.carc") ||
+                        !path.StartsWith("/data/Course/")) return;
+
                     Console.WriteLine($"Load course editor: {path}");
 
                     OnCarcOpen?.Invoke(path);
-                }
-            };
-        }
-        else
-        {
-            var fileInfo = new FileInfo(fileName);
-            var romFsBasePath = Path.Combine(fileInfo.DirectoryName, "data");
-
-            _tree = new("RomTree", IconConsts.FileExtIcons);
-            _tree.Archive = new DiskArchive(romFsBasePath);
-            _tree.Activate += (view, path, item2) =>
-            {
-                if (path.EndsWith("nkm"))
-                {
-                    var nkmDiskPath = Path.Combine(romFsBasePath, path.Remove(0, 1));
-
-                    Console.WriteLine($"Load course editor: {nkmDiskPath}");
-
-                    OnNkmOpen?.Invoke(nkmDiskPath);
-                }
-            };
+                };
+                break;
+            case ".json":
+                _project = JsonConvert.DeserializeObject<MkdsRomProject>(File.ReadAllText(fileName));
+                InitializeDiskRom(Path.Combine(fileInfo.DirectoryName!, _project.RomInfo.FsRootPath));
+                break;
+            case ".nkproj":
+                InitializeDiskRom(Path.Combine(fileInfo.DirectoryName!, "data"));
+                break;
         }
     }
 
     public override bool Draw()
     {
-        if (ImGui.Begin("Rom Explorer"))
+        if (ImGui.Begin($"Rom Explorer ({_project?.Name ?? _fileName})"))
         {
             ImGui.SetWindowSize(new Vector2(600, 800), ImGuiCond.Once);
 
@@ -94,38 +116,57 @@ class NitroKartRomExplorerContentView : WindowContentView
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Courses"))
-                {
-                    if (ImGui.CollapsingHeader("Mushroom Cup")) { }
-
-                    if (ImGui.CollapsingHeader("Flower Cup")) { }
-
-                    if (ImGui.CollapsingHeader("Star Cup")) { }
-
-                    if (ImGui.CollapsingHeader("Special Cup")) { }
-
-                    if (ImGui.CollapsingHeader("Shell Cup")) { }
-
-                    if (ImGui.CollapsingHeader("Banana Cup")) { }
-
-                    if (ImGui.CollapsingHeader("Leaf Cup")) { }
-
-                    if (ImGui.CollapsingHeader("Lightning Cup")) { }
-
-                    ImGui.EndTabItem();
-                }
-
-                if (ImGui.BeginTabItem("Missions"))
-                {
-                    ImGui.EndTabItem();
-                }
-
-
                 ImGui.EndTabBar();
             }
         }
+
         ImGui.End();
 
+        _loadingModal.Draw();
+
         return true;
+    }
+
+    private void InitializeDiskRom(string romFsBasePath)
+    {
+        _tree = new("RomTree", IconConsts.FileExtIcons);
+        _tree.Archive = new DiskArchive(romFsBasePath);
+        _tree.Activate += (view, path, item2) =>
+        {
+            if (!path.EndsWith("nkm")) return;
+
+            string nkmDiskPath = Path.Combine(romFsBasePath, path.Remove(0, 1));
+
+            Console.WriteLine($"Load course editor: {nkmDiskPath}");
+
+            OnNkmOpen?.Invoke(nkmDiskPath);
+        };
+    }
+
+    private void BuildRom()
+    {
+        _createProjectTask = Task.Factory.StartNew(BuildRomAsync);
+    }
+
+    private async Task BuildRomAsync()
+    {
+        if (_project is null)
+            return;
+
+        var result = Nfd.SaveDialog(out string outPath, new Dictionary<string, string>
+        {
+            { "Nintendo DS ROM", "nds" }
+        }, $"{_project.Name}.nds");
+
+        if (result != NfdStatus.Ok || outPath is null)
+            return;
+
+        _loadingModal.Open();
+
+        var fileInfo = new FileInfo(_fileName);
+        var rom = await _romFactory.CreateAsync(_project, fileInfo.DirectoryName);
+        await File.WriteAllBytesAsync(outPath, rom.Write());
+
+        _loadingModal.Close();
     }
 }
