@@ -19,12 +19,10 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.RomExplorer;
 class NitroKartRomExplorerContentView : WindowContentView
 {
     private readonly string _fileName;
-    private readonly NdsRom _rom;
     private readonly MkdsRomProject _project = null;
     private readonly LoadingModalView _loadingModal = new("Building ROM... Please wait.");
     private readonly MkdsRomFactory _romFactory = new();
 
-    private Task _createProjectTask;
     private ArchiveTreeView _tree;
 
     internal Action<string> OnNkmOpen;
@@ -75,8 +73,8 @@ class NitroKartRomExplorerContentView : WindowContentView
         {
             case ".nds":
             case ".srl":
-                _rom = new NdsRom(File.ReadAllBytes(fileName));
-                NitroFsArchive = _rom.ToArchive();
+                var rom = new NdsRom(File.ReadAllBytes(fileName));
+                NitroFsArchive = rom.ToArchive();
 
                 _tree = new("RomTree", IconConsts.FileExtIcons);
 
@@ -145,23 +143,26 @@ class NitroKartRomExplorerContentView : WindowContentView
 
     private void BuildRom()
     {
-        _createProjectTask = Task.Factory.StartNew(BuildRomAsync);
+        Task.Factory.StartNew(BuildRomAsync);
     }
 
     private async Task BuildRomAsync()
     {
         if (_project is null)
             return;
-
+        
+        _loadingModal.Open();
+        
         var result = Nfd.SaveDialog(out string outPath, new Dictionary<string, string>
         {
             { "Nintendo DS ROM", "nds" }
         }, $"{_project.Name}.nds");
 
         if (result != NfdStatus.Ok || outPath is null)
+        {
+            _loadingModal.Close();
             return;
-
-        _loadingModal.Open();
+        }
 
         var fileInfo = new FileInfo(_fileName);
         var rom = await _romFactory.CreateAsync(_project, fileInfo.DirectoryName);

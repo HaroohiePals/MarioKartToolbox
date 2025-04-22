@@ -45,29 +45,6 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
         ImGui.TableNextRow();
 
         ImGui.TableNextColumn();
-        ImGui.TextUnformatted("Unpack Archives");
-        ImGui.SameLine();
-        ImGui.TextDisabled("(?)");
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.BeginTooltip();
-            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
-            ImGui.TextUnformatted(
-                "Mario Kart DS stores many of its internal assets in file archives with the \".carc\" extension " +
-                "(Compressed Nitro Archives).\n" +
-                "Decompressing and extracting these archives allows you to access and manipulate the individual files " +
-                "(such as textures, models, and configuration data) directly through the file system, making it much " +
-                "easier to view, edit, or replace game content.");
-            ImGui.PopTextWrapPos();
-            ImGui.EndTooltip();
-        }
-
-        ImGui.TableNextColumn();
-        ImGui.Checkbox("##UnpackArc", ref _unpackArc);
-
-        ImGui.TableNextRow();
-
-        ImGui.TableNextColumn();
         ImGui.TextUnformatted("Output Project File");
         ImGui.TableNextColumn();
         ImGui.InputText("##OutputPath", ref _outputProjectFilePath, 10000);
@@ -145,6 +122,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
         {
             _errorMessage = "The input file does not exist.";
             _createResult = false;
+            _loadingModal.Close();
             return;
         }
         
@@ -155,6 +133,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
         {
             _errorMessage = "The output folder is not empty.";
             _createResult = false;
+            _loadingModal.Close();
             return;
         }
 
