@@ -14,8 +14,6 @@ public class ModalService : IModalService
 
     public void HideModal(ModalView modal)
     {
-        _modalViews.Remove(modal);
-
         modal.Close();
     }
 

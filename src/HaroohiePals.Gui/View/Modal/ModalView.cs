@@ -69,7 +69,7 @@ public abstract class ModalView : IView
             ImGui.EndPopup();
         }
 
-        if (!open)
+        if (IsOpen && !open)
         {
             IsOpen = false;
             OnClose();
