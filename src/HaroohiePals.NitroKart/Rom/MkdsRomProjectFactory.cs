@@ -27,7 +27,7 @@ public class MkdsRomProjectFactory
             FsRootPath = "root/",
             BannerPath = "banner.bin",
             HeaderPath = "header.bin",
-            RsaSignaturePath = "rsasig.bin",
+            RsaSignaturePath = rom.RsaSignature is not null ? "rsasig.bin" : null,
             Arm9Path = "arm9.bin",
             Arm9OvtPath = "arm9ovt.bin",
             Arm9OverlaysPaths = arm9OverlaysPaths,
@@ -48,8 +48,8 @@ public class MkdsRomProjectFactory
 
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.BannerPath), rom.Banner).ConfigureAwait(false);
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.HeaderPath), rom.Header.Write()).ConfigureAwait(false);
-        await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.RsaSignaturePath), rom.RsaSignature).ConfigureAwait(false);
-
+        if (romInfo.RsaSignaturePath is not null && rom.RsaSignature is not null)
+            await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.RsaSignaturePath), rom.RsaSignature).ConfigureAwait(false);
         await ExtractArm9BinaryAsync(rom, Path.Combine(outputPath, romInfo.Arm9Path)).ConfigureAwait(false);
         await File.WriteAllBytesAsync(Path.Combine(outputPath, romInfo.Arm9OvtPath), rom.Arm9OverlayTable.Write()).ConfigureAwait(false);
         await ExtractOverlaysAsync(rom, rom.Arm9OverlayTable, outputPath, romInfo.Arm9OverlaysPaths).ConfigureAwait(false);
@@ -65,7 +65,6 @@ public class MkdsRomProjectFactory
 
     private async Task ExtractArm9BinaryAsync(NdsRom rom, string outputPath)
     {
-        //todo: decompression
         await File.WriteAllBytesAsync(outputPath, rom.Arm9Binary);
     }
 

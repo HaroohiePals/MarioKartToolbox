@@ -30,7 +30,9 @@ public class MkdsRomFactory
         var arm7OverlayTable = await ReadOverlayTableAsync(Path.Combine(workingDirPath, project.RomInfo.Arm7OvtPath), header.SubOvtSize).ConfigureAwait(false);
 
         byte[] banner = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.BannerPath)).ConfigureAwait(false);
-        byte[] rsaSignature = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.RsaSignaturePath)).ConfigureAwait(false);
+        byte[] rsaSignature = project.RomInfo.RsaSignaturePath is null ? 
+            null : 
+            await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.RsaSignaturePath)).ConfigureAwait(false);
         byte[] arm9Binary = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.Arm9Path)).ConfigureAwait(false);
         byte[] arm7Binary = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.Arm7Path)).ConfigureAwait(false);
 
