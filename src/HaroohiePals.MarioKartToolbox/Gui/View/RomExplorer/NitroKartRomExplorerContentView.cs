@@ -179,7 +179,7 @@ class NitroKartRomExplorerContentView : WindowContentView
             return;
         }
         
-        _modalService.ShowModal(_romBuildSuccessModal);
         _modalService.HideModal(_loadingModal);
+        _modalService.ShowModal(_romBuildSuccessModal);
     }
 }
