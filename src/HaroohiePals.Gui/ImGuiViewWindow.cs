@@ -59,6 +59,7 @@ public class ImGuiViewWindow(ImGuiGameWindowSettings settings, IModalService mod
 
         foreach (var modal in _modalService.GetAllModals())
             modal.Draw();
+        _modalService.Cleanup();
 
         Content?.Draw();
     }
