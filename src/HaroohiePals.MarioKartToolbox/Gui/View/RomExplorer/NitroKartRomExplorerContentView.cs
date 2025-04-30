@@ -18,9 +18,12 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.RomExplorer;
 
 class NitroKartRomExplorerContentView : WindowContentView
 {
+    private readonly IModalService _modalService;
     private readonly string _fileName;
     private readonly MkdsRomProject _project = null;
     private readonly LoadingModalView _loadingModal = new("Building ROM... Please wait.");
+    private readonly MessageModalView _errorModal = new("Error", "An unexpected error has occured.");
+    private readonly MessageModalView _romBuildSuccessModal = new("Success", "Rom built successfully.");
     private readonly MkdsRomFactory _romFactory = new();
 
     private ArchiveTreeView _tree;
@@ -62,9 +65,10 @@ class NitroKartRomExplorerContentView : WindowContentView
         }
     }
 
-    public NitroKartRomExplorerContentView(string fileName)
+    public NitroKartRomExplorerContentView(string fileName, IModalService modalService)
     {
         _fileName = fileName;
+        _modalService = modalService;
 
         var fileInfo = new FileInfo(fileName);
         string ext = fileInfo.Extension.ToLower();
@@ -120,8 +124,6 @@ class NitroKartRomExplorerContentView : WindowContentView
 
         ImGui.End();
 
-        _loadingModal.Draw();
-
         return true;
     }
 
@@ -151,7 +153,7 @@ class NitroKartRomExplorerContentView : WindowContentView
         if (_project is null)
             return;
         
-        _loadingModal.Open();
+        _modalService.ShowModal(_loadingModal);
         
         var result = Nfd.SaveDialog(out string outPath, new Dictionary<string, string>
         {
@@ -160,14 +162,24 @@ class NitroKartRomExplorerContentView : WindowContentView
 
         if (result != NfdStatus.Ok || outPath is null)
         {
-            _loadingModal.Close();
+            _modalService.HideModal(_loadingModal);
             return;
         }
 
-        var fileInfo = new FileInfo(_fileName);
-        var rom = await _romFactory.CreateAsync(_project, fileInfo.DirectoryName);
-        await File.WriteAllBytesAsync(outPath, rom.Write());
-
-        _loadingModal.Close();
+        try
+        {
+            var fileInfo = new FileInfo(_fileName);
+            var rom = await _romFactory.CreateAsync(_project, fileInfo.DirectoryName);
+            await File.WriteAllBytesAsync(outPath, rom.Write());
+        }
+        catch
+        {
+            _modalService.HideModal(_loadingModal);
+            _modalService.ShowModal(_errorModal);
+            return;
+        }
+        
+        _modalService.ShowModal(_romBuildSuccessModal);
+        _modalService.HideModal(_loadingModal);
     }
 }

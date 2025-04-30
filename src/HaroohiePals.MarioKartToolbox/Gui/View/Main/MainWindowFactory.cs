@@ -37,7 +37,7 @@ class MainWindowFactory : IMainWindowFactory
             _applicationSettings, _modalService, _courseEditorSubWindowFactory);
 
     public NitroKartRomExplorerContentView CreateNitroKartRomExplorerContentView(string fileName)
-        => new NitroKartRomExplorerContentView(fileName);
+        => new NitroKartRomExplorerContentView(fileName, _modalService);
 
     public ModalView CreatePreferencesModal()
         => new PreferencesModalView(_applicationSettings);

@@ -40,7 +40,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
         ImGui.InputText("##RomFilePath", ref _romFilePath, 10000);
         ImGui.SameLine();
         if (ImGui.Button("Browse...##RomFilePath"))
-            SelectObjFilePath();
+            SelectSaveRomFilePath();
 
         ImGui.TableNextRow();
 
@@ -76,7 +76,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
         _loadingModal.Draw();
     }
 
-    private void SelectObjFilePath()
+    private void SelectSaveRomFilePath()
     {
         var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
         {
@@ -141,11 +141,21 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
         
         _loadingModal.Open();
 
-        byte[] romData = await File.ReadAllBytesAsync(_romFilePath);
-        var rom = new NdsRom(romData);
-        var projectFactory = new MkdsRomProjectFactory();
-        await projectFactory.CreateAsync(rom, projectName, outputPath, _unpackArc);
-
+        try
+        {
+            byte[] romData = await File.ReadAllBytesAsync(_romFilePath);
+            var rom = new NdsRom(romData);
+            var projectFactory = new MkdsRomProjectFactory();
+            await projectFactory.CreateAsync(rom, projectName, outputPath, _unpackArc);
+        }
+        catch
+        {
+            _errorMessage = "An unexpected error has occured.";
+            _createResult = false;
+            _loadingModal.Close();
+            return;
+        }
+        
         _createResult = true;
     }
 }
