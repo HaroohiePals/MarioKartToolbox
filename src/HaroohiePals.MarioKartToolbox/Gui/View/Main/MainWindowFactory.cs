@@ -50,4 +50,25 @@ class MainWindowFactory : IMainWindowFactory
 
     public NitroKartCourseProjectModalView CreateNitroKartCourseProjectModal()
         => new NitroKartCourseProjectModalView();
+
+    public ModalView CreateObsoleteNkprojWarningModalView()
+        => new MessageModalView("Warning",
+            "The \"nkproj\" file format is outdated and no longer supported.\n" +
+            "To continue working on this project, please first convert it back to a Nintendo DS ROM using\n" +
+            "Mario Kart Toolbox 1.x. Then, create a new project in the updated format via:\n" +
+            "File > New > Nitro ROM Project\n\n" +
+            "You can then rebuild the ROM by first opening the newly created project:\n" +
+            "File > Open > Open ROM > Your Project.json\n" +
+            "And then:\n" +
+            "File > Save As... > Nintendo DS ROM");
+
+    public ModalView CreateNdsRomWarningModalView()
+        => new MessageModalView("Warning",
+            "Directly editing a ROM file is strongly discouraged as some operations might not be supported.\n\n" +
+            "Instead, extract the ROM into a Nitro ROM Project using:\n" +
+            "File > New > Nitro ROM Project\n\n" +
+            "You can then rebuild the ROM by first opening the newly created project:\n" +
+            "File > Open > Open ROM > Your Project.json\n" +
+            "And then:\n" +
+            "File > Save As... > Nintendo DS ROM");
 }

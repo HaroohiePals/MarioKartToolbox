@@ -13,4 +13,6 @@ interface IMainWindowFactory
     ModalView CreateAboutModal();
     ModalView CreateRomProjectModal();
     NitroKartCourseProjectModalView CreateNitroKartCourseProjectModal();
+    ModalView CreateObsoleteNkprojWarningModalView();
+    ModalView CreateNdsRomWarningModalView();
 }

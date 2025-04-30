@@ -74,14 +74,22 @@ class MainWindowViewModel
             case ".carc":
                 LoadCarcCourseEditor(fileName);
                 break;
-            case ".nds":
-            case ".srl":
+            case ".nds" or ".srl":
+            case ".nkproj" or ".xml":
             case ".json":
-            case ".xml":
-            case ".nkproj":
                 try
                 {
                     CloseAllWindows();
+
+                    switch (ext)
+                    {
+                        case ".nkproj" or ".xml":
+                            _modalService.ShowModal(_windowFactory.CreateObsoleteNkprojWarningModalView());
+                            break;
+                        case ".nds" or ".srl":
+                            _modalService.ShowModal(_windowFactory.CreateNdsRomWarningModalView());
+                            break;
+                    }
 
                     _romExplorer = _windowFactory.CreateNitroKartRomExplorerContentView(fileName);
                     _romExplorer.CloseCallback = () => CloseRomExplorer(false);

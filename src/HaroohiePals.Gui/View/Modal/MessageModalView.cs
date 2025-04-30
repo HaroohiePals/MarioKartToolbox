@@ -26,7 +26,7 @@ public class MessageModalView(
                 break;
             case MessageModalButtonsType.Ok:
                 ShowCloseButton = false;
-                if (DrawAlignedButton("Ok", 0.5f))
+                if (DrawAlignedButton("OK", 0.5f))
                     OnConfirmButtonClick();
                 break;
             case MessageModalButtonsType.YesNo:
