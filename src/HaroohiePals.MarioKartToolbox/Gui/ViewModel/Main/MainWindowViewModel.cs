@@ -12,6 +12,8 @@ using NativeFileDialogs.Net;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using HaroohiePals.IO.Archive;
+using HaroohiePals.Nitro.Fs;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.Main;
 
@@ -22,7 +24,7 @@ class MainWindowViewModel(
     IApplicationSettingsService applicationSettingsService)
 {
     private CourseEditorContentView _courseEditorView;
-    private NitroKartRomExplorerContentView _romExplorer;
+    private RomExplorerContentView _romExplorer;
 
     /// <summary>
     /// Workaround
@@ -71,12 +73,14 @@ class MainWindowViewModel(
                             break;
                     }
 
-                    _romExplorer = windowFactory.CreateNitroKartRomExplorerContentView(fileName);
+                    _romExplorer = windowFactory.CreateRomExplorerContentView(fileName);
                     _romExplorer.CloseCallback = () => CloseRomExplorer(false);
 
-                    _romExplorer.OnNkmOpen += LoadBinaryCourseEditor;
-                    _romExplorer.OnCarcOpen +=
-                        (ext is ".nds" or ".srl") ? LoadRomCarcCourseEditor : LoadCarcCourseEditor;
+                    _romExplorer.SetFileActivationCallbacks(
+                        ext is ".nds" or ".srl"
+                            ? LoadRomCarcCourseEditor
+                            : (path, _) => LoadCarcCourseEditor(path),
+                        LoadBinaryCourseEditor);
 
                     SetMainWindowContent.Invoke(_romExplorer);
 
@@ -86,6 +90,7 @@ class MainWindowViewModel(
                 {
                     Console.WriteLine($"Error Opening ROM: {ex.Message}");
                 }
+
                 break;
         }
     }
@@ -102,7 +107,7 @@ class MainWindowViewModel(
         if (result == NfdStatus.Ok)
             OpenFile(outPath);
     }
-    
+
     public void OpenRomProjectFile()
     {
         var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
@@ -114,7 +119,7 @@ class MainWindowViewModel(
         if (result == NfdStatus.Ok)
             OpenFile(outPath);
     }
-    
+
     public void OpenRomFile()
     {
         var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
@@ -125,7 +130,7 @@ class MainWindowViewModel(
         if (result == NfdStatus.Ok)
             OpenFile(outPath);
     }
-    
+
     private void LoadBinaryCourseEditor(string path)
     {
         CloseRomExplorer();
@@ -146,7 +151,8 @@ class MainWindowViewModel(
         if (!Directory.Exists(baseTexPath))
             baseTexPath = null;
 
-        _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsFolderCourse(basePath, baseTexPath, courseMapPath));
+        _courseEditorView =
+            windowFactory.CreateCourseEditorView(new MkdsFolderCourse(basePath, baseTexPath, courseMapPath));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
         SetMainWindowContent.Invoke(_courseEditorView);
@@ -175,16 +181,19 @@ class MainWindowViewModel(
         discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
     }
 
-    private void LoadRomCarcCourseEditor(string path)
+    private void LoadRomCarcCourseEditor(string path, Archive romArchive)
     {
+        if (romArchive is not NitroFsArchive nitroFsArchive)
+            return;
+
         CloseRomExplorer();
 
-        string basePath = path;
         string baseTexPath = path.Replace(".carc", "Tex.carc");
-        if (!_romExplorer.NitroFsArchive.ExistsFile(baseTexPath))
+        if (!nitroFsArchive.ExistsFile(baseTexPath))
             baseTexPath = null;
 
-        _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsRomCarcCourse(_romExplorer.NitroFsArchive, basePath, baseTexPath, "/course_map.nkm"));
+        _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsRomCarcCourse(nitroFsArchive, path,
+            baseTexPath, "/course_map.nkm"));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
         SetMainWindowContent.Invoke(_courseEditorView);
@@ -202,7 +211,8 @@ class MainWindowViewModel(
         if (!File.Exists(baseTexPath))
             baseTexPath = null;
 
-        _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsCarcCourse(basePath, baseTexPath, "/course_map.nkm"));
+        _courseEditorView =
+            windowFactory.CreateCourseEditorView(new MkdsCarcCourse(basePath, baseTexPath, "/course_map.nkm"));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
         SetMainWindowContent.Invoke(_courseEditorView);

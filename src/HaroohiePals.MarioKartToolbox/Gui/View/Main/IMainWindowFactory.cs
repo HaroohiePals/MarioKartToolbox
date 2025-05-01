@@ -9,7 +9,7 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.Main;
 interface IMainWindowFactory
 {
     CourseEditorContentView CreateCourseEditorView(IMkdsCourse course);
-    NitroKartRomExplorerContentView CreateNitroKartRomExplorerContentView(string fileName);
+    RomExplorerContentView CreateRomExplorerContentView(string fileName);
     ModalView CreatePreferencesModal();
     ModalView CreateAboutModal();
     ModalView CreateRomProjectModal(Action<string> onCreateProject);
