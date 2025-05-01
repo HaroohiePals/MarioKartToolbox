@@ -149,8 +149,6 @@ class MainWindowViewModel(
         _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsFolderCourse(basePath, baseTexPath, courseMapPath));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
-        // todo: Open course editor through the state machine
-        //_modalService.OpenWindow(_courseEditorView);
         SetMainWindowContent.Invoke(_courseEditorView);
 
         discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
@@ -172,8 +170,6 @@ class MainWindowViewModel(
         _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsIntermediateCourse(basePath, courseMapPath));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
-        // todo: Open course editor through the state machine
-        //_modalService.OpenWindow(_courseEditorView);
         SetMainWindowContent.Invoke(_courseEditorView);
 
         discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
@@ -191,8 +187,6 @@ class MainWindowViewModel(
         _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsRomCarcCourse(_romExplorer.NitroFsArchive, basePath, baseTexPath, "/course_map.nkm"));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
-        // todo: Open course editor through the state machine
-        //_modalService.OpenWindow(_mapDataEditor);
         SetMainWindowContent.Invoke(_courseEditorView);
 
         discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
@@ -222,7 +216,7 @@ class MainWindowViewModel(
             return;
 
         // reopen rom explorer
-        SetMainWindowContent.Invoke(_romExplorer ?? null);
+        SetMainWindowContent.Invoke(_romExplorer);
 
         _courseEditorView.Dispose();
         _courseEditorView = null;
