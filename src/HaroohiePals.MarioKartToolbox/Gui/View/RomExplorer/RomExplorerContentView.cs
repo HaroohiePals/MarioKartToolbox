@@ -15,6 +15,7 @@ class RomExplorerContentView(RomExplorerViewModel viewModel): WindowContentView
     public Action? CloseCallback;
 
     private ArchiveTreeView? _tree;
+    private MkdsCourseListView? _courseListView;
 
     public override IReadOnlyCollection<MenuItem> MenuItems
     {
@@ -49,14 +50,18 @@ class RomExplorerContentView(RomExplorerViewModel viewModel): WindowContentView
 
     public override void Update(UpdateArgs args)
     {
-        if (_tree is not null)
-            return;
-        
-        _tree = new("RomTree", IconConsts.FileExtIcons)
+        if (_tree is null)
         {
-            Archive = viewModel.RomArchive
-        };
-        _tree.Activate += (_, path, _) => viewModel.ActivateItem(path);
+            _tree = new ArchiveTreeView("RomTree", IconConsts.FileExtIcons)
+            {
+                Archive = viewModel.RomArchive
+            };
+            _tree.Activate += (_, path, _) => viewModel.ActivateItem(path);
+        }
+        if (viewModel.IsProjectLoaded() && _courseListView is null && viewModel.RomArchive is not null)
+        {
+            _courseListView = new MkdsCourseListView(viewModel.RomArchive, viewModel.ActivateItem);
+        }
     }
 
     public override bool Draw()
@@ -67,10 +72,15 @@ class RomExplorerContentView(RomExplorerViewModel viewModel): WindowContentView
 
             if (ImGui.BeginTabBar("##Tabs_RomExplorer"))
             {
-                if (ImGui.BeginTabItem("File System"))
+                if (_courseListView is not null && ImGui.BeginTabItem("Course List"))
                 {
-                    _tree?.Draw();
-
+                    _courseListView.Draw();
+                    ImGui.EndTabItem();
+                }
+                
+                if (_tree is not null && ImGui.BeginTabItem("File System"))
+                {
+                    _tree.Draw();
                     ImGui.EndTabItem();
                 }
 
