@@ -12,20 +12,20 @@ sealed class CreateMkdsRomProjectCommand : Command
         var input = new Argument<string>("input", "Input ROM Path.");
         var projectName = new Argument<string>("name", "Project Name.");
         var output = new Option<string>("--output", "Output Project Path. Must be empty.");
-        var unpackArc = new Option<bool>("--unpackarc", () => false, "Unpack archives (CARC).");
+        var noUnpack = new Option<bool>("--no-unpack", () => false, "Disables archives unpacking (.carc).");
 
         output.AddAlias("-o");
-        unpackArc.AddAlias("-u");
+        noUnpack.AddAlias("-n");
 
         Add(input);
         Add(projectName);
         Add(output);
-        Add(unpackArc);
+        Add(noUnpack);
 
-        this.SetHandler(HandleAsync, input, projectName, output, unpackArc);
+        this.SetHandler(HandleAsync, input, projectName, output, noUnpack);
     }
 
-    private async Task HandleAsync(string inputPath, string projectName, string? outputPath, bool unpackArc)
+    private async Task HandleAsync(string inputPath, string projectName, string? outputPath, bool noUnpackArc)
     {
         if (!File.Exists(inputPath))
         {
@@ -36,14 +36,14 @@ sealed class CreateMkdsRomProjectCommand : Command
         if (outputPath is null)
             outputPath = projectName;
 
-        if (Directory.Exists(outputPath) && Directory.EnumerateFiles(outputPath).Count() > 0)
+        if (Directory.Exists(outputPath) && Directory.EnumerateFiles(outputPath).Any())
         {
             Console.WriteLine("The output folder is not empty.");
             return;
         }
 
-        var rom = new NdsRom(File.ReadAllBytes(inputPath));
+        var rom = new NdsRom(await File.ReadAllBytesAsync(inputPath));
         var projectFactory = new MkdsRomProjectFactory();
-        await projectFactory.CreateAsync(rom, projectName, outputPath, unpackArc);
+        await projectFactory.CreateAsync(rom, projectName, outputPath, !noUnpackArc);
     }
 }
