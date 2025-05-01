@@ -1,4 +1,5 @@
-﻿using HaroohiePals.Gui.View.Modal;
+﻿using System;
+using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.MarioKartToolbox.Application.Clipboard;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
 using HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
@@ -45,8 +46,8 @@ class MainWindowFactory : IMainWindowFactory
     public ModalView CreateAboutModal()
         => new AboutModalView();
 
-    public ModalView CreateRomProjectModal()
-        => new RomProjectModalView();
+    public ModalView CreateRomProjectModal(Action<string> onCreateProject = null)
+        => new RomProjectModalView(onCreateProject);
 
     public NitroKartCourseProjectModalView CreateNitroKartCourseProjectModal()
         => new NitroKartCourseProjectModalView();

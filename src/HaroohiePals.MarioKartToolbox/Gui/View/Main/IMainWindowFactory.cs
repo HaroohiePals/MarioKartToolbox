@@ -1,4 +1,5 @@
-﻿using HaroohiePals.Gui.View.Modal;
+﻿using System;
+using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 using HaroohiePals.MarioKartToolbox.Gui.View.RomExplorer;
 using HaroohiePals.NitroKart.Course;
@@ -11,7 +12,7 @@ interface IMainWindowFactory
     NitroKartRomExplorerContentView CreateNitroKartRomExplorerContentView(string fileName);
     ModalView CreatePreferencesModal();
     ModalView CreateAboutModal();
-    ModalView CreateRomProjectModal();
+    ModalView CreateRomProjectModal(Action<string> onCreateProject);
     NitroKartCourseProjectModalView CreateNitroKartCourseProjectModal();
     ModalView CreateObsoleteNkprojWarningModalView();
     ModalView CreateNdsRomWarningModalView();

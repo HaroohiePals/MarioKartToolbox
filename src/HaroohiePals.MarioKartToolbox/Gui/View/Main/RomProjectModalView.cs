@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -14,17 +16,18 @@ using NativeFileDialogs.Net;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.Main;
 
-public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
+public class RomProjectModalView(Action<string>? onCreateProject = null) 
+    : ModalView(WINDOW_TITLE, WindowSize)
 {
     private const string WINDOW_TITLE = "Create a new Nitro Rom Project";
+    private const bool UNPACK_ARC = true;
     private static readonly Vector2 WindowSize = new(400, 0);
     
     private readonly LoadingModalView _loadingModal = new("Extracting ROM... Please wait.");
-    private Task _createProjectTask;
+    private Task? _createProjectTask;
 
     private string _romFilePath = "";
     private string _outputProjectFilePath = "";
-    private bool _unpackArc = true;
     private string _errorMessage = "";
     private bool _createResult;
     
@@ -78,12 +81,12 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
 
     private void SelectInputRomFilePath()
     {
-        var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
+        var result = Nfd.OpenDialog(out string? outPath, new Dictionary<string, string>
         {
             { "Nintendo DS ROM", "nds,srl" }
         });
 
-        if (result == NfdStatus.Ok)
+        if (result == NfdStatus.Ok && outPath is not null)
             _romFilePath = outPath;
 
         _errorMessage = "";
@@ -91,12 +94,12 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
 
     private void SelectOutputProjectFilePath()
     {
-        var result = Nfd.SaveDialog(out string outPath, new Dictionary<string, string>
+        var result = Nfd.SaveDialog(out string? outPath, new Dictionary<string, string>
         {
             { "Nitro ROM Project", "json" }
         }, "RomProject.json");
 
-        if (result == NfdStatus.Ok)
+        if (result == NfdStatus.Ok && outPath is not null)
             _outputProjectFilePath = outPath;
         
         _errorMessage = "";
@@ -127,7 +130,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
         }
         
         var outputFileInfo = new FileInfo(_outputProjectFilePath);
-        string outputPath = outputFileInfo.DirectoryName; 
+        string outputPath = outputFileInfo.DirectoryName!; 
 
         if (Directory.Exists(outputPath) && Directory.EnumerateFiles(outputPath).Any())
         {
@@ -146,7 +149,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
             byte[] romData = await File.ReadAllBytesAsync(_romFilePath);
             var rom = new NdsRom(romData);
             var projectFactory = new MkdsRomProjectFactory();
-            await projectFactory.CreateAsync(rom, projectName, outputPath, _unpackArc);
+            await projectFactory.CreateAsync(rom, projectName, outputPath, UNPACK_ARC);
         }
         catch
         {
@@ -156,6 +159,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
             return;
         }
         
+        onCreateProject?.Invoke(_outputProjectFilePath);
         _createResult = true;
     }
 }
