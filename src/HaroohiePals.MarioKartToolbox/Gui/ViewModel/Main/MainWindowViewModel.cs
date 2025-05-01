@@ -51,13 +51,6 @@ class MainWindowViewModel
     public void ShowRomProjectModal()
         => _modalService.ShowModal(_windowFactory.CreateRomProjectModal());
 
-    public void NewNitroKartCourse()
-    {
-        var window = _windowFactory.CreateNitroKartCourseProjectModal();
-        window.OnProjectCreated = LoadCourseProject;
-        _modalService.ShowModal(window);
-    }
-
     public void OpenFile(string fileName)
     {
         var fileInfo = new FileInfo(fileName);
@@ -123,14 +116,23 @@ class MainWindowViewModel
             OpenFile(outPath);
     }
     
+    public void OpenRomProjectFile()
+    {
+        var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
+        {
+            { "Nitro ROM Project", "json" },
+            { "Nitro Kart Project (Legacy)", "nkproj" }
+        });
+
+        if (result == NfdStatus.Ok)
+            OpenFile(outPath);
+    }
+    
     public void OpenRomFile()
     {
         var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
         {
-            { "All compatible files", "json,nds,srl,nkproj" },
-            { "Mario Kart Toolbox 2.0 ROM Project", "json" },
-            { "Nintendo DS ROM File", "nds,srl" },
-            { "Nitro Kart Project (Legacy)", "nkproj" }
+            { "Nintendo DS ROM File", "nds,srl" }
         });
 
         if (result == NfdStatus.Ok)

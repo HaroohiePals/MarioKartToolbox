@@ -25,8 +25,8 @@ class MainWindow : ImGuiViewWindow
     [
         new("File")
         {
-            Items = new()
-            {
+            Items =
+            [
                 new("New")
                 {
                     Items =
@@ -34,15 +34,17 @@ class MainWindow : ImGuiViewWindow
                         new("Nitro ROM Project", _viewModel.ShowRomProjectModal)
                     ]
                 },
+
                 new("Open")
                 {
                     Items =
                     [
+                        new("Open Project", _viewModel.OpenRomProjectFile),
                         new("Open Course", _viewModel.OpenCourseFile),
                         new("Open ROM", _viewModel.OpenRomFile),
                     ]
                 }
-            }
+            ]
         },
         new("Edit"),
         new("Tools")

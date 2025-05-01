@@ -16,7 +16,7 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.Main;
 
 public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
 {
-    private const string WINDOW_TITLE = "Create a new NDS Rom Project";
+    private const string WINDOW_TITLE = "Create a new Nitro Rom Project";
     private static readonly Vector2 WindowSize = new(400, 0);
     
     private readonly LoadingModalView _loadingModal = new("Extracting ROM... Please wait.");
@@ -40,7 +40,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
         ImGui.InputText("##RomFilePath", ref _romFilePath, 10000);
         ImGui.SameLine();
         if (ImGui.Button("Browse...##RomFilePath"))
-            SelectSaveRomFilePath();
+            SelectInputRomFilePath();
 
         ImGui.TableNextRow();
 
@@ -76,7 +76,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
         _loadingModal.Draw();
     }
 
-    private void SelectSaveRomFilePath()
+    private void SelectInputRomFilePath()
     {
         var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
         {
@@ -93,7 +93,7 @@ public class RomProjectModalView() : ModalView(WINDOW_TITLE, WindowSize)
     {
         var result = Nfd.SaveDialog(out string outPath, new Dictionary<string, string>
         {
-            { "Mario Kart Toolbox 2.0 ROM Project", "json" }
+            { "Nitro ROM Project", "json" }
         }, "RomProject.json");
 
         if (result == NfdStatus.Ok)
