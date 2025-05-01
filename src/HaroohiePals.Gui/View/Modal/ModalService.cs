@@ -28,7 +28,7 @@ public class ModalService : IModalService
     
     public void Cleanup()
     {
-        var closedModals = _modalViews.Where(x => !x.IsOpen).ToList();
+        var closedModals = _modalViews.Where(x => x is { IsOpen: false, IsOpening: false }).ToList();
         foreach (var modal in closedModals)
             _modalViews.Remove(modal);
     }
