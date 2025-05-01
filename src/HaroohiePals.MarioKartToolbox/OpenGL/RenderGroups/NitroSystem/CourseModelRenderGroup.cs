@@ -18,10 +18,10 @@ public class CourseModelRenderGroup : RenderGroup, IDisposable
     private const string COURSE_NSBTX_PATH = "course_model.nsbtx";
     private const string COURSE_NSBTA_PATH = "course_model.nsbta";
     private const string COURSE_NSBTP_PATH = "course_model.nsbtp";
-    private const string SKY_NSBMD_PATH = "course_model_V.nsbmd";
-    private const string SKY_NSBTX_PATH = "course_model_V.nsbtx";
-    private const string SKY_NSBTA_PATH = "course_model_V.nsbta";
-    private const bool ENABLE_PARTIAL_FOG = false;
+    private const string COURSE_V_NSBMD_PATH = "course_model_V.nsbmd";
+    private const string COURSE_V_NSBTX_PATH = "course_model_V.nsbtx";
+    private const string COURSE_V_NSBTA_PATH = "course_model_V.nsbta";
+    private const bool COURSE_V_ENABLE_PARTIAL_FOG = false;
 
     private IMkdsCourse? _course;
     private readonly G3dModelManager _modelManager = new GLG3dModelManager();
@@ -54,13 +54,13 @@ public class CourseModelRenderGroup : RenderGroup, IDisposable
 
     public override void Update(float deltaTime)
     {
-        if (_anmObj != null)
+        if (_anmObj is not null)
             _anmObj.Frame = (_anmObj.Frame + deltaTime * 60) % _anmObj.AnimationResource.NrFrames;
 
-        if (_anmObjPat != null)
+        if (_anmObjPat is not null)
             _anmObjPat.Frame = (_anmObjPat.Frame + deltaTime * 60) % _anmObjPat.AnimationResource.NrFrames;
 
-        if (_anmObjSky != null)
+        if (_anmObjSky is not null)
             _anmObjSky.Frame = (_anmObjSky.Frame + deltaTime * 60) % _anmObjSky.AnimationResource.NrFrames;
     }
 
@@ -82,7 +82,7 @@ public class CourseModelRenderGroup : RenderGroup, IDisposable
         if (EnableCourseModelV && _renderObjSky is not null)
         {
             _renderer.RenderObj = _renderObjSky;
-            _renderer.EnableWireframe = WireframeCourseModel;
+            _renderer.EnableWireframe = WireframeCourseModelV;
             _renderer.Render(context.ViewMatrix, context.ProjectionMatrix, ViewportContext.InvalidPickingId,
                 context.TranslucentPass);
         }
@@ -192,18 +192,18 @@ public class CourseModelRenderGroup : RenderGroup, IDisposable
         if (_course is null)
             return;
 
-        var nsbmd = _course.GetMainFileOrDefault<Nsbmd>(SKY_NSBMD_PATH);
+        var nsbmd = _course.GetMainFileOrDefault<Nsbmd>(COURSE_V_NSBMD_PATH);
         if (nsbmd is null)
         {
             _renderObjSky = null;
             return;
         }
-        var nsbtx = _course.GetTexFileOrDefault<Nsbtx>(SKY_NSBTX_PATH);
-        var nsbta = _course.GetMainFileOrDefault<Nsbta>(SKY_NSBTA_PATH);
+        var nsbtx = _course.GetTexFileOrDefault<Nsbtx>(COURSE_V_NSBTX_PATH);
+        var nsbta = _course.GetMainFileOrDefault<Nsbta>(COURSE_V_NSBTA_PATH);
 
         var model = nsbmd.ModelSet.Models[0];
 
-        if (ENABLE_PARTIAL_FOG)
+        if (COURSE_V_ENABLE_PARTIAL_FOG)
         {
             bool modelVHasPartialFog = false;
             switch (_course.MapData.StageInfo.CourseId)
@@ -247,6 +247,9 @@ public class CourseModelRenderGroup : RenderGroup, IDisposable
 
     private void SetupRendererLight(ViewportContext context)
     {
+        if (_renderer is null)
+            return;
+        
         _renderer.LightVectors[0] = (0, -1, 0);
         _renderer.LightVectors[1] =
             (-context.ViewMatrix.Column2.Xyz - context.ViewMatrix.Column1.Xyz).Normalized();
