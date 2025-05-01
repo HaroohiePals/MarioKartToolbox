@@ -32,7 +32,7 @@ class RomExplorerContentView(RomExplorerViewModel viewModel): WindowContentView
 
             if (viewModel.IsProjectLoaded())
             {
-                fileMenu.Items.Insert(0, new("Save As...")
+                fileMenu.Items.Insert(0, new("Export")
                 {
                     Items =
                     [

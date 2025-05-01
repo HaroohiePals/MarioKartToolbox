@@ -48,9 +48,9 @@ class MainWindowFactory(
             "Mario Kart Toolbox 1.x. Then, create a new project in the updated format via:\n" +
             "File > New > Nitro ROM Project\n\n" +
             "You can then rebuild the ROM by first opening the newly created project:\n" +
-            "File > Open > Open ROM > Your Project.json\n" +
+            "File > Open > Open Project > Your Project.json\n" +
             "And then:\n" +
-            "File > Save As... > Nintendo DS ROM");
+            "File > Export > Nintendo DS ROM");
 
     public ModalView CreateNdsRomWarningModalView()
         => new MessageModalView("Warning",
@@ -58,7 +58,7 @@ class MainWindowFactory(
             "Instead, extract the ROM into a Nitro ROM Project using:\n" +
             "File > New > Nitro ROM Project\n\n" +
             "You can then rebuild the ROM by first opening the newly created project:\n" +
-            "File > Open > Open ROM > Your Project.json\n" +
+            "File > Open > Open Project > Your Project.json\n" +
             "And then:\n" +
-            "File > Save As... > Nintendo DS ROM");
+            "File > Export > Nintendo DS ROM");
 }
