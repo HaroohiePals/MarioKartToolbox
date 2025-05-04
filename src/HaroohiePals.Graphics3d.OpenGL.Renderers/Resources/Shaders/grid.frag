@@ -1,6 +1,8 @@
 #version 400 core
 
 layout (location = 0) out vec4 FragColor;
+layout (location = 1) out uvec4 outPickingId;
+layout (location = 2) out uint outFogBit;
 
 in float near;
 in float far;
@@ -9,6 +11,7 @@ in vec3 nearPoint;
 in vec3 farPoint;
 in mat4 fragView;
 in mat4 fragProj;
+uniform uint uPickingId;
 
 vec4 grid(vec3 fragPos3D, float scale) {
     vec2 coord = fragPos3D.xz * scale;
@@ -51,4 +54,14 @@ void main() {
 
     FragColor = (grid(fragPos3D, 10.0 / scale) + grid(fragPos3D, 1.0 / scale)) * float(t > 0.0); // adding multiple resolution for the grid
     FragColor.a *= fading;
+    
+    if (FragColor.a < 0.0001)
+        discard;
+
+    outPickingId.r = uPickingId & 0xFFu;
+    outPickingId.g = (uPickingId >> 8) & 0xFFu;
+    outPickingId.b = (uPickingId >> 16) & 0xFFu;
+    outPickingId.a = (uPickingId >> 24) & 0xFFu;
+
+    outFogBit = 0;
 }

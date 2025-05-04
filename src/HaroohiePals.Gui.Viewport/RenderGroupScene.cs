@@ -2,12 +2,9 @@
 
 namespace HaroohiePals.Gui.Viewport;
 
-public abstract class RenderGroupScene : ViewportScene
+public abstract class RenderGroupScene(IGLFramebufferProvider framebufferProvider) : ViewportScene(framebufferProvider)
 {
-    public RenderGroupCollection RenderGroups { get; } = new();
-
-    protected RenderGroupScene(IGLFramebufferProvider framebufferProvider)
-        : base(framebufferProvider) { }
+    public RenderGroupCollection RenderGroups { get; } = [];
 
     public override void Update(ViewportContext context, float deltaTime)
     {
