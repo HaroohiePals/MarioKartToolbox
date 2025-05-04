@@ -160,7 +160,8 @@ public sealed class Gizmo
         DrawInputOverrideValue();
 
         var guizmoOperation = _guizmoOperation;
-        var contentPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
+
+        var contentPos = ImGui.GetCursorScreenPos(); // + new System.Numerics.Vector2(20, 20);
 
         _imGuizmo.SetOrthographic(IsOrthographic);
         _imGuizmo.BeginFrame();

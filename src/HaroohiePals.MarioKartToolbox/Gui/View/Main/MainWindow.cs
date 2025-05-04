@@ -25,46 +25,58 @@ class MainWindow : ImGuiViewWindow
     [
         new("File")
         {
-            Items = new()
-            {
-                new("New"),
-                new("Open", _viewModel.OpenFile)
-            }
+            Items =
+            [
+                new("New")
+                {
+                    Items =
+                    [
+                        new("Nitro ROM Project", _viewModel.ShowRomProjectModal)
+                    ]
+                },
+
+                new("Open")
+                {
+                    Items =
+                    [
+                        new("Open Project", _viewModel.OpenRomProjectFile),
+                        new("Open Course", _viewModel.OpenCourseFile),
+                        new("Open ROM", _viewModel.OpenRomFile),
+                    ]
+                }
+            ]
         },
         new("Edit"),
         new("Tools")
         {
-            Items = new()
-                {
-                    new("Preferences", _viewModel.ShowPreferences),
-                }
+            Items =
+            [
+                new("Preferences", _viewModel.ShowPreferences),
+            ]
         },
         new("Window")
         {
-            Items = new()
-                {
-                    new("Restore default layout", _viewModel.RestoreDefaultLayout)
-                }
+            Items =
+            [
+                new("Restore default layout", _viewModel.RestoreDefaultLayout)
+            ]
         },
         new("About", _viewModel.ShowAbout)
     ];
 
-    public MainWindow(IModalService modalService, IApplicationSettingsService applicationSettingsService, 
+    public MainWindow(IModalService modalService, IApplicationSettingsService applicationSettingsService,
         MainWindowViewModel viewModel) : base(ImGuiGameWindowSettings.Default with
-        {
-            Title = WINDOW_TITLE,
-            Size = WindowSize,
-            UiScale = viewModel.GetUiScaleSetting(),
-            IconGlyphs = IconConsts.Icons
-        }, modalService)
+    {
+        Title = WINDOW_TITLE,
+        Size = WindowSize,
+        UiScale = viewModel.GetUiScaleSetting(),
+        IconGlyphs = IconConsts.Icons
+    }, modalService)
     {
         _viewModel = viewModel;
         _applicationSettingsService = applicationSettingsService;
 
-        _viewModel.SetMainWindowContent += (content) =>
-        {
-            Content = content;
-        };
+        _viewModel.SetMainWindowContent += (content) => { Content = content; };
 
         _applicationSettingsService.ApplicationSettingsChanged += OnApplicationSettingsChanged;
 
@@ -86,7 +98,8 @@ class MainWindow : ImGuiViewWindow
         Console.WriteLine($"OpenGL Version: {GL.GetString(StringName.Version)}");
 
         string informationalVersion = Assembly.GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
 
         Title = $"{WINDOW_TITLE} {informationalVersion}";
 

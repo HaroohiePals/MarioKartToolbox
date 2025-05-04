@@ -12,6 +12,7 @@ out vec3 nearPoint;
 out vec3 farPoint;
 out mat4 fragView;
 out mat4 fragProj;
+out uint fragPickingId;
 
 uniform mat4 model;
 uniform mat4 view;

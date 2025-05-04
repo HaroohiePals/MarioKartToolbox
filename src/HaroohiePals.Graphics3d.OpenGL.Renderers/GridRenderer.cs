@@ -1,39 +1,42 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿#nullable enable
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace HaroohiePals.Graphics3d.OpenGL.Renderers;
 
-// http://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGrid/
+// Inspired by:
+// https://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGrid/
 
 public class GridRenderer : IDisposable
 {
-    private GLShader _shader;
-    private GLVertexArray _vertexArray;
-    private int _vtxCount;
-    private GLBuffer<VertexData> _vertexBuffer;
+    private readonly GLShader _shader;
+    private readonly GLVertexArray _vertexArray;
+    private readonly int _vertexCount;
 
-    public float Scale = 1000f;
-    public float Near = 0.25f;
-    public float Far = 1600f;
+    public float Scale { get; set; } = 1000f;
+    public float Near { get; set; } = 0.25f;
+    public float Far { get; set; } = 1600f;
+    public uint PickingId { get; set; }
 
     public GridRenderer()
     {
         _shader = new GLShader(Resources.Shaders.GridVertex, Resources.Shaders.GridFragment);
 
-        var vertices = new VertexData[6] {
+        VertexData[] vertices =
+        [
             new() { Position = new(1, 1, 0) }, new() { Position = new(-1, -1, 0) }, new() { Position = new(-1, 1, 0) },
             new() { Position = new(-1, -1, 0) }, new() { Position = new(1, 1, 0) }, new() { Position = new(1, -1, 0) }
-        };
+        ];
 
         // 1. bind Vertex Array Object
         _vertexArray = new GLVertexArray();
         _vertexArray.Bind();
 
-        _vtxCount = vertices.Length;
+        _vertexCount = vertices.Length;
 
         // 2. copy our vertices array in a buffer for OpenGL to use
-        _vertexBuffer = new GLBuffer<VertexData>(vertices, BufferUsageHint.StaticDraw);
-        _vertexBuffer.Bind(BufferTarget.ArrayBuffer);
+        var vertexBuffer = new GLBuffer<VertexData>(vertices, BufferUsageHint.StaticDraw);
+        vertexBuffer.Bind(BufferTarget.ArrayBuffer);
 
         // 3. Setup vertex attribute pointers
         GLVertexData.SetupVertexAttribPointers();
@@ -52,6 +55,7 @@ public class GridRenderer : IDisposable
         _shader.SetFloat("gridScale", Scale);
         _shader.SetFloat("gridFar", Far);
         _shader.SetFloat("gridNear", Near);
+        _shader.SetUint("uPickingId", PickingId);
 
         GL.Enable(EnableCap.Blend);
         GL.Enable(EnableCap.DepthTest);
@@ -66,7 +70,7 @@ public class GridRenderer : IDisposable
         _vertexArray.Bind();
 
         GLVertexData.EnableAllAttribs();
-        GL.DrawArrays(PrimitiveType.Triangles, 0, _vtxCount);
+        GL.DrawArrays(PrimitiveType.Triangles, 0, _vertexCount);
 
         GL.BindVertexArray(0);
         GL.UseProgram(0);

@@ -40,7 +40,7 @@ public sealed class NdsRom
             if (er.Read<uint>() == 0xDEC00621) //Nitro Footer
             {
                 er.BaseStream.Position -= 4;
-                StaticFooter = new NitroFooter(er);
+                StaticFooter = new NdsRomNitroFooter(er);
             }
 
             er.BaseStream.Position = Header.SubRomOffset;
@@ -50,12 +50,10 @@ public sealed class NdsRom
             Fnt = new NdsRomFileNameTable(er);
 
             er.BaseStream.Position = Header.MainOvtOffset;
-            Arm9OverlayTable = new NdsRomOverlayTable[Header.MainOvtSize / 32];
-            for (int i = 0; i < Header.MainOvtSize / 32; i++) Arm9OverlayTable[i] = new NdsRomOverlayTable(er);
+            Arm9OverlayTable = new NdsRomOverlayTable(er, Header.MainOvtSize);
 
             er.BaseStream.Position = Header.SubOvtOffset;
-            Arm7OverlayTable = new NdsRomOverlayTable[Header.SubOvtSize / 32];
-            for (int i = 0; i < Header.SubOvtSize / 32; i++) Arm7OverlayTable[i] = new NdsRomOverlayTable(er);
+            Arm7OverlayTable = new NdsRomOverlayTable(er, Header.SubOvtSize);
 
             er.BaseStream.Position = Header.FatOffset;
             Fat = new FatEntry[Header.FatSize / 8];
@@ -65,7 +63,7 @@ public sealed class NdsRom
             if (Header.BannerOffset != 0)
             {
                 er.BaseStream.Position = Header.BannerOffset;
-                Banner = new NdsRomBanner(er);
+                Banner = er.Read<byte>(NdsRomBanner.SIZE);
             }
 
             FileData = new byte[Header.FatSize / 8][];
@@ -298,13 +296,11 @@ public sealed class NdsRom
 
         er.WritePadding(0x200);
         Header.MainOvtOffset = (uint)er.BaseStream.Position;
-        Header.MainOvtSize = (uint)Arm9OverlayTable.Length * 0x20;
-        foreach (var v in Arm9OverlayTable)
-        {
-            v.Write(er);
-        }
+        Header.MainOvtSize = (uint)Arm9OverlayTable.Length * NdsRomOverlayTableEntry.SIZE;
 
-        foreach (var v in Arm9OverlayTable)
+        Arm9OverlayTable.Write(er);
+
+        foreach (var v in Arm9OverlayTable.Entries)
         {
             er.WritePadding(0x200);
             Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
@@ -325,13 +321,11 @@ public sealed class NdsRom
 
         er.WritePadding(0x200);
         Header.SubOvtOffset = (uint)er.BaseStream.Position;
-        Header.SubOvtSize = (uint)Arm7OverlayTable.Length * 0x20;
-        foreach (var v in Arm7OverlayTable)
-        {
-            v.Write(er);
-        }
+        Header.SubOvtSize = (uint)Arm7OverlayTable.Length * NdsRomOverlayTableEntry.SIZE;
 
-        foreach (var v in Arm7OverlayTable)
+        Arm7OverlayTable.Write(er);
+        
+        foreach (var v in Arm7OverlayTable.Entries)
         {
             er.WritePadding(0x200);
             Fat[v.FileId].FileTop = (uint)er.BaseStream.Position;
@@ -346,7 +340,7 @@ public sealed class NdsRom
         {
             er.WritePadding(0x200, 0xFF);
             Header.BannerOffset = (uint)er.BaseStream.Position;
-            Banner.Write(er);
+            er.Write(Banner);
         }
         else
         {
@@ -374,16 +368,17 @@ public sealed class NdsRom
     public byte[] KeyPadding2;
 
     public byte[] Arm9Binary;
-    public NitroFooter StaticFooter;
+    public NdsRomNitroFooter StaticFooter;
 
     public byte[] Arm7Binary;
     public NdsRomFileNameTable Fnt;
 
-    public NdsRomOverlayTable[] Arm9OverlayTable;
-    public NdsRomOverlayTable[] Arm7OverlayTable;
+    public NdsRomOverlayTable Arm9OverlayTable;
+    public NdsRomOverlayTable Arm7OverlayTable;
 
     public FatEntry[] Fat;
-    public NdsRomBanner Banner;
+    //public NdsRomBanner Banner;
+    public byte[] Banner;
 
     public byte[][] FileData;
 

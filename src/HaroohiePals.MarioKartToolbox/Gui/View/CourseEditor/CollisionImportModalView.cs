@@ -83,14 +83,13 @@ class CollisionImportModalView : ModalView
                         canContinue = DrawImportSettings();
                         break;
                 }
-
-                ImGui.EndChild();
             }
-
             ImGui.EndChild();
         }
+        ImGui.EndChild();
 
-        ImGui.SetCursorPosX(ImGui.GetWindowContentRegionMax().X - 2 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
+        var contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+        ImGui.SetCursorPosX(contentRegionMax.X - 2 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
 
         if (_curStep == CollisionImportSteps.Step1)
             ImGui.BeginDisabled();
@@ -208,7 +207,8 @@ class CollisionImportModalView : ModalView
     {
         var avail = ImGui.GetContentRegionAvail();
 
-        if (ImGui.BeginChildFrame(ImGui.GetID("DrawPropertyGrid"), avail, ImGuiWindowFlags.NoBackground))
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
+        if (ImGui.BeginChild(ImGui.GetID("DrawPropertyGrid"), avail))
         {
             if (_selectionChanged)
             {
@@ -217,9 +217,9 @@ class CollisionImportModalView : ModalView
             }
 
             _propertyGridWidget.Draw();
-
-            ImGui.EndChildFrame();
         }
+        ImGui.EndChild();
+        ImGui.PopStyleColor();
     }
 
     private bool DrawImportSettings()
@@ -273,7 +273,7 @@ class CollisionImportModalView : ModalView
 
         ImGui.PushItemWidth(100);
         int compressionMethod = (int)_compressionMethod;
-        ImGui.Combo("Octree compression", ref compressionMethod, new[] { "Equal", "Merge" }, 2);
+        ImGui.Combo("Octree compression", ref compressionMethod, ["Equal", "Merge"], 2);
         _compressionMethod = (KclOctree.CompressionMethod)compressionMethod;
         ImGui.PopItemWidth();
 
@@ -342,21 +342,27 @@ class CollisionImportModalView : ModalView
             bool variantParsed = false;
             bool colorParsed = false;
             bool shadowParsed = false;
+            bool unusedParsed = false;
 
             var colorRegex = new Regex("color[0-9]|col[0-9]|c[0-9]");
 
             foreach (string part in parts)
             {
                 if (!colorParsed && colorRegex.IsMatch(part) &&
-                    int.TryParse(part[part.Length - 1].ToString(), out int lightId))
+                    int.TryParse(part[^1].ToString(), out int lightId))
                 {
                     attribute.LightId = lightId < 4 ? (MkdsCollisionLightId)lightId : MkdsCollisionLightId.Light0;
                     colorParsed = true;
                 }
-                else if (!shadowParsed && (part == "s" || part == "shd" || part == "shadow"))
+                else if (!shadowParsed && part is "s" or "shd" or "shadow")
                 {
                     attribute.Map2dShadow = true;
                     shadowParsed = true;
+                }
+                else if (!unusedParsed && part is "u" or "uf" or "unused")
+                {
+                    attribute.UnusedFlag = true;
+                    unusedParsed = true;
                 }
                 else if (!typeParsed)
                 {
@@ -484,6 +490,13 @@ public class MaterialAttribute
     {
         get => Attribute.LightId;
         set => Attribute.LightId = value;
+    }
+
+    [Category("Flags"), DisplayName("Unused Flag")]
+    public bool UnusedFlag
+    {
+        get => Attribute.UnusedFlag;
+        set => Attribute.UnusedFlag = value;
     }
 
     public override string ToString()

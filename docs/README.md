@@ -34,6 +34,10 @@ Planned features will be added in the issues of this repository.
 
 ## Credits
 
+### Assets
+- [Logo](./assets/img/icon.png) design by [Daniel @kaasiand.cool](https://bsky.app/profile/kaasiand.cool)
+- Placeholder Item Box model by [Jacanapes @jacanapes_](https://x.com/jacanapes_)
+
 ### Software
 - [Dear ImGui](https://github.com/ocornut/imgui)
 - [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET)
@@ -51,9 +55,6 @@ Planned features will be added in the issues of this repository.
 - [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSharp)
 - [TextCopy](https://github.com/CopyText/TextCopy)
 - [xUnit.net](https://github.com/xunit/xunit)
-
-### Assets
-- Logo design by [Daniel @kaasiand](https://twitter.com/kaasiand)
 
 ### Testing
 - Mario Kart DS Modding Discord Server
