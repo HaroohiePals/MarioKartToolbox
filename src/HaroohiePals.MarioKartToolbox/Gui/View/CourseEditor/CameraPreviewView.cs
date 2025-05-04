@@ -29,7 +29,7 @@ class CameraPreviewView : CourseViewportView
     private readonly CameraPreviewSettings _settings = new();
 
     private NitroKartRenderGroupScenePerspective _topScene => (NitroKartRenderGroupScenePerspective)_scene;
-    private NitroKartRenderGroupScenePerspective _bottomScene;
+    private readonly NitroKartRenderGroupScenePerspective _bottomScene;
 
     private float _topFov = 45f;
     private OpenTK.Mathematics.Matrix4 _topView;
@@ -42,7 +42,7 @@ class CameraPreviewView : CourseViewportView
 
     //todo: create viewmodel
     private RaceContext _raceContext;
-    private Driver _driver = new();
+    private readonly Driver _driver = new();
     private MkdsEnemyPoint _currentEnemyPoint;
     private MkdsEnemyPoint _nextEnemyPoint;
 
@@ -51,7 +51,8 @@ class CameraPreviewView : CourseViewportView
 
     private bool _showControls = true;
 
-    public CameraPreviewView(ICourseEditorContext context, IApplicationSettingsService applicationSettings) : base(PANE_TITLE, context)
+    public CameraPreviewView(ICourseEditorContext context, IApplicationSettingsService applicationSettings) : base(
+        PANE_TITLE, context)
     {
         _applicationSettings = applicationSettings;
         _lastActionCount = Context.ActionStack.UndoActionsCount;
@@ -127,15 +128,32 @@ class CameraPreviewView : CourseViewportView
                 targetHeight = dsScreenHeight * 2 + (_settings.UseScreenGap ? dsScreenGap : 0);
 
             float screenGapFactor = _settings.UseScreenGap ? targetHeight / (dsScreenGap + (dsScreenHeight * 2)) : 0;
-            float screenGap = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? dsScreenGap * screenGapFactor : 0;
-            float screenHeight = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? (targetHeight - screenGap) / 2 : 0;
-            float screenWidth = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? screenHeight / dsScreenHeight * dsScreenWidth : 0;
+            float screenGap = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? dsScreenGap * screenGapFactor
+                : 0;
+            float screenHeight = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? (targetHeight - screenGap) / 2
+                : 0;
+            float screenWidth = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? screenHeight / dsScreenHeight * dsScreenWidth
+                : 0;
 
-            var frameSize = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? new Vector2(screenWidth, screenHeight * 2 + screenGap) : new Vector2(0);
+            var frameSize = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? new Vector2(screenWidth, screenHeight * 2 + screenGap)
+                : new Vector2(0);
 
-            ImGui.SetCursorPosX(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? availableSpace.X / 2f - screenWidth / 2f : 0f);
-            ImGui.SetCursorPosY(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? ImGui.GetCursorPosY() + ((availableSpace.Y - targetHeight) / 2f) : 0f);
-            if (ImGui.BeginChild(ImGui.GetID("TestFrames"), frameSize, false, ImGuiWindowFlags.None))
+            ImGui.SetCursorPosX(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? availableSpace.X / 2f - screenWidth / 2f
+                : 0f);
+            ImGui.SetCursorPosY(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? ImGui.GetCursorPosY() + ((availableSpace.Y - targetHeight) / 2f)
+                : 0f);
+            
+            
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0));
+            ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
+            
+            if (ImGui.BeginChild("TestFrames", frameSize, ImGuiChildFlags.AlwaysUseWindowPadding))
             {
                 _viewportPanel.Size = new Vector2(screenWidth, screenHeight);
                 _bottomViewportPanel.Size = new Vector2(screenWidth, screenHeight);
@@ -158,23 +176,22 @@ class CameraPreviewView : CourseViewportView
                         isEdit ? _viewportPanel.Context.ViewMatrix : _bottomView, _bottomProj, null);
                     _bottomViewportPanel.Draw();
                 }
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
+            
+            ImGui.PopStyleColor();
+            ImGui.PopStyleVar();
 
             ImGui.SetCursorPosY(32 * scale);
             ImGui.SetCursorPosX(8 * scale);
 
-            if (popWindowPadding)
-            {
-                popWindowPadding = false;
-                ImGui.PopStyleVar();
-            }
+            popWindowPadding = false;
+            ImGui.PopStyleVar();
 
             RenderControls();
-
-            ImGui.End();
         }
+
+        ImGui.End();
 
         if (popWindowPadding)
         {
@@ -231,7 +248,8 @@ class CameraPreviewView : CourseViewportView
 
         bool isOddFrame = (_lastFrame & 1) == 1;
 
-        _raceContext.Update(isOddFrame, Context.Course.MapData.IsMgStage || _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen);
+        _raceContext.Update(isOddFrame,
+            Context.Course.MapData.IsMgStage || _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen);
 
         void updateSingleCam()
         {
@@ -260,7 +278,8 @@ class CameraPreviewView : CourseViewportView
         switch (_settings.Mode)
         {
             case CameraPreviewMode.AnimIntro:
-                if (Context.Course.MapData.IsMgStage || _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen)
+                if (Context.Course.MapData.IsMgStage ||
+                    _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen)
                     updateSingleCam();
                 else
                     updateDoubleCam();
@@ -270,7 +289,7 @@ class CameraPreviewView : CourseViewportView
 
                 if (_settings.ReplayMoveDriver &&
                     (!_settings.ReplaySimulateCountdown ||
-                    _settings.ReplaySimulateCountdown && _lastFrame > 60 * 3))
+                     _settings.ReplaySimulateCountdown && _lastFrame > 60 * 3))
                     UpdateDriver(1 / 60f);
                 break;
         }
@@ -289,7 +308,8 @@ class CameraPreviewView : CourseViewportView
         AdvanceFrames(framesToAdvance);
     }
 
-    private void ApplyViewProjection(CameraPreviewViewportPanel viewportPanel, OpenTK.Mathematics.Matrix4 view, OpenTK.Mathematics.Matrix4 proj, float? fov = null)
+    private void ApplyViewProjection(CameraPreviewViewportPanel viewportPanel, OpenTK.Mathematics.Matrix4 view,
+        OpenTK.Mathematics.Matrix4 proj, float? fov = null)
     {
         viewportPanel.ApplyView(view);
 
@@ -312,16 +332,19 @@ class CameraPreviewView : CourseViewportView
 
         CameraPreviewMode oldMode = _settings.Mode;
 
-        bool popAlpha = true;
+        bool popStyles = true;
 
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0));
         ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.75f);
-        if (ImGui.BeginChild("ControlsChild", new Vector2(_showControls ? width : smallWidth, _showControls ? height : smallHeight), false, ImGuiWindowFlags.NoScrollbar))
+        
+        if (ImGui.BeginChild("ControlsChild",
+                new Vector2(_showControls ? width : smallWidth, _showControls ? height : smallHeight),
+                ImGuiChildFlags.None | ImGuiChildFlags.AlwaysUseWindowPadding))
         {
-            if (popAlpha)
-            {
-                ImGui.PopStyleVar();
-                popAlpha = false;
-            }
+            ImGui.PopStyleVar();
+            ImGui.PopStyleVar();
+            popStyles = false;
+            
             if (ImGui.CollapsingHeader(title))
             {
                 _showControls = true;
@@ -357,17 +380,20 @@ class CameraPreviewView : CourseViewportView
                         _settings.EditSecondTarget = false;
                         Initialize();
                     }
+
                     ImGui.SameLine();
                     if (ImGui.RadioButton("Target B", _settings.EditSecondTarget))
                     {
                         _settings.EditSecondTarget = true;
                         Initialize();
                     }
+
                     ImGui.SameLine();
                     if (ImGui.Button("Apply view"))
                     {
                         ApplyEditView();
                     }
+
                     ImGui.Checkbox("Keep original target distance", ref _settings.EditKeepOriginalTargetDistance);
                     if (!_settings.EditKeepOriginalTargetDistance)
                     {
@@ -386,18 +412,20 @@ class CameraPreviewView : CourseViewportView
             {
                 _showControls = false;
             }
-
-            ImGui.EndChild();
         }
-        if (popAlpha)
+        ImGui.EndChild();
+
+        if (popStyles)
         {
             ImGui.PopStyleVar();
-            popAlpha = false;
+            ImGui.PopStyleVar();
         }
-
+        
         //todo: Shortcuts
         if (new KeyBinding(ImGuiKey.M).IsPressed())
-            _settings.Mode = _settings.Mode == CameraPreviewMode.AnimIntro ? CameraPreviewMode.Edit : CameraPreviewMode.AnimIntro;
+            _settings.Mode = _settings.Mode == CameraPreviewMode.AnimIntro
+                ? CameraPreviewMode.Edit
+                : CameraPreviewMode.AnimIntro;
 
         if (oldMode != _settings.Mode)
             Initialize();
@@ -435,7 +463,8 @@ class CameraPreviewView : CourseViewportView
                     // In battle mode, the course intro is on a single screen and runs at 60 fps,
                     // so I only need to simulate 1 frame as opposed to the 2 frames of 30 fps (both screens)
 
-                    bool isSingleScreen = Context.Course.MapData.IsMgStage || _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen;
+                    bool isSingleScreen = Context.Course.MapData.IsMgStage ||
+                                          _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen;
 
                     _lastFrame = isSingleScreen ? -1 : -2;
                     _raceContext = new RaceContext(Context.Course, _driver, true);
@@ -479,7 +508,8 @@ class CameraPreviewView : CourseViewportView
                 _editEye = cameraRoute.Update(camera, camera.PathSpeed);
         }
 
-        _topView = OpenTK.Mathematics.Matrix4.LookAt((OpenTK.Mathematics.Vector3)_editEye, (OpenTK.Mathematics.Vector3)target, up);
+        _topView = OpenTK.Mathematics.Matrix4.LookAt((OpenTK.Mathematics.Vector3)_editEye,
+            (OpenTK.Mathematics.Vector3)target, up);
         _topProj = RaceCameraUtils.CalculateProjection(CameraMode.DoubleTop, fovSin, fovCos);
         _bottomProj = RaceCameraUtils.CalculateProjection(CameraMode.DoubleBottom, fovSin, fovCos);
         _topFov = OpenTK.Mathematics.MathHelper.RadiansToDegrees((float)Math.Atan2(fovSin, fovCos));
@@ -495,9 +525,9 @@ class CameraPreviewView : CourseViewportView
 
         var eye = view.ExtractTranslation();
 
-        float distance = _settings.EditKeepOriginalTargetDistance ?
-            (float)(_editEye - (_settings.EditSecondTarget ? camera.Target2 : camera.Target1)).LengthFast :
-            _settings.EditTargetDistance;
+        float distance = _settings.EditKeepOriginalTargetDistance
+            ? (float)(_editEye - (_settings.EditSecondTarget ? camera.Target2 : camera.Target1)).LengthFast
+            : _settings.EditTargetDistance;
 
         var target = eye - view.Row2.Xyz * distance;
 
@@ -536,7 +566,8 @@ class CameraPreviewView : CourseViewportView
         _driver.Position = _driver.Position + targetDirection * deltaTime * _settings.ReplayDriverMoveSpeed * 100;
 
         // Interpolate direction
-        _driver.Direction = OpenTK.Mathematics.Vector3d.Lerp(_driver.Direction, targetDirection, deltaTime * _settings.ReplayDriverMoveSpeed);
+        _driver.Direction = OpenTK.Mathematics.Vector3d.Lerp(_driver.Direction, targetDirection,
+            deltaTime * _settings.ReplayDriverMoveSpeed);
 
         if (_settings.ReplayApplyDriverPosOnKtp2 && Context.Course.MapData.KartPoint2D.Count > 0)
             Context.Course.MapData.KartPoint2D[0].Position = _driver.Position;
