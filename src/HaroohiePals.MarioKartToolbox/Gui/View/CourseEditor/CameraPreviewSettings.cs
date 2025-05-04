@@ -1,9 +1,12 @@
 ﻿namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
-internal class CameraPreviewSettings
+class CameraPreviewSettings
 {
     public CameraPreviewViewportMode ViewportMode = CameraPreviewViewportMode.DualScreen;
     public CameraPreviewMode Mode = CameraPreviewMode.AnimIntro;
+
+    public bool UseScreenGap = true;
+    public bool UseNativeResolution = false;
 
     public bool ReplaySimulateCountdown = true;
     public bool ReplayMoveDriver = true;

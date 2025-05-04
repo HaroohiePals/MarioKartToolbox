@@ -19,15 +19,17 @@ using System.Numerics;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
-internal class CameraPreviewView : CourseViewportView
+class CameraPreviewView : CourseViewportView
 {
+    private const string PANE_TITLE = "Camera Preview";
+
     private readonly IApplicationSettingsService _applicationSettings;
     private readonly CameraPreviewViewportPanel _bottomViewportPanel;
 
     private readonly CameraPreviewSettings _settings = new();
 
     private NitroKartRenderGroupScenePerspective _topScene => (NitroKartRenderGroupScenePerspective)_scene;
-    private NitroKartRenderGroupScenePerspective _bottomScene;
+    private readonly NitroKartRenderGroupScenePerspective _bottomScene;
 
     private float _topFov = 45f;
     private OpenTK.Mathematics.Matrix4 _topView;
@@ -40,15 +42,17 @@ internal class CameraPreviewView : CourseViewportView
 
     //todo: create viewmodel
     private RaceContext _raceContext;
-    private Driver _driver = new();
+    private readonly Driver _driver = new();
     private MkdsEnemyPoint _currentEnemyPoint;
     private MkdsEnemyPoint _nextEnemyPoint;
 
     private int _lastFrame = -2;
     private int _lastActionCount = 0;
 
-    public CameraPreviewView(ICourseEditorContext context, IApplicationSettingsService applicationSettings,
-        string title = "Camera Preview") : base(title, context)
+    private bool _showControls = true;
+
+    public CameraPreviewView(ICourseEditorContext context, IApplicationSettingsService applicationSettings) : base(
+        PANE_TITLE, context)
     {
         _applicationSettings = applicationSettings;
         _lastActionCount = Context.ActionStack.UndoActionsCount;
@@ -67,33 +71,6 @@ internal class CameraPreviewView : CourseViewportView
         context.SceneObjectHolder.SelectionChanged += SelectionChanged;
 
         Initialize();
-    }
-
-    private void SelectionChanged()
-    {
-        if (_settings.Mode == CameraPreviewMode.Edit)
-            Initialize();
-    }
-
-    private NitroKartRenderGroupScenePerspective CreateScene()
-    {
-        var scene = new NitroKartRenderGroupScenePerspective
-        {
-            StageInfo = Context.Course.MapData.StageInfo
-        };
-
-        if (Context.Course.MapData.MapObjects != null)
-        {
-            var mobjRenderGroup = new MkdsMObjRenderGroup(Context);
-            scene.RenderGroups.Add(mobjRenderGroup);
-            mobjRenderGroup.EditMode = false;
-        }
-
-        var perspectiveNsbmdGroup = new CourseModelRenderGroup();
-        perspectiveNsbmdGroup.Load(Context.Course);
-        scene.RenderGroups.Add(perspectiveNsbmdGroup);
-
-        return scene;
     }
 
     public override void Dispose()
@@ -125,6 +102,133 @@ internal class CameraPreviewView : CourseViewportView
         }
     }
 
+    public override bool Draw()
+    {
+        float scale = ImGuiEx.GetUiScale();
+
+        bool popWindowPadding = true;
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        if (ImGui.Begin(_title, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        {
+            if (ImGui.IsWindowAppearing())
+            {
+                ImGui.SetWindowFocus("Timeline");
+                ImGui.SetWindowFocus(_title);
+            }
+
+            var availableSpace = ImGui.GetContentRegionAvail();
+
+            float dsScreenHeight = 192f;
+            float dsScreenWidth = 256f;
+            float dsScreenGap = 64f;
+
+            float targetHeight = availableSpace.Y;
+
+            if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen && _settings.UseNativeResolution)
+                targetHeight = dsScreenHeight * 2 + (_settings.UseScreenGap ? dsScreenGap : 0);
+
+            float screenGapFactor = _settings.UseScreenGap ? targetHeight / (dsScreenGap + (dsScreenHeight * 2)) : 0;
+            float screenGap = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? dsScreenGap * screenGapFactor
+                : 0;
+            float screenHeight = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? (targetHeight - screenGap) / 2
+                : 0;
+            float screenWidth = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? screenHeight / dsScreenHeight * dsScreenWidth
+                : 0;
+
+            var frameSize = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? new Vector2(screenWidth, screenHeight * 2 + screenGap)
+                : new Vector2(0);
+
+            ImGui.SetCursorPosX(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? availableSpace.X / 2f - screenWidth / 2f
+                : 0f);
+            ImGui.SetCursorPosY(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen
+                ? ImGui.GetCursorPosY() + ((availableSpace.Y - targetHeight) / 2f)
+                : 0f);
+            
+            
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0));
+            ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
+            
+            if (ImGui.BeginChild("TestFrames", frameSize, ImGuiChildFlags.AlwaysUseWindowPadding))
+            {
+                _viewportPanel.Size = new Vector2(screenWidth, screenHeight);
+                _bottomViewportPanel.Size = new Vector2(screenWidth, screenHeight);
+
+                bool isEdit = _settings.Mode == CameraPreviewMode.Edit;
+                if (_viewportPanel is CameraPreviewViewportPanel topPanel)
+                {
+                    topPanel.EnableCameraControls = isEdit;
+
+                    if (!isEdit)
+                        ApplyViewProjection(topPanel, _topView, _topProj, _topFov);
+
+                    _viewportPanel.Draw();
+                }
+
+                if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen)
+                {
+                    ImGui.SetCursorPosY(screenHeight + screenGap);
+                    ApplyViewProjection(_bottomViewportPanel,
+                        isEdit ? _viewportPanel.Context.ViewMatrix : _bottomView, _bottomProj, null);
+                    _bottomViewportPanel.Draw();
+                }
+            }
+            ImGui.EndChild();
+            
+            ImGui.PopStyleColor();
+            ImGui.PopStyleVar();
+
+            ImGui.SetCursorPosY(32 * scale);
+            ImGui.SetCursorPosX(8 * scale);
+
+            popWindowPadding = false;
+            ImGui.PopStyleVar();
+
+            RenderControls();
+        }
+
+        ImGui.End();
+
+        if (popWindowPadding)
+        {
+            popWindowPadding = false;
+            ImGui.PopStyleVar();
+        }
+
+        return true;
+    }
+
+    private void SelectionChanged()
+    {
+        if (_settings.Mode == CameraPreviewMode.Edit)
+            Initialize();
+    }
+
+    private NitroKartRenderGroupScenePerspective CreateScene()
+    {
+        var scene = new NitroKartRenderGroupScenePerspective
+        {
+            StageInfo = Context.Course.MapData.StageInfo
+        };
+
+        if (Context.Course.MapData.MapObjects != null)
+        {
+            var mobjRenderGroup = new MkdsMObjRenderGroup(Context);
+            scene.RenderGroups.Add(mobjRenderGroup);
+            mobjRenderGroup.EditMode = false;
+        }
+
+        var perspectiveNsbmdGroup = new CourseModelRenderGroup();
+        perspectiveNsbmdGroup.Load(Context.Course);
+        scene.RenderGroups.Add(perspectiveNsbmdGroup);
+
+        return scene;
+    }
+
     private void RecalculateFrame()
     {
         Initialize();
@@ -144,7 +248,8 @@ internal class CameraPreviewView : CourseViewportView
 
         bool isOddFrame = (_lastFrame & 1) == 1;
 
-        _raceContext.Update(isOddFrame, Context.Course.MapData.IsMgStage || _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen);
+        _raceContext.Update(isOddFrame,
+            Context.Course.MapData.IsMgStage || _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen);
 
         void updateSingleCam()
         {
@@ -173,7 +278,8 @@ internal class CameraPreviewView : CourseViewportView
         switch (_settings.Mode)
         {
             case CameraPreviewMode.AnimIntro:
-                if (Context.Course.MapData.IsMgStage || _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen)
+                if (Context.Course.MapData.IsMgStage ||
+                    _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen)
                     updateSingleCam();
                 else
                     updateDoubleCam();
@@ -183,7 +289,7 @@ internal class CameraPreviewView : CourseViewportView
 
                 if (_settings.ReplayMoveDriver &&
                     (!_settings.ReplaySimulateCountdown ||
-                    _settings.ReplaySimulateCountdown && _lastFrame > 60 * 3))
+                     _settings.ReplaySimulateCountdown && _lastFrame > 60 * 3))
                     UpdateDriver(1 / 60f);
                 break;
         }
@@ -202,7 +308,8 @@ internal class CameraPreviewView : CourseViewportView
         AdvanceFrames(framesToAdvance);
     }
 
-    private void ApplyViewProjection(CameraPreviewViewportPanel viewportPanel, OpenTK.Mathematics.Matrix4 view, OpenTK.Mathematics.Matrix4 proj, float? fov = null)
+    private void ApplyViewProjection(CameraPreviewViewportPanel viewportPanel, OpenTK.Mathematics.Matrix4 view,
+        OpenTK.Mathematics.Matrix4 proj, float? fov = null)
     {
         viewportPanel.ApplyView(view);
 
@@ -212,152 +319,123 @@ internal class CameraPreviewView : CourseViewportView
             viewportPanel.ApplyProjection(proj);
     }
 
-    public override bool Draw()
-    {
-        float scale = ImGuiEx.GetUiScale();
-        float timeControlFixedSpace = 0; // 50f * scale;
-
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-        if (ImGui.Begin(_title))
-        {
-            if (ImGui.IsWindowAppearing())
-            {
-                ImGui.SetWindowFocus("Timeline");
-                ImGui.SetWindowFocus(_title);
-            }
-
-            RenderControls();
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-
-            float screenGap = 10f;
-            var availableSpace = ImGui.GetContentRegionAvail();
-
-            availableSpace.Y -= timeControlFixedSpace;
-
-            float screenY = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? availableSpace.Y / 2 - screenGap : 0;
-            float screenX = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? screenY / 192 * 256 : 0;
-
-            var frameSize = _settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? new Vector2(screenX, screenY * 2 + 10) : new Vector2(0);
-
-            ImGui.SetCursorPosX(_settings.ViewportMode == CameraPreviewViewportMode.DualScreen ? availableSpace.X / 2f - screenX / 2f : 0f);
-            if (ImGui.BeginChild(ImGui.GetID("TestFrames"), frameSize, ImGuiChildFlags.FrameStyle))
-            {
-                _viewportPanel.Size = new Vector2(screenX, screenY);
-                _bottomViewportPanel.Size = new Vector2(screenX, screenY);
-
-                bool isEdit = _settings.Mode == CameraPreviewMode.Edit;
-                if (_viewportPanel is CameraPreviewViewportPanel topPanel)
-                {
-                    topPanel.EnableCameraControls = isEdit;
-
-                    if (!isEdit)
-                        ApplyViewProjection(topPanel, _topView, _topProj, _topFov);
-
-                    _viewportPanel.Draw();
-                }
-
-                if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen)
-                {
-                    ApplyViewProjection(_bottomViewportPanel,
-                        isEdit ? _viewportPanel.Context.ViewMatrix : _bottomView, _bottomProj, null);
-                    _bottomViewportPanel.Draw();
-                }
-            }
-            ImGui.EndChild();
-
-            ImGui.PopStyleVar();
-        }
-        ImGui.End();
-
-        ImGui.PopStyleVar();
-
-        return true;
-    }
-
     private void RenderControls()
     {
+        string title = "Controls";
+
         float scale = ImGuiEx.GetUiScale();
 
-        float btnSize = 24 * scale;
-        float spacing = 2 * scale;
+        float width = 330 * scale;
+        float smallWidth = (ImGui.CalcTextSize(title).X + 64) * scale;
+        float height = (_settings.Mode == CameraPreviewMode.AnimIntro ? 130 : 250) * scale;
+        float smallHeight = 21 * scale;
 
         CameraPreviewMode oldMode = _settings.Mode;
 
-        if (ImGui.Button($"{FontAwesome6.Gear}##CameraPreviewSettings", new(btnSize)))
-            ImGui.OpenPopup("Camera Preview Settings");
+        bool popStyles = true;
 
-        if (ImGui.BeginPopup("Camera Preview Settings", ImGuiWindowFlags.AlwaysAutoResize))
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(0));
+        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.75f);
+        
+        if (ImGui.BeginChild("ControlsChild",
+                new Vector2(_showControls ? width : smallWidth, _showControls ? height : smallHeight),
+                ImGuiChildFlags.None | ImGuiChildFlags.AlwaysUseWindowPadding))
         {
-            ImGuiEx.ComboEnum("Mode", ref _settings.Mode);
-            ImGuiEx.ComboEnum("Viewport mode", ref _settings.ViewportMode);
-
-            if (_settings.Mode == CameraPreviewMode.AnimReplay)
+            ImGui.PopStyleVar();
+            ImGui.PopStyleVar();
+            popStyles = false;
+            
+            if (ImGui.CollapsingHeader(title))
             {
-                ImGui.Checkbox("Simulate Countdown", ref _settings.ReplaySimulateCountdown);
-                ImGui.Checkbox("Move Driver", ref _settings.ReplayMoveDriver);
-                ImGui.SliderFloat("Driver Speed", ref _settings.ReplayDriverMoveSpeed, 0f, 100f);
-                ImGui.Checkbox("Apply Driver Pos on KTP2", ref _settings.ReplayApplyDriverPosOnKtp2);
-            }
+                _showControls = true;
+                ImGuiEx.ComboEnum("Screens", ref _settings.ViewportMode);
 
-            ImGui.EndPopup();
-        }
-
-        //todo: Shortcuts
-        if (new KeyBinding(ImGuiKey.M).IsPressed())
-            _settings.Mode = _settings.Mode == CameraPreviewMode.AnimIntro ? CameraPreviewMode.Edit : CameraPreviewMode.AnimIntro;
-
-        if (oldMode != _settings.Mode)
-            Initialize();
-
-        if (_settings.Mode == CameraPreviewMode.Edit)
-        {
-            ImGui.SameLine();
-
-            if (GetSelectedCamera() != null)
-            {
-                //if (ImGui.Button("Get"))
-                //{
-                //    Initialize();
-                //}
-                //ImGui.SameLine();
-                if (ImGui.Button("Apply view"))
+                if (_settings.ViewportMode == CameraPreviewViewportMode.DualScreen)
                 {
-                    ApplyEditView();
+                    ImGui.Checkbox("Use Native Resolution", ref _settings.UseNativeResolution);
+                    ImGui.Checkbox("Use Screen Gap", ref _settings.UseScreenGap);
                 }
-                ImGui.SameLine();
-                if (ImGui.RadioButton("Target A", !_settings.EditSecondTarget))
+
+                ImGuiEx.ComboEnum("Mode", ref _settings.Mode);
+
+                if (_settings.Mode == CameraPreviewMode.AnimReplay)
                 {
-                    _settings.EditSecondTarget = false;
-                    Initialize();
+                    ImGui.Checkbox("Simulate Countdown", ref _settings.ReplaySimulateCountdown);
+                    ImGui.Checkbox("Move Driver", ref _settings.ReplayMoveDriver);
+                    ImGui.SliderFloat("Driver Speed", ref _settings.ReplayDriverMoveSpeed, 0f, 100f);
+                    ImGui.Checkbox("Apply Driver Pos on KTP2", ref _settings.ReplayApplyDriverPosOnKtp2);
                 }
-                ImGui.SameLine();
-                if (ImGui.RadioButton("Target B", _settings.EditSecondTarget))
+
+                if (_settings.Mode == CameraPreviewMode.Edit)
                 {
-                    _settings.EditSecondTarget = true;
-                    Initialize();
-                }
-                ImGui.SameLine();
-                ImGui.Checkbox("Keep original target distance", ref _settings.EditKeepOriginalTargetDistance);
-                if (!_settings.EditKeepOriginalTargetDistance)
-                {
+                    var selectedCamera = GetSelectedCamera();
+
+                    if (selectedCamera is null)
+                    {
+                        ImGui.BeginDisabled();
+                    }
+
+                    if (ImGui.RadioButton("Target A", !_settings.EditSecondTarget))
+                    {
+                        _settings.EditSecondTarget = false;
+                        Initialize();
+                    }
+
                     ImGui.SameLine();
-                    ImGui.SetNextItemWidth(200f);
-                    ImGui.DragFloat("Target distance", ref _settings.EditTargetDistance, 1f, 100f, 3000f);
+                    if (ImGui.RadioButton("Target B", _settings.EditSecondTarget))
+                    {
+                        _settings.EditSecondTarget = true;
+                        Initialize();
+                    }
+
+                    ImGui.SameLine();
+                    if (ImGui.Button("Apply view"))
+                    {
+                        ApplyEditView();
+                    }
+
+                    ImGui.Checkbox("Keep original target distance", ref _settings.EditKeepOriginalTargetDistance);
+                    if (!_settings.EditKeepOriginalTargetDistance)
+                    {
+                        ImGui.SetNextItemWidth(200f);
+                        ImGui.DragFloat("Target distance", ref _settings.EditTargetDistance, 1f, 100f, 3000f);
+                    }
+
+                    if (selectedCamera is null)
+                    {
+                        ImGui.EndDisabled();
+                        ImGui.TextUnformatted("Please select a compatible camera on the tree or viewport.");
+                    }
                 }
             }
             else
             {
-                ImGui.TextUnformatted("Please select a compatible camera on the tree or viewport.");
+                _showControls = false;
             }
         }
+        ImGui.EndChild();
+
+        if (popStyles)
+        {
+            ImGui.PopStyleVar();
+            ImGui.PopStyleVar();
+        }
+        
+        //todo: Shortcuts
+        if (new KeyBinding(ImGuiKey.M).IsPressed())
+            _settings.Mode = _settings.Mode == CameraPreviewMode.AnimIntro
+                ? CameraPreviewMode.Edit
+                : CameraPreviewMode.AnimIntro;
+
+        if (oldMode != _settings.Mode)
+            Initialize();
     }
 
     private MkdsCamera GetSelectedCamera()
-    {
-        return Context.SceneObjectHolder.GetSelection().OfType<MkdsCamera>().SingleOrDefault(x => x.Type is
+        => Context.SceneObjectHolder.GetSelection().OfType<MkdsCamera>()
+            .FirstOrDefault(x => x.Type is
                 MkdsCameraType.FixedLookAtTargets or
                 MkdsCameraType.RouteLookAtTargets);
-    }
 
     private void Initialize()
     {
@@ -385,7 +463,8 @@ internal class CameraPreviewView : CourseViewportView
                     // In battle mode, the course intro is on a single screen and runs at 60 fps,
                     // so I only need to simulate 1 frame as opposed to the 2 frames of 30 fps (both screens)
 
-                    bool isSingleScreen = Context.Course.MapData.IsMgStage || _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen;
+                    bool isSingleScreen = Context.Course.MapData.IsMgStage ||
+                                          _settings.ViewportMode == CameraPreviewViewportMode.SingleScreen;
 
                     _lastFrame = isSingleScreen ? -1 : -2;
                     _raceContext = new RaceContext(Context.Course, _driver, true);
@@ -429,7 +508,8 @@ internal class CameraPreviewView : CourseViewportView
                 _editEye = cameraRoute.Update(camera, camera.PathSpeed);
         }
 
-        _topView = OpenTK.Mathematics.Matrix4.LookAt((OpenTK.Mathematics.Vector3)_editEye, (OpenTK.Mathematics.Vector3)target, up);
+        _topView = OpenTK.Mathematics.Matrix4.LookAt((OpenTK.Mathematics.Vector3)_editEye,
+            (OpenTK.Mathematics.Vector3)target, up);
         _topProj = RaceCameraUtils.CalculateProjection(CameraMode.DoubleTop, fovSin, fovCos);
         _bottomProj = RaceCameraUtils.CalculateProjection(CameraMode.DoubleBottom, fovSin, fovCos);
         _topFov = OpenTK.Mathematics.MathHelper.RadiansToDegrees((float)Math.Atan2(fovSin, fovCos));
@@ -445,9 +525,9 @@ internal class CameraPreviewView : CourseViewportView
 
         var eye = view.ExtractTranslation();
 
-        float distance = _settings.EditKeepOriginalTargetDistance ?
-            (float)(_editEye - (_settings.EditSecondTarget ? camera.Target2 : camera.Target1)).LengthFast :
-            _settings.EditTargetDistance;
+        float distance = _settings.EditKeepOriginalTargetDistance
+            ? (float)(_editEye - (_settings.EditSecondTarget ? camera.Target2 : camera.Target1)).LengthFast
+            : _settings.EditTargetDistance;
 
         var target = eye - view.Row2.Xyz * distance;
 
@@ -486,7 +566,8 @@ internal class CameraPreviewView : CourseViewportView
         _driver.Position = _driver.Position + targetDirection * deltaTime * _settings.ReplayDriverMoveSpeed * 100;
 
         // Interpolate direction
-        _driver.Direction = OpenTK.Mathematics.Vector3d.Lerp(_driver.Direction, targetDirection, deltaTime * _settings.ReplayDriverMoveSpeed);
+        _driver.Direction = OpenTK.Mathematics.Vector3d.Lerp(_driver.Direction, targetDirection,
+            deltaTime * _settings.ReplayDriverMoveSpeed);
 
         if (_settings.ReplayApplyDriverPosOnKtp2 && Context.Course.MapData.KartPoint2D.Count > 0)
             Context.Course.MapData.KartPoint2D[0].Position = _driver.Position;
