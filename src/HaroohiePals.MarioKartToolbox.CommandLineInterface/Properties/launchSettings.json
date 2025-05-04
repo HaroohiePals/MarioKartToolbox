@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "HaroohiePals.MarioKartToolbox.CommandLineInterface": {
+      "commandName": "Project",
+      "commandLineArgs": "create testfiles/rom.nds romproj -o testfiles/proj"
+    }
+  }
+}

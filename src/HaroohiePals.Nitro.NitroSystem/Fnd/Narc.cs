@@ -29,7 +29,10 @@ public sealed class Narc
     public Narc(Archive archive, bool hasFnt = true)
     {
         var nitroFsArc = new NitroFsArchive(archive);
+
         Header = new BinaryFileHeader(NarcSignature, 3);
+        Header.ByteOrder = 0xFFFE;
+
         FileAllocationTable    = new NarcFileAllocationTable();
         FileNameTable    = new NarcFileNameTable();
         FileImageBlock  = new NarcFileImageBlock();

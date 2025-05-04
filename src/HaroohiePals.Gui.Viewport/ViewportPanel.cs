@@ -40,7 +40,7 @@ public class ViewportPanel : IView
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
         var   region     = ImGui.GetContentRegionAvail();
-        var   contentPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
+        var contentPos = ImGui.GetWindowPos(); // + ImGui.GetWindowContentRegionMin();
         float vertRatio  = region.X / Context.ViewportSize.X;
         float horizRatio = region.Y / Context.ViewportSize.Y;
 
@@ -78,9 +78,8 @@ public class ViewportPanel : IView
                 DoubleClick?.Invoke();
 
             RenderControls();
-
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
 
         return true;
     }

@@ -59,6 +59,7 @@ public class ImGuiViewWindow(ImGuiGameWindowSettings settings, IModalService mod
 
         foreach (var modal in _modalService.GetAllModals())
             modal.Draw();
+        _modalService.Cleanup();
 
         Content?.Draw();
     }
@@ -75,10 +76,7 @@ public class ImGuiViewWindow(ImGuiGameWindowSettings settings, IModalService mod
 
     private bool HasContentChanged()
     {
-        bool result = false;
-
-        if (_prevContent != Content)
-            result = true;
+        bool result = _prevContent != Content;
 
         _prevContent = Content;
         return result;

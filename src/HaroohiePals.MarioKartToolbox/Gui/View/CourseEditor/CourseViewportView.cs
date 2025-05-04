@@ -9,17 +9,17 @@ using System.Linq;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
-internal abstract class CourseViewportView : IView, IDisposable
+abstract class CourseViewportView : IView, IDisposable
 {
-    protected string _title;
+    protected readonly string _title;
     protected RenderGroupScene _scene;
     protected InteractiveViewportPanel _viewportPanel;
     protected readonly ICourseEditorContext Context;
 
     protected KclPrismRenderGroup _perspectiveKclPrismGroup;
 
-    private bool _shouldUpdateDrawTool = false;
-    private bool _cancelOperationAdded = false;
+    private bool _shouldUpdateDrawTool;
+    private bool _cancelOperationAdded;
 
     protected CourseViewportView(string title, ICourseEditorContext context)
     {
@@ -47,14 +47,16 @@ internal abstract class CourseViewportView : IView, IDisposable
     {
         _viewportPanel.DrawTool = null;
 
-        var lastSelected = Context.SceneObjectHolder.GetSelection().LastOrDefault();
+        object lastSelected = Context.SceneObjectHolder.GetSelection().LastOrDefault();
 
         if (lastSelected != null)
         {
-            if (lastSelected is IMapDataCollection col)
-                _viewportPanel.DrawTool = MapDataCollectionDrawTool.CreateTool(Context.Course, col);
-            else if (lastSelected is IMapDataEntry entry)
-                _viewportPanel.DrawTool = MapDataCollectionDrawTool.CreateTool(Context.Course, entry);
+            _viewportPanel.DrawTool = lastSelected switch
+            {
+                IMapDataCollection col => MapDataCollectionDrawTool.CreateTool(Context.Course, col),
+                IMapDataEntry entry => MapDataCollectionDrawTool.CreateTool(Context.Course, entry),
+                _ => _viewportPanel.DrawTool
+            };
         }
 
         _shouldUpdateDrawTool = false;
@@ -69,11 +71,10 @@ internal abstract class CourseViewportView : IView, IDisposable
 
         if (_viewportPanel.IsGizmoStarted)
         {
-            if (!_cancelOperationAdded)
-            {
-                _cancelOperationAdded = true;
-                Context.StartOperation(_viewportPanel.CancelGizmoTransform);
-            }
+            if (_cancelOperationAdded) 
+                return;
+            _cancelOperationAdded = true;
+            Context.StartOperation(_viewportPanel.CancelGizmoTransform);
         }
         else if (_cancelOperationAdded)
         {

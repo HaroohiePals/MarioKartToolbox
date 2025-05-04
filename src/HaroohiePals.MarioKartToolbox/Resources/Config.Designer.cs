@@ -72,31 +72,31 @@ namespace HaroohiePals.MarioKartToolbox.Resources {
         ///Collapsed=0
         ///
         ///[Window][Test Window]
-        ///Pos=1019,474
-        ///Size=381,426
+        ///Pos=1000,385
+        ///Size=400,342
         ///Collapsed=0
-        ///DockId=0x00000004,1
+        ///DockId=0x00000007,1
         ///
         ///[Window][Properties]
-        ///Pos=1019,474
-        ///Size=381,426
+        ///Pos=1000,385
+        ///Size=400,342
         ///Collapsed=0
-        ///DockId=0x00000004,0
+        ///DockId=0x00000007,0
         ///
         ///[Window][Map Data Explorer]
-        ///Pos=1019,43
-        ///Size=381,429
+        ///Pos=1000,43
+        ///Size=400,340
         ///Collapsed=0
-        ///DockId=0x00000001,0
+        ///DockId=0x00000006,0
         ///
         ///[Window][Archive]
-        ///Pos=1019,43
-        ///Size=381,429
+        ///Pos=1000,385
+        ///Size=400,342
         ///Collapsed=0
-        ///DockId=0x00000001,1
+        ///DockId=0x00000007,2
         ///
         ///[Window][Top-down]
-        ///P [rest of string was truncated]&quot;;.
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ImGuiIni {
             get {
