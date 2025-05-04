@@ -10,4 +10,5 @@ public interface IModalService
     void ShowModal(ModalView modal);
     void HideModal(ModalView modal);
     IReadOnlyCollection<ModalView> GetAllModals();
+    void Cleanup();
 }

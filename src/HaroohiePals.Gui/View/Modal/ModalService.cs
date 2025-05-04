@@ -8,14 +8,13 @@ namespace HaroohiePals.Gui.View.Modal;
 public class ModalService : IModalService
 {
     private readonly List<ModalView> _modalViews = [];
+    
     public bool IsAnyModalOpen => _modalViews.Any(x => x.IsOpen);
 
     public IReadOnlyCollection<ModalView> GetAllModals() => _modalViews;
-
+    
     public void HideModal(ModalView modal)
     {
-        _modalViews.Remove(modal);
-
         modal.Close();
     }
 
@@ -25,5 +24,12 @@ public class ModalService : IModalService
             _modalViews.Add(modal);
 
         modal.Open();
+    }
+    
+    public void Cleanup()
+    {
+        var closedModals = _modalViews.Where(x => x is { IsOpen: false, IsOpening: false }).ToList();
+        foreach (var modal in closedModals)
+            _modalViews.Remove(modal);
     }
 }

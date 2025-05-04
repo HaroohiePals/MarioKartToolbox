@@ -8,34 +8,23 @@ using HaroohiePals.MarioKartToolbox.Gui.View.Main;
 using HaroohiePals.MarioKartToolbox.Gui.View.RomExplorer;
 using HaroohiePals.NitroKart.Course;
 using ImGuiNET;
-using NativeFileDialogs;
 using NativeFileDialogs.Net;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using HaroohiePals.IO.Archive;
+using HaroohiePals.Nitro.Fs;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.Main;
 
-class MainWindowViewModel
+class MainWindowViewModel(
+    IModalService modalService,
+    IMainWindowFactory windowFactory,
+    IApplicationDiscordRichPresenceService discordRichPresenceService,
+    IApplicationSettingsService applicationSettingsService)
 {
-    private readonly IModalService _modalService;
-    private readonly IMainWindowFactory _windowFactory;
-
-    private readonly IApplicationDiscordRichPresenceService _discordRichPresenceService;
-    private readonly IApplicationSettingsService _applicationSettingsService;
-
     private CourseEditorContentView _courseEditorView;
-    private NitroKartRomExplorerContentView _romExplorer;
-
-    public MainWindowViewModel(IModalService modalService, IMainWindowFactory windowFactory,
-        IApplicationDiscordRichPresenceService discordRichPresenceService,
-        IApplicationSettingsService applicationSettingsService)
-    {
-        _modalService = modalService;
-        _windowFactory = windowFactory;
-        _discordRichPresenceService = discordRichPresenceService;
-        _applicationSettingsService = applicationSettingsService;
-    }
+    private RomExplorerContentView _romExplorer;
 
     /// <summary>
     /// Workaround
@@ -43,78 +32,99 @@ class MainWindowViewModel
     public Action<WindowContentView> SetMainWindowContent;
 
     public void ShowPreferences()
-    {
-        _modalService.ShowModal(_windowFactory.CreatePreferencesModal());
-    }
+        => modalService.ShowModal(windowFactory.CreatePreferencesModal());
 
     public void ShowAbout()
-    {
-        _modalService.ShowModal(_windowFactory.CreateAboutModal());
-    }
+        => modalService.ShowModal(windowFactory.CreateAboutModal());
 
-    public void NewNitroKartCourse()
-    {
-        var window = _windowFactory.CreateNitroKartCourseProjectModal();
-        window.OnProjectCreated = LoadCourseProject;
-        _modalService.ShowModal(window);
-    }
+    public void ShowRomProjectModal()
+        => modalService.ShowModal(windowFactory.CreateRomProjectModal(OpenFile));
 
     public void OpenFile(string fileName)
     {
         var fileInfo = new FileInfo(fileName);
         string ext = fileInfo.Extension.ToLower();
 
-        if (ext == ".nkm")
+        switch (ext)
         {
-            LoadBinaryCourseEditor(fileName);
-        }
-        else if (ext == ".inkm")
-        {
-            LoadIntermediateCourseEditor(fileName);
-        }
-        else if (ext == ".nds" || ext == ".xml" || ext == ".nkproj")
-        {
-            //try
-            //{
-            //    LoadCourseProject(result.Path);
-            //    return;
-            //}
-            //catch { }
+            case ".nkm":
+                LoadBinaryCourseEditor(fileName);
+                break;
+            case ".inkm":
+                LoadIntermediateCourseEditor(fileName);
+                break;
+            case ".carc":
+                LoadCarcCourseEditor(fileName);
+                break;
+            case ".nds" or ".srl":
+            case ".nkproj" or ".xml":
+            case ".json":
+                try
+                {
+                    CloseAllWindows();
 
-            try
-            {
-                CloseAllWindows();
+                    switch (ext)
+                    {
+                        case ".nkproj" or ".xml":
+                            modalService.ShowModal(windowFactory.CreateObsoleteNkprojWarningModalView());
+                            break;
+                        case ".nds" or ".srl":
+                            modalService.ShowModal(windowFactory.CreateNdsRomWarningModalView());
+                            break;
+                    }
 
-                _romExplorer = _windowFactory.CreateNitroKartRomExplorerContentView(fileName);
-                _romExplorer.CloseCallback = () => CloseRomExplorer(false);
+                    _romExplorer = windowFactory.CreateRomExplorerContentView(fileName);
+                    _romExplorer.CloseCallback = () => CloseRomExplorer(false);
 
-                _romExplorer.OnNkmOpen += LoadBinaryCourseEditor;
-                _romExplorer.OnCarcOpen += ext == ".nds" ? LoadRomCarcCourseEditor : LoadCarcCourseEditor;
+                    _romExplorer.SetFileActivationCallbacks(
+                        ext is ".nds" or ".srl"
+                            ? LoadRomCarcCourseEditor
+                            : (path, _) => LoadCarcCourseEditor(path),
+                        LoadBinaryCourseEditor);
 
-                // todo: Open rom explorer through the state machine
-                //_modalService.OpenWindow(_romExplorer);
-                SetMainWindowContent.Invoke(_romExplorer);
+                    SetMainWindowContent.Invoke(_romExplorer);
 
-                _discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.RomExplorer);
-            }
-            catch { }
-        }
-        else if (ext == ".carc")
-        {
-            LoadCarcCourseEditor(fileName);
+                    discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.RomExplorer);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error Opening ROM: {ex.Message}");
+                }
+
+                break;
         }
     }
 
-    public void OpenFile()
+    public void OpenCourseFile()
     {
         var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
         {
-            { "All compatible files", "nkm,inkm,carc,nds,nkproj" },
+            { "All compatible files", "nkm,carc" },
             { "Nitro Kart Map Data", "nkm" },
-            { "Intermediate Nitro Kart Map Data", "inkm" },
-            { "Compressed Nitro Archive", "carc" },
-            { "Nintendo DS ROM File", "nds" },
-            { "Nitro Kart Project", "nkproj" }
+            { "Compressed Nitro Archive", "carc" }
+        });
+
+        if (result == NfdStatus.Ok)
+            OpenFile(outPath);
+    }
+
+    public void OpenRomProjectFile()
+    {
+        var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
+        {
+            { "Nitro ROM Project", "json" },
+            { "Nitro Kart Project (Legacy)", "nkproj" }
+        });
+
+        if (result == NfdStatus.Ok)
+            OpenFile(outPath);
+    }
+
+    public void OpenRomFile()
+    {
+        var result = Nfd.OpenDialog(out string outPath, new Dictionary<string, string>
+        {
+            { "Nintendo DS ROM File", "nds,srl" }
         });
 
         if (result == NfdStatus.Ok)
@@ -125,7 +135,7 @@ class MainWindowViewModel
     {
         CloseRomExplorer();
 
-        string basePath = Path.GetDirectoryName(path);
+        string basePath = Path.GetDirectoryName(path)!;
         string courseMapPath = $"/{Path.GetFileName(path)}";
 
         if (basePath.EndsWith("\\MissionRun", StringComparison.InvariantCultureIgnoreCase) ||
@@ -141,19 +151,18 @@ class MainWindowViewModel
         if (!Directory.Exists(baseTexPath))
             baseTexPath = null;
 
-        _courseEditorView = _windowFactory.CreateCourseEditorView(new MkdsFolderCourse(basePath, baseTexPath, courseMapPath));
+        _courseEditorView =
+            windowFactory.CreateCourseEditorView(new MkdsFolderCourse(basePath, baseTexPath, courseMapPath));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
-        // todo: Open course editor through the state machine
-        //_modalService.OpenWindow(_courseEditorView);
         SetMainWindowContent.Invoke(_courseEditorView);
 
-        _discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
+        discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
     }
 
     private void LoadIntermediateCourseEditor(string path)
     {
-        string basePath = Path.GetDirectoryName(path);
+        string basePath = Path.GetDirectoryName(path)!;
         string courseMapPath = $"/{Path.GetFileName(path)}";
 
         if (basePath.EndsWith("\\MissionRun", StringComparison.InvariantCultureIgnoreCase) ||
@@ -164,33 +173,32 @@ class MainWindowViewModel
             courseMapPath = $"/MissionRun{courseMapPath}";
         }
 
-        _courseEditorView = _windowFactory.CreateCourseEditorView(new MkdsIntermediateCourse(basePath, courseMapPath));
+        _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsIntermediateCourse(basePath, courseMapPath));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
-        // todo: Open course editor through the state machine
-        //_modalService.OpenWindow(_courseEditorView);
         SetMainWindowContent.Invoke(_courseEditorView);
 
-        _discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
+        discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
     }
 
-    private void LoadRomCarcCourseEditor(string path)
+    private void LoadRomCarcCourseEditor(string path, Archive romArchive)
     {
+        if (romArchive is not NitroFsArchive nitroFsArchive)
+            return;
+
         CloseRomExplorer();
 
-        string basePath = path;
         string baseTexPath = path.Replace(".carc", "Tex.carc");
-        if (!_romExplorer.NitroFsArchive.ExistsFile(baseTexPath))
+        if (!nitroFsArchive.ExistsFile(baseTexPath))
             baseTexPath = null;
 
-        _courseEditorView = _windowFactory.CreateCourseEditorView(new MkdsRomCarcCourse(_romExplorer.NitroFsArchive, basePath, baseTexPath, "/course_map.nkm"));
+        _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsRomCarcCourse(nitroFsArchive, path,
+            baseTexPath, "/course_map.nkm"));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
-        // todo: Open course editor through the state machine
-        //_modalService.OpenWindow(_mapDataEditor);
         SetMainWindowContent.Invoke(_courseEditorView);
 
-        _discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
+        discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
     }
 
     private void LoadCarcCourseEditor(string path)
@@ -203,26 +211,13 @@ class MainWindowViewModel
         if (!File.Exists(baseTexPath))
             baseTexPath = null;
 
-        _courseEditorView = _windowFactory.CreateCourseEditorView(new MkdsCarcCourse(basePath, baseTexPath, "/course_map.nkm"));
+        _courseEditorView =
+            windowFactory.CreateCourseEditorView(new MkdsCarcCourse(basePath, baseTexPath, "/course_map.nkm"));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
-        // todo: Open course editor through the state machine
-        //_modalService.OpenWindow(_mapDataEditor);
         SetMainWindowContent.Invoke(_courseEditorView);
 
-        _discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
-    }
-
-    private void LoadCourseProject(string projectPath)
-    {
-        //var course = new ProjectCourse(projectPath);
-
-        //Container.FirstByType<MapDataEditor>().Close();
-
-        //var editor = new MapDataEditor(this);
-        //editor.LoadCourse(course);
-
-        //Add(editor);
+        discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
     }
 
     private void CloseCourseEditor()
@@ -231,7 +226,7 @@ class MainWindowViewModel
             return;
 
         // reopen rom explorer
-        SetMainWindowContent.Invoke(_romExplorer ?? null);
+        SetMainWindowContent.Invoke(_romExplorer);
 
         _courseEditorView.Dispose();
         _courseEditorView = null;
@@ -241,10 +236,6 @@ class MainWindowViewModel
     {
         if (_romExplorer is null)
             return;
-
-        //// Why?
-        //foreach (var modal in _modalService.GetAllModals())
-        //    modal.Close();
 
         SetMainWindowContent.Invoke(null);
         if (!keepLoaded)
@@ -256,7 +247,7 @@ class MainWindowViewModel
         CloseRomExplorer(false);
         CloseCourseEditor();
 
-        _discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.Idle);
+        discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.Idle);
     }
 
     public void RestoreDefaultLayout()
@@ -265,7 +256,7 @@ class MainWindowViewModel
         ImGui.LoadIniSettingsFromDisk("imgui.ini");
     }
 
-    public float GetUiScaleSetting() => _applicationSettingsService.Settings.Appearance.UiScale;
+    public float GetUiScaleSetting() => applicationSettingsService.Settings.Appearance.UiScale;
 
-    public void LoadTheme() => ImGuiThemeManager.Apply(_applicationSettingsService.Settings.Appearance.Theme);
+    public void LoadTheme() => ImGuiThemeManager.Apply(applicationSettingsService.Settings.Appearance.Theme);
 }

@@ -126,6 +126,18 @@ public sealed class NdsRomHeader
         er.Write(HeaderCRC);
     }
 
+    public byte[] Write()
+    {
+        using (var m = new MemoryStream())
+        {
+            var ew = new EndianBinaryWriterEx(m, Endianness.LittleEndian);
+            Write(ew);
+            ew.WritePadding(512, 0);
+            ew.Close();
+            return m.ToArray();
+        }
+    }
+
     public string GameName;  //12
     public string GameCode;  //4
     public string MakerCode; //2
