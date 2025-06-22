@@ -265,4 +265,21 @@ public static class MObjUtil
         result = QtrnRotY(result, DegToIdx(rotation.Y));
         return QtrnRotZ(result, DegToIdx(rotation.Z));
     }
+
+    public static Quaterniond Qtrn20D79B0(Quaterniond a1, ushort angle)
+    {
+        double sin = SinIdx((ushort)(angle >> 1));
+        double cos = CosIdx((ushort)(angle >> 1));
+        return new Quaterniond(
+            a1.X * cos - a1.Z * sin,
+            a1.W * sin,
+            a1.Z * cos + a1.X * sin,
+            a1.W * cos
+        );
+    }
+
+    public static ushort VecToYIdxAngle(in Vector3d direction)
+    {
+        return DegToIdx(MathHelper.RadiansToDegrees(Math.Atan2(direction.X, direction.Z)));
+    }
 }

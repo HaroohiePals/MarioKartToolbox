@@ -4,12 +4,13 @@ using System;
 
 namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups;
 
-internal class PlaneGridRenderGroup : RenderGroup, IDisposable
+class PlaneGridRenderGroup : RenderGroup, IDisposable
 {
-    private GridRenderer _gridRenderer = new();
+    private readonly GridRenderer _gridRenderer = new();
 
     public override void Render(ViewportContext context)
     {
+        _gridRenderer.PickingId = ViewportContext.InvalidPickingId;
         _gridRenderer.Render(context.ViewMatrix, context.ProjectionMatrix, context.TranslucentPass);
     }
     public void Dispose()

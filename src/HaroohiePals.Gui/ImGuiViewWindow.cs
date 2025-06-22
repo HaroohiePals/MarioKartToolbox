@@ -1,5 +1,4 @@
 ﻿#nullable enable
-
 using HaroohiePals.Gui.View;
 using HaroohiePals.Gui.View.Menu;
 using HaroohiePals.Gui.View.Modal;
@@ -11,10 +10,7 @@ namespace HaroohiePals.Gui;
 
 public class ImGuiViewWindow(ImGuiGameWindowSettings settings, IModalService modalService) : ImGuiGameWindow(settings)
 {
-    private readonly IModalService _modalService = modalService;
-    public ImGuiViewWindow(IModalService modalService) : this(ImGuiGameWindowSettings.Default, modalService) { }
-
-    private MenuView _mainMenu = new();
+    private readonly MenuView _mainMenu = new();
     private IReadOnlyCollection<MenuItem> _mainMenuItems = [];
 
     /// <summary>
@@ -39,10 +35,7 @@ public class ImGuiViewWindow(ImGuiGameWindowSettings settings, IModalService mod
     {
         _mainMenu.Items.Clear();
 
-        if (Content is not null)
-            _mainMenu.Items.AddRange(_mainMenuItems.Merge(Content.MenuItems));
-        else
-            _mainMenu.Items.AddRange(_mainMenuItems);
+        _mainMenu.Items.AddRange(Content is not null ? _mainMenuItems.Merge(Content.MenuItems) : _mainMenuItems);
     }
 
     protected sealed override void OnLoad()
@@ -52,13 +45,14 @@ public class ImGuiViewWindow(ImGuiGameWindowSettings settings, IModalService mod
         LoadFinished?.Invoke();
     }
 
-    protected override sealed void RenderLayout(FrameEventArgs args)
+    protected sealed override void RenderLayout(FrameEventArgs args)
     {
         if (_mainMenu.Items.Count > 0)
             _mainMenu.Draw();
 
-        foreach (var modal in _modalService.GetAllModals())
+        foreach (var modal in modalService.GetAllModals())
             modal.Draw();
+        modalService.Cleanup();
 
         Content?.Draw();
     }
@@ -75,10 +69,7 @@ public class ImGuiViewWindow(ImGuiGameWindowSettings settings, IModalService mod
 
     private bool HasContentChanged()
     {
-        bool result = false;
-
-        if (_prevContent != Content)
-            result = true;
+        bool result = _prevContent != Content;
 
         _prevContent = Content;
         return result;

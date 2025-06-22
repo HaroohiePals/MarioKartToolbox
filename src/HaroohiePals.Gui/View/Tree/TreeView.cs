@@ -21,7 +21,7 @@ public class TreeView : IView
 
     public bool Draw()
     {
-        ImGui.BeginChild(Id);
+        if (ImGui.BeginChild(Id))
         {
             _newSelectedNode = SelectedNode;
 
@@ -32,8 +32,8 @@ public class TreeView : IView
             SelectedNode = _newSelectedNode;
             if (SelectedNode != oldSelection)
                 SelectionChanged?.Invoke(this);
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
 
         return true;
     }

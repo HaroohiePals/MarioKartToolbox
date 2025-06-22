@@ -40,15 +40,26 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
             float near = _topDownScene.OrthographicProjection.Near;
             var cursor = ImGui.GetCursorPos();
             float padding = ImGui.GetStyle().ItemSpacing.X;
+
+            // Extend parents boundary (workaround)
+            ImGui.Dummy(Vector2.Zero);
+
             ImGui.SetCursorPosX(Context.ViewportSize.X - 12 - padding);
             ImGui.SetCursorPosY(padding * 2);
+
             var bgCol = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg];
             bgCol.W = 0.5f;
             ImGui.PushStyleColor(ImGuiCol.FrameBg, bgCol);
-            if (ImGui.VSliderFloat("", new System.Numerics.Vector2(12, Context.ViewportSize.Y - padding * 4), ref near,
+
+            if (ImGui.VSliderFloat($"##NearSlider_{GetHashCode()}", new System.Numerics.Vector2(12, Context.ViewportSize.Y - padding * 4), ref near,
                     MaximumNear,
                     10, ""))
+            {
                 _topDownScene.OrthographicProjection.Near = near;
+            }
+
+            _canUseSelectionRectangle = !ImGui.IsItemActive();
+
             ImGui.PopStyleColor();
             ImGui.SetCursorPos(cursor);
         }
@@ -62,13 +73,12 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
         float spacing = 2 * scale;
         var padding = new Vector2(36, 8) * scale;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
-        ImGui.SetNextWindowPos(ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin() + padding);
-        if (ImGui.BeginChildFrame(ImGui.GetID("TopTools"), new Vector2(200f * scale, btnSize + spacing),
-                ImGuiWindowFlags.NoBackground))
-        {
-            ImGui.PopStyleVar();
+        // Make child frame transparent
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
 
+        ImGui.SetCursorPos(padding);
+        if (ImGui.BeginChild(ImGui.GetID("TopTools"), new Vector2((btnSize + 3) * scale, btnSize + spacing)))
+        {
             int i = 0;
 
             ImGui.SetCursorPosX((btnSize + spacing) * i++);
@@ -82,16 +92,15 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
                 float x = 4 * scale;
                 float y = 4 * scale;
 
-                int visibilityTypeCount = 5; //Enum.GetValues(typeof(VisibilityType)).Length;
+                int visibilityTypeCount = 5;
 
                 int fieldCount = _visibilityManager.EntityCount + 1;
 
                 float frameHeight = btnSize + y * 2 + btnSize * fieldCount;
                 frameHeight = Math.Min(500 * scale, frameHeight);
                 float frameWidth = 300 * scale;
-
-                if (ImGui.BeginChildFrame(ImGui.GetID("TopTools"),
-                        new Vector2(frameWidth, frameHeight), ImGuiWindowFlags.NoBackground))
+                if (ImGui.BeginChild(ImGui.GetID("TopTools"),
+                        new Vector2(frameWidth, frameHeight), ImGuiChildFlags.FrameStyle))
                 {
                     var inputWidth = btnSize * visibilityTypeCount;
 
@@ -99,10 +108,7 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
                     ImGui.SetCursorPosX(x);
                     ImGui.SetCursorPosY(y);
 
-                    ImGui.BeginDisabled();
-                    ImGui.Text("Settings");
-                    ImGui.EndDisabled();
-                    ImGui.Separator();
+                    ImGui.SeparatorText("Settings");
 
                     // Gizmo settings
                     y += btnSize;
@@ -113,7 +119,8 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
                     ImGui.Text("Gizmo Mode");
 
                     ImGui.SameLine();
-                    ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - inputWidth - 10f);
+                    var contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+                    ImGui.SetCursorPosX(contentRegionMax.X - inputWidth - 10f);
 
                     ImGui.PushItemWidth(inputWidth);
                     ImGuiEx.ComboEnum("##GizmoMode", ref _gizmo.Mode);
@@ -126,7 +133,8 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
                     ImGui.Text("Rotate/Scale Mode");
 
                     ImGui.SameLine();
-                    ImGui.SetCursorPosX(ImGui.GetContentRegionMax().X - inputWidth - 10f);
+                    contentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
+                    ImGui.SetCursorPosX(contentRegionMax.X - inputWidth - 10f);
 
                     ImGui.PushItemWidth(inputWidth);
                     ImGuiEx.ComboEnum("##RotateScaleMode", ref _gizmo.RotateScaleMode);
@@ -135,14 +143,15 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
                     y += btnSize;
 
                     _visibilityManager.Draw(x, y);
-
-                    ImGui.EndChildFrame();
                 }
+                ImGui.EndChild();
 
                 ImGui.EndPopup();
             }
-
-            ImGui.EndChildFrame();
         }
+
+        ImGui.PopStyleColor();
+
+        ImGui.EndChild();
     }
 }

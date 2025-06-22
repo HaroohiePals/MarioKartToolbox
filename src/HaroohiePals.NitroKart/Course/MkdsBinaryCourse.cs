@@ -1,4 +1,6 @@
-﻿using HaroohiePals.IO.Archive;
+﻿#nullable enable
+
+using HaroohiePals.IO.Archive;
 using HaroohiePals.KCollision.Formats;
 using HaroohiePals.NitroKart.MapData.Binary;
 using HaroohiePals.NitroKart.MapData.Intermediate;
@@ -7,26 +9,29 @@ namespace HaroohiePals.NitroKart.Course;
 
 public abstract class MkdsBinaryCourse : IMkdsCourse
 {
-    public const string CourseCollisionPath = "/course_collision.kcl";
+    public const string COURSE_COLLISION_PATH = "/course_collision.kcl";
+
+    private readonly string _courseMapPath;
 
     protected readonly Archive _mainArchive;
-    protected readonly Archive _texArchive;
+    protected readonly Archive? _texArchive;
 
-    private string _courseMapPath;
+    private event IMkdsCourse.CourseFileUpdatedEventHandler? _courseFileUpdated;
 
     public CourseFileCache MainArchive { get; }
-    public CourseFileCache TexArchive { get; }
+    public CourseFileCache? TexArchive { get; }
 
-    public MkdsMapData MapData { get; private set; }
+    public MkdsMapData? MapData { get; private set; }
 
     private MkdsKcl _collision;
+
     public MkdsKcl Collision
     {
-        get => _collision; 
-        set => MainArchive.SetFileData(CourseCollisionPath, value.Write());
+        get => _collision;
+        set => MainArchive.SetFileData(COURSE_COLLISION_PATH, value.Write());
     }
 
-    protected MkdsBinaryCourse(Archive mainArchive, Archive texArchive, string courseMapPath)
+    protected MkdsBinaryCourse(Archive mainArchive, Archive? texArchive, string courseMapPath)
     {
         _courseMapPath = courseMapPath;
 
@@ -36,39 +41,28 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
         MainArchive = new(_mainArchive);
         MainArchive.FileUpdated += FileUpdated;
 
-        if (_texArchive != null)
+        if (_texArchive is not null)
         {
             TexArchive = new(_texArchive);
             TexArchive.FileUpdated += FileUpdated;
         }
 
         UpdateMapData();
-        _collision = MainArchive.GetFileOrDefault<MkdsKcl>(CourseCollisionPath);
+        _collision = MainArchive.GetFileOrDefault<MkdsKcl>(COURSE_COLLISION_PATH);
     }
-
-
-    private event IMkdsCourse.CourseFileUpdatedEventHandler _courseFileUpdated;
 
     event IMkdsCourse.CourseFileUpdatedEventHandler IMkdsCourse.CourseFileUpdated
     {
-        add
-        {
-            _courseFileUpdated += value;
-        }
+        add => _courseFileUpdated += value;
 
-        remove
-        {
-            _courseFileUpdated -= value;
-        }
+        remove => _courseFileUpdated -= value;
     }
 
     public virtual bool Save()
     {
         MainArchive.Flush();
-        if (MapData != null)
-            _mainArchive.SetFileData(_courseMapPath, NkmdFactory.FromMapData(MapData).Write());
-        if (Collision != null)
-            _mainArchive.SetFileData(CourseCollisionPath, Collision.Write());
+        _mainArchive.SetFileData(_courseMapPath, NkmdFactory.FromMapData(MapData).Write());
+        _mainArchive.SetFileData(COURSE_COLLISION_PATH, Collision.Write());
         TexArchive?.Flush();
 
         return true;
@@ -78,8 +72,8 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
     {
         if (cache == MainArchive && Archive.PathEqual(path, _courseMapPath))
             UpdateMapData();
-        else if (cache == MainArchive && Archive.PathEqual(path, CourseCollisionPath))
-            _collision = MainArchive.GetFileOrDefault<MkdsKcl>(CourseCollisionPath);
+        else if (cache == MainArchive && Archive.PathEqual(path, COURSE_COLLISION_PATH))
+            _collision = MainArchive.GetFileOrDefault<MkdsKcl>(COURSE_COLLISION_PATH);
 
         _courseFileUpdated?.Invoke(cache == TexArchive, path);
     }
@@ -90,11 +84,11 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
             nkmData => MkdsMapDataFactory.CreateFromNkm(new Nkmd(nkmData)));
     }
 
-    public T GetMainFileOrDefault<T>(string path, T defaultValue = default)
+    public T? GetMainFileOrDefault<T>(string path, T? defaultValue = default)
         => MainArchive.GetFileOrDefault(path, defaultValue);
 
-    public T GetTexFileOrDefault<T>(string path, T defaultValue = default)
-        => TexArchive.GetFileOrDefault(path, defaultValue);
+    public T? GetTexFileOrDefault<T>(string path, T? defaultValue = default)
+        => TexArchive is null ? default : TexArchive.GetFileOrDefault(path, defaultValue);
 
     //public void SetMainFileData(string path, byte[] data)
     //    => MainArchive.SetFileData(path, data);
@@ -102,8 +96,9 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
     //public void SetTexFileData(string path, byte[] data)
     //    => TexArchive.SetFileData(path, data);
 
-    public bool ExistsMainFile(string path) 
+    public bool ExistsMainFile(string path)
         => MainArchive.ExistsFile(path);
+
     public bool ExistsTexFile(string path)
-        => TexArchive.ExistsFile(path);
+        => TexArchive?.ExistsFile(path) ?? false;
 }

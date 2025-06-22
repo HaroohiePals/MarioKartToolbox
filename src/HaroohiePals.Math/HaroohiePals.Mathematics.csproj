@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTK.Mathematics" Version="4.7.1" />
+    <PackageReference Include="OpenTK.Mathematics" Version="4.9.4" />
   </ItemGroup>
 
   <ItemGroup>

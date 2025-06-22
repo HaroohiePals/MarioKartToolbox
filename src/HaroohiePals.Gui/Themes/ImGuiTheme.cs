@@ -222,9 +222,9 @@ public class ImGuiTheme
         theme.Colors.ResizeGripActive = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.ResizeGripActive]);
         theme.Colors.Tab = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.Tab]);
         theme.Colors.TabHovered = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.TabHovered]);
-        theme.Colors.TabActive = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.TabActive]);
-        theme.Colors.TabUnfocused = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.TabUnfocused]);
-        theme.Colors.TabUnfocusedActive = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.TabUnfocusedActive]);
+        theme.Colors.TabActive = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.TabSelected]);
+        theme.Colors.TabUnfocused = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.TabDimmed]);
+        theme.Colors.TabUnfocusedActive = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.TabDimmedSelected]);
         theme.Colors.DockingPreview = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.DockingPreview]);
         theme.Colors.DockingEmptyBg = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.DockingEmptyBg]);
         theme.Colors.PlotLines = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.PlotLines]);
@@ -238,7 +238,7 @@ public class ImGuiTheme
         theme.Colors.TableRowBgAlt = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.TableRowBgAlt]);
         theme.Colors.TextSelectedBg = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.TextSelectedBg]);
         theme.Colors.DragDropTarget = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.DragDropTarget]);
-        theme.Colors.NavHighlight = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.NavHighlight]);
+        theme.Colors.NavHighlight = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.NavCursor]);
         theme.Colors.NavWindowingHighlight = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.NavWindowingHighlight]);
         theme.Colors.NavWindowingDimBg = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.NavWindowingDimBg]);
         theme.Colors.ModalWindowDimBg = ImGuiEx.ColorConvertFloat4ToColor(colors[(int)ImGuiCol.ModalWindowDimBg]);
@@ -332,9 +332,9 @@ public class ImGuiTheme
         colors[(int)ImGuiCol.ResizeGripActive] = ImGuiEx.ColorConvertColorToFloat4(Colors.ResizeGripActive);
         colors[(int)ImGuiCol.Tab] = ImGuiEx.ColorConvertColorToFloat4(Colors.Tab);
         colors[(int)ImGuiCol.TabHovered] = ImGuiEx.ColorConvertColorToFloat4(Colors.TabHovered);
-        colors[(int)ImGuiCol.TabActive] = ImGuiEx.ColorConvertColorToFloat4(Colors.TabActive);
-        colors[(int)ImGuiCol.TabUnfocused] = ImGuiEx.ColorConvertColorToFloat4(Colors.TabUnfocused);
-        colors[(int)ImGuiCol.TabUnfocusedActive] = ImGuiEx.ColorConvertColorToFloat4(Colors.TabUnfocusedActive);
+        colors[(int)ImGuiCol.TabSelected] = ImGuiEx.ColorConvertColorToFloat4(Colors.TabActive);
+        colors[(int)ImGuiCol.TabDimmed] = ImGuiEx.ColorConvertColorToFloat4(Colors.TabUnfocused);
+        colors[(int)ImGuiCol.TabDimmedSelected] = ImGuiEx.ColorConvertColorToFloat4(Colors.TabUnfocusedActive);
         colors[(int)ImGuiCol.DockingPreview] = ImGuiEx.ColorConvertColorToFloat4(Colors.DockingPreview);
         colors[(int)ImGuiCol.DockingEmptyBg] = ImGuiEx.ColorConvertColorToFloat4(Colors.DockingEmptyBg);
         colors[(int)ImGuiCol.PlotLines] = ImGuiEx.ColorConvertColorToFloat4(Colors.PlotLines);
@@ -348,7 +348,7 @@ public class ImGuiTheme
         colors[(int)ImGuiCol.TableRowBgAlt] = ImGuiEx.ColorConvertColorToFloat4(Colors.TableRowBgAlt);
         colors[(int)ImGuiCol.TextSelectedBg] = ImGuiEx.ColorConvertColorToFloat4(Colors.TextSelectedBg);
         colors[(int)ImGuiCol.DragDropTarget] = ImGuiEx.ColorConvertColorToFloat4(Colors.DragDropTarget);
-        colors[(int)ImGuiCol.NavHighlight] = ImGuiEx.ColorConvertColorToFloat4(Colors.NavHighlight);
+        colors[(int)ImGuiCol.NavCursor] = ImGuiEx.ColorConvertColorToFloat4(Colors.NavHighlight);
         colors[(int)ImGuiCol.NavWindowingHighlight] = ImGuiEx.ColorConvertColorToFloat4(Colors.NavWindowingHighlight);
         colors[(int)ImGuiCol.NavWindowingDimBg] = ImGuiEx.ColorConvertColorToFloat4(Colors.NavWindowingDimBg);
         colors[(int)ImGuiCol.ModalWindowDimBg] = ImGuiEx.ColorConvertColorToFloat4(Colors.ModalWindowDimBg);

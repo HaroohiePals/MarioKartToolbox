@@ -1,6 +1,6 @@
 ﻿namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
-internal enum CameraPreviewMode
+enum CameraPreviewMode
 {
     Edit,
     AnimReplay,

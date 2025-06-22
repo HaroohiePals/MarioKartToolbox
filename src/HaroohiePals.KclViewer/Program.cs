@@ -3,12 +3,11 @@ using HaroohiePals.KclViewer.Gui;
 
 namespace HaroohiePals.KclViewer;
 
-internal class Program
+static class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         var modalService = new ModalService();
-
         new KclViewerWindow(modalService).Run();
     }
 }

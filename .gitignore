@@ -362,5 +362,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# JetBrains Rider
+.idea/
+
 # Wavefront obj resources
 !src/*/Resources/Models/*.obj
