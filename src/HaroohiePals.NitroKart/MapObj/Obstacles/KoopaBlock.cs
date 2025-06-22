@@ -4,6 +4,7 @@ using HaroohiePals.NitroKart.MapData;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections.MobjSettings;
 using OpenTK.Mathematics;
+using System;
 
 namespace HaroohiePals.NitroKart.MapObj.Obstacles
 {
@@ -34,6 +35,7 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
                 new(MoveStateinit, MoveStateUpdate),
                 new(SlowDownStateInit, SlowDownStateUpdate)
             });
+            _speed = ((KoopaBlockSettings)obji.Settings).PathSpeed / 100.0;
             _pathwalker = Pathwalker.FromPath(obji.Path.Target, _speed);
             _waitCounter = 0;
             _lastMtx = new Matrix3d(Mtx.Row0, Mtx.Row1, Mtx.Row2);

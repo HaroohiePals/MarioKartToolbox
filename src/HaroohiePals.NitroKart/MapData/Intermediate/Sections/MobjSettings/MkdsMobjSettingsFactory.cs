@@ -9,6 +9,7 @@ public static class MkdsMobjSettingsFactory
         {
             Itembox      => new ItemboxSettings(source),
             MoveItembox  => new MoveItemboxSettings(source),
+            KoopaBlock   => new KoopaBlockSettings(source),
             Gear         => new GearSettings(source),
             TestCylinder => new RotatingCylinderSettings(source),
             RotaryRoom   => new RotatingCylinderSettings(source),
