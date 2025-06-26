@@ -8,7 +8,7 @@ using System;
 
 namespace HaroohiePals.NitroKart.MapObj.Obstacles
 {
-    [MapObj(MkdsMapObjectId.KoopaBlock, new[] { typeof(KoopaBlock.RenderPart) }, typeof(KoopaBlock.LogicPart))]
+    [MapObj(MkdsMapObjectId.KoopaBlock, new[] { typeof(KoopaBlock.RenderPart) }, typeof(KoopaBlockLogicPart))]
     public class KoopaBlock : DColMObjInstance
     {
         private enum KoopaBlockState
@@ -120,7 +120,7 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
             _pathwalker.PartSpeed = val * val2;
         }
 
-        private void Update()
+        public virtual void Update()
         {
             if (_waitCounter > 0)
             {
@@ -169,15 +169,6 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
 
             protected override void Render(KoopaBlock instance, in Matrix4x3d camMtx, ushort alpha)
                 => instance.Render((byte)alpha);
-        }
-
-        public class LogicPart : LogicPart<KoopaBlock>
-        {
-            public LogicPart(MkdsContext context)
-                : base(context, LogicPartType.Type0) { }
-
-            protected override void Update(KoopaBlock instance)
-                => instance.Update();
         }
     }
 }
