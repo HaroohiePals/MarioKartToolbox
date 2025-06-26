@@ -61,7 +61,6 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
             Alpha = 31;
             _stateMachine.NextState = KoopaBlockState.SpeedUp;
             _stateMachine.GotoNextState = true;
-            //instance->dcolMObj.mobj.sfxMaxDistanceSquare = gSfxParams[3].maxDistanceSquare;
         }
 
         private void SpeedUpStateInit()
@@ -127,12 +126,6 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
             {
                 _waitCounter--;
                 Velocity = Vector3d.Zero;
-                /*
-                if (!(_waitCounter > 0))
-                {
-                    mobj_emitSfxIfAudible(&instance->dcolMObj.mobj, SET_KBLOCK_BEGIN_MOVE_SU);
-                }
-                */
             }
             else
             {
