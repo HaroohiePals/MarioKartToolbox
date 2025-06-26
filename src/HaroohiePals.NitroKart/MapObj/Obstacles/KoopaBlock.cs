@@ -8,7 +8,7 @@ using System;
 
 namespace HaroohiePals.NitroKart.MapObj.Obstacles
 {
-    [MapObj(MkdsMapObjectId.KoopaBlock, new[] { typeof(KoopaBlock.RenderPart) }, typeof(KoopaBlockLogicPart))]
+    [MapObj(MkdsMapObjectId.KoopaBlock, new[] { typeof(KoopaBlockRenderPart) }, typeof(KoopaBlockLogicPart))]
     public class KoopaBlock : DColMObjInstance
     {
         private enum KoopaBlockState
@@ -23,6 +23,7 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
         private Pathwalker _pathwalker;
         private double _speed;
         private ushort _waitCounter;
+        internal Model Model { get; set; }
 
         public KoopaBlock(MkdsContext context, MapObj.RenderPart[] renderParts, MapObj.LogicPart logicPart)
             : base(context, renderParts, logicPart) { }
@@ -144,31 +145,6 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
                 Velocity = Position - _lastPosition;
                 _basePos = -_size.Y * Mtx.Row1 + Position;
             }
-        }
-
-        private void Render(byte alpha)
-        {
-            Mtx.Row3 = Position / 16.0;
-            MObjUtil.Model2RenderModel(_context, _model, Mtx, Scale, alpha);
-        }
-
-        public class RenderPart : RenderPart<KoopaBlock>
-        {
-            public Model Model { get; private set; }
-            public RenderPart(MkdsContext context)
-                : base(context, RenderPartType.Normal) { }
-
-            protected override void GlobalInit()
-            {
-                var nsbmd = MObjUtil.GetMapObjFile<Nsbmd>(_context, "koopa_block.nsbmd");
-                Model = new Model(_context, nsbmd);
-                Model.SetPolyIdLightFlagsEmi(63, 1 << 0, new Rgb555(10, 10, 10));
-                foreach (var instance in _instances)
-                    instance._model = Model;
-            }
-
-            protected override void Render(KoopaBlock instance, in Matrix4x3d camMtx, ushort alpha)
-                => instance.Render((byte)alpha);
         }
     }
 }
