@@ -36,14 +36,14 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
                 new(MoveStateinit, MoveStateUpdate),
                 new(SlowDownStateInit, SlowDownStateUpdate)
             });
-            _speed = ((KoopaBlockSettings)obji.Settings).PathSpeed / 100.0;
+            _speed = ((((KoopaBlockSettings)obji.Settings).PathSpeed << 12) / 100) / 4096.0;
             _pathwalker = Pathwalker.FromPath(obji.Path.Target, _speed);
             _waitCounter = 0;
             _lastMtx = new Matrix3d(Mtx.Row0, Mtx.Row1, Mtx.Row2);
             _field124 = Vector3d.Zero;
             _field130 = 0;
             _size.X = Scale.X * 400;
-            _size.Y = Scale.Y * 100 / 2;
+            _size.Y = (Scale.Y * 100) / 2.0;
             _size.Z = Scale.Z * 175;
             _sizeZ2 = Scale.Z * 175;
             _isFloorYZ = false;
@@ -89,7 +89,9 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
 
         private void MoveStateinit()
         {
-            _pathwalker.SetSpeed(_speed);
+            double speed = _speed;
+            _pathwalker.Speed = speed;
+            _pathwalker.PartSpeed = speed * _pathwalker.Path.Parts[_pathwalker.PartIdx].OneDivLength;
         }
 
         private void MoveStateUpdate()
@@ -110,22 +112,20 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
         {
             double sin;
             double val;
-            double val2;
 
-            sin = -MObjUtil.SinIdx((ushort)(_pathwalker.Progress * 64.0));
+            sin = -(MObjUtil.SinIdx((ushort)(_pathwalker.Progress * 64.0)));
             val = sin * _speed;
             _pathwalker.Speed = val > 0.125 ? val : 0.125;
-            val2 = _pathwalker.Path.Parts[_pathwalker.PartIdx].OneDivLength;
             if (val <= 0.125)
                 val = 0.125;
-            _pathwalker.PartSpeed = val * val2;
+            _pathwalker.PartSpeed = val * _pathwalker.Path.Parts[_pathwalker.PartIdx].OneDivLength;
         }
 
         public virtual void Update()
         {
-            if (_waitCounter > 0)
+            if (_waitCounter != 0)
             {
-                _waitCounter--;
+                _waitCounter -= 1;
                 Velocity = Vector3d.Zero;
             }
             else
@@ -143,7 +143,7 @@ namespace HaroohiePals.NitroKart.MapObj.Obstacles
                 Position = _pathwalker.CalcCurrentPointLinearXYZ();
                 _stateMachine.Execute();
                 Velocity = Position - _lastPosition;
-                _basePos = -_size.Y * Mtx.Row1 + Position;
+                _basePos = (-_size.Y * Mtx.Row1) + Position;
             }
         }
     }
