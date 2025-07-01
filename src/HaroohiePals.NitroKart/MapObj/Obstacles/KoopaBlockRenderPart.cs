@@ -7,7 +7,7 @@ using System.IO;
 
 namespace HaroohiePals.NitroKart.MapObj.Obstacles;
 
-class KoopaBlockRenderPart : RenderPart<KoopaBlock>
+sealed class KoopaBlockRenderPart : RenderPart<KoopaBlock>
 {
     private Model _koopaBlockModel;
 
@@ -20,7 +20,9 @@ class KoopaBlockRenderPart : RenderPart<KoopaBlock>
         _koopaBlockModel = new Model(_context, nsbmd);
         _koopaBlockModel.SetPolyIdLightFlagsEmi(63, 1 << 0, new Rgb555(10, 10, 10));
         foreach (var instance in _instances)
+        {
             instance.Model = _koopaBlockModel;
+        }
     }
 
     protected override void Render(KoopaBlock instance, in Matrix4x3d camMtx, ushort alpha)

@@ -1,5 +1,6 @@
 ﻿namespace HaroohiePals.NitroKart.MapObj.Obstacles;
-class KoopaBlockLogicPart : LogicPart<KoopaBlock>
+
+sealed class KoopaBlockLogicPart : LogicPart<KoopaBlock>
 {
     public KoopaBlockLogicPart(MkdsContext context)
         : base(context, LogicPartType.Type0) { }
