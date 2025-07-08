@@ -39,7 +39,7 @@ public class MkdsMapObjDatabase : IMkdsMapObjDatabase
 
         //Obstacle
         {MkdsMapObjectId.MoveItembox, new(MkdsMapObjectId.MoveItembox, "Itembox (Moving)", null, null, IsTimeTrialVisible: false, IsPathRequired: true)},
-        {MkdsMapObjectId.KoopaBlock, new(MkdsMapObjectId.KoopaBlock, "KoopaBlock", null, null, IsPathRequired: true)},
+        {MkdsMapObjectId.KoopaBlock, new(MkdsMapObjectId.KoopaBlock, "KoopaBlock", null, new[]{ "koopa_block.nsbmd" }, IsPathRequired: true)},
         {MkdsMapObjectId.Gear, new(MkdsMapObjectId.Gear, "Gear", null, new[]{ "gear_black.nsbmd","gear_white.nsbmd" })},
         {MkdsMapObjectId.Bridge, new(MkdsMapObjectId.Bridge, "Bridge", null, new[]{ "bridge.nsbmd","bridge.nsbca" })},
         {MkdsMapObjectId.SecondHand, new(MkdsMapObjectId.SecondHand, "SecondHand", null, new[]{ "second_hand.nsbmd" })},
