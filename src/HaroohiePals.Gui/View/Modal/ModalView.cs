@@ -52,7 +52,7 @@ public abstract class ModalView : IView
 
         bool open = true;
 
-        if (ShowCloseButton && ImGui.BeginPopupModal(Title, ref open) || ImGui.BeginPopupModal(Title))
+        if (ShowCloseButton && ImGui.BeginPopupModal(Title, ref open, ImGuiWindowFlags.NoSavedSettings) || ImGui.BeginPopupModal(Title))
         {
             IsOpen = true;
 
