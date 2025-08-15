@@ -33,6 +33,7 @@ public class MessageModalView(
                 ShowCloseButton = false;
                 if (DrawAlignedButton("Yes", 0.0f))
                     OnConfirmButtonClick();
+                ImGui.SameLine();
                 if (DrawAlignedButton("No", 1.0f))
                     OnCancelButtonClick();
                 break;

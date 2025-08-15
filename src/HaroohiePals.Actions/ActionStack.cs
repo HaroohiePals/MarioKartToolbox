@@ -46,6 +46,11 @@ public sealed class ActionStack
     /// Whether the last performed action is a create or delete action.
     /// </summary>
     public bool IsLastActionCreateOrDelete => _undo.Count > 0 ? _undo.Last.Value.IsCreateDelete : false;
+    
+    /// <summary>
+    /// Callback executed when an action is performed.
+    /// </summary>
+    public event Action<IAction> ActionExecuted;
 
     /// <summary>
     /// Creates a new action stack with the given <paramref name="capacity"/>.
@@ -63,13 +68,13 @@ public sealed class ActionStack
     /// <summary>
     /// Gets a copy of the current contents of the action stack.
     /// </summary>
-    /// <returns>A copy of the contents of the undo and redo stack concatted.</returns>
+    /// <returns>A copy of the contents of the undo and redo stack concatenated.</returns>
     public IReadOnlyList<IAction> Peek() => _undo.Concat(_redo).ToList();
 
     /// <summary>
     /// Adds a new action to the stack.
     /// The action is performed if <paramref name="execute"/> is <see langword="true"/>.
-    /// Otherwise it is expected that the action was already performed.
+    /// Otherwise, it is expected that the action was already performed.
     /// </summary>
     /// <param name="action">The action to add.</param>
     /// <param name="execute">Whether the action should be performed.</param>
@@ -81,8 +86,11 @@ public sealed class ActionStack
         if (_undo.Count > Capacity)
             _undo.RemoveFirst();
 
-        if (execute)
-            action.Do();
+        if (!execute) 
+            return;
+        
+        action.Do();
+        ActionExecuted?.Invoke(action);
     }
 
     /// <summary>
