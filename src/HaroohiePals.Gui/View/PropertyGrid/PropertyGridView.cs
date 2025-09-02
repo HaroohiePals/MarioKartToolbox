@@ -51,8 +51,16 @@ public class PropertyGridView : IView
 
     public void Refresh()
     {
-        if (_selectedObjects != null)
-            _items = CreateItems(_selectedObjects).ToList();
+        if (_selectedObjects == null)
+        {
+            return;
+        }
+
+        _items = CreateItems(_selectedObjects).ToList();
+        if (GetAdditionalItems is not null)
+        {
+            _items.AddRange(GetAdditionalItems.Invoke());
+        }
     }
 
     public void Clear()
@@ -215,11 +223,6 @@ public class PropertyGridView : IView
                 if (item.Editor != null || item.NestedPropertyGridView != null)
                     items.Add(item);
             }
-        }
-
-        if (GetAdditionalItems is not null)
-        {
-            items.AddRange(GetAdditionalItems.Invoke());
         }
 
         return items;
