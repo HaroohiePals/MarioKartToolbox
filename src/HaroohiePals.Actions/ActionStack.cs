@@ -48,9 +48,9 @@ public sealed class ActionStack
     public bool IsLastActionCreateOrDelete => _undo.Count > 0 ? _undo.Last.Value.IsCreateDelete : false;
     
     /// <summary>
-    /// Callback executed when an action is performed.
+    /// Callback executed when an action is added.
     /// </summary>
-    public event Action<IAction> ActionExecuted;
+    public event Action<IAction> ActionAdded;
 
     /// <summary>
     /// Creates a new action stack with the given <paramref name="capacity"/>.
@@ -85,12 +85,13 @@ public sealed class ActionStack
 
         if (_undo.Count > Capacity)
             _undo.RemoveFirst();
+        
+        ActionAdded?.Invoke(action);
 
         if (!execute) 
             return;
         
         action.Do();
-        ActionExecuted?.Invoke(action);
     }
 
     /// <summary>

@@ -12,6 +12,7 @@ namespace HaroohiePals.Gui.View.PropertyGrid;
 public class PropertyGridView : IView
 {
     public PropertyGridFlags Flags = PropertyGridFlags.ShowCategories;
+    public Func<IEnumerable<PropertyGridItem>> GetAdditionalItems;
 
     private List<PropertyGridItem> _items;
     private object[] _selectedObjects;
@@ -50,8 +51,16 @@ public class PropertyGridView : IView
 
     public void Refresh()
     {
-        if (_selectedObjects != null)
-            _items = CreateItems(_selectedObjects).ToList();
+        if (_selectedObjects == null)
+        {
+            return;
+        }
+
+        _items = CreateItems(_selectedObjects).ToList();
+        if (GetAdditionalItems is not null)
+        {
+            _items.AddRange(GetAdditionalItems.Invoke());
+        }
     }
 
     public void Clear()
