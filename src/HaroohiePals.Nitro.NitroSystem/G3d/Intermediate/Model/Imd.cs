@@ -509,18 +509,24 @@ public class Imd
 
         foreach (var model in models)
         {
-            foreach (var texImage in model.TexImageArray)
+            if (model.TexImageArray is not null)
             {
-                if (texImageArray.FirstOrDefault(x => x.Name == texImage.Name) == null)
+                foreach (var texImage in model.TexImageArray)
                 {
-                    texImageArray.Add(texImage);
+                    if (texImageArray.FirstOrDefault(x => x.Name == texImage.Name) == null)
+                    {
+                        texImageArray.Add(texImage);
+                    }
                 }
             }
-            foreach (var texPalette in model.TexPaletteArray)
+            if (model.TexPaletteArray is not null)
             {
-                if (texPaletteArray.FirstOrDefault(x => x.Name == texPalette.Name) == null)
+                foreach (var texPalette in model.TexPaletteArray)
                 {
-                    texPaletteArray.Add(texPalette);
+                    if (texPaletteArray.FirstOrDefault(x => x.Name == texPalette.Name) == null)
+                    {
+                        texPaletteArray.Add(texPalette);
+                    }
                 }
             }
         }
