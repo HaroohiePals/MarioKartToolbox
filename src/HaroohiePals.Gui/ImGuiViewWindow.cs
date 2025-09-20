@@ -62,9 +62,16 @@ public class ImGuiViewWindow(ImGuiGameWindowSettings settings, IModalService mod
         base.OnUpdateFrame(args);
 
         if (HasContentChanged())
+        {
             RefreshMenu();
+        }
 
-        Content?.Update(new UpdateArgs(args.Time));
+        var updateArgs = new UpdateArgs(args.Time);
+        foreach (var modal in modalService.GetAllModals())
+        {
+            modal.Update(updateArgs);
+        }
+        Content?.Update(updateArgs);
     }
 
     private bool HasContentChanged()
