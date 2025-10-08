@@ -18,10 +18,10 @@ public abstract class ModalView : IView
     public bool IsOpen { get; private set; }
     public bool IsOpening => _shouldOpen;
 
-    public ModalView(string title) 
+    public ModalView(string title)
         : this(title, DefaultSize) { }
 
-    public ModalView(string title, Vector2 size) 
+    public ModalView(string title, Vector2 size)
         : this(title, size, DEFAULT_SHOW_CLOSE_BUTTON) { }
 
     public ModalView(string title, Vector2 size, bool showCloseButton)
@@ -40,6 +40,8 @@ public abstract class ModalView : IView
     {
         _shouldClose = true;
     }
+
+    public virtual void Update(UpdateArgs args) { }
 
     public bool Draw()
     {
