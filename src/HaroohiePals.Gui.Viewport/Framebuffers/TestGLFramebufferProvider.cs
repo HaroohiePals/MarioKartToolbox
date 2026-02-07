@@ -14,6 +14,8 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
 {
     public const int PickingBufferId = 1;
     public const int FogBufferId     = 2;
+    
+    private static readonly int SupportedSamplesCount = GL.GetString(StringName.Version).Contains("Metal") ? 1 : 4;
 
     private static readonly GLTextureAttachmentDefinition ImageBufDefinition =
         new(PixelInternalFormat.Rgb, PixelFormat.Rgb, PixelType.UnsignedByte,
@@ -27,16 +29,16 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
         new(RenderbufferStorage.Depth24Stencil8, FramebufferAttachment.DepthStencilAttachment);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition ImageBufMultiDefinition =
-        new(4, PixelInternalFormat.Rgb, FramebufferAttachment.ColorAttachment0);
+        new(SupportedSamplesCount, PixelInternalFormat.Rgb, FramebufferAttachment.ColorAttachment0);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition PickingBufMultiDefinition =
-        new(4, PixelInternalFormat.Rgba8ui, FramebufferAttachment.ColorAttachment1);
+        new(SupportedSamplesCount, PixelInternalFormat.Rgba8ui, FramebufferAttachment.ColorAttachment1);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition FogBufMultiDefinition =
-        new(4, PixelInternalFormat.R8ui, FramebufferAttachment.ColorAttachment2);
+        new(SupportedSamplesCount, PixelInternalFormat.R8ui, FramebufferAttachment.ColorAttachment2);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition DepthBufMultiDefinition =
-        new(4, PixelInternalFormat.Depth24Stencil8, FramebufferAttachment.DepthStencilAttachment);
+        new(SupportedSamplesCount, PixelInternalFormat.Depth24Stencil8, FramebufferAttachment.DepthStencilAttachment);
 
     private static readonly Vector2[] ScreenQuadVertices =
     {
