@@ -87,15 +87,23 @@ public class MkdsRomFactory
         var fatEntries = new List<FatEntry>();
         var fileData = new List<byte[]>();
 
-        int i = 0;
+        int currFileId = 0;
 
-        foreach (var entry in overlayTable.Entries)
+        while (currFileId < overlayTable.Length)
         {
-            string overlayPath = overlayPaths[i++];
-            string targetFilePath = Path.Combine(workingDirPath, overlayPath);
+            int i = 0;
+            foreach (var entry in overlayTable.Entries)
+            {
+                string overlayPath = overlayPaths[i++];
+                string targetFilePath = Path.Combine(workingDirPath, overlayPath);
 
-            fatEntries.Add(new FatEntry(0, 0));
-            fileData.Add(await File.ReadAllBytesAsync(targetFilePath));
+                if(entry.FileId == currFileId)
+                {
+                    fatEntries.Add(new FatEntry(0, 0));
+                    fileData.Add(await File.ReadAllBytesAsync(targetFilePath));
+                    currFileId++;
+                }
+            }
         }
 
         return new ReadOverlayFilesResult(fatEntries, fileData);

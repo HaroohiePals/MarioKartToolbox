@@ -78,7 +78,7 @@ public class MkdsRomProjectFactory
             string targetFilePath = Path.Combine(outputPath, overlayPath);
 
             new FileInfo(targetFilePath).Directory?.Create();
-            await File.WriteAllBytesAsync(targetFilePath, rom.FileData[entry.Id]).ConfigureAwait(false);
+            await File.WriteAllBytesAsync(targetFilePath, rom.FileData[entry.FileId]).ConfigureAwait(false);
         }
     }
 
