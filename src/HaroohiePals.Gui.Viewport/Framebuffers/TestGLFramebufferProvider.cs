@@ -22,7 +22,7 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
             TextureFilterMode.Linear, FramebufferAttachment.ColorAttachment0);
 
     private static readonly GLTextureAttachmentDefinition PickingBufDefinition =
-        new(PixelInternalFormat.Rgba8ui, PixelFormat.RgbaInteger, PixelType.UnsignedByte,
+        new(PixelInternalFormat.Rgb, PixelFormat.Rgb, PixelType.UnsignedByte,
             TextureFilterMode.Nearest, FramebufferAttachment.ColorAttachment1);
 
     private static readonly GLRenderbufferAttachmentDefinition DepthBufDefinition =
@@ -32,7 +32,7 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
         new(SupportedSamplesCount, PixelInternalFormat.Rgb, FramebufferAttachment.ColorAttachment0);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition PickingBufMultiDefinition =
-        new(SupportedSamplesCount, PixelInternalFormat.Rgba8ui, FramebufferAttachment.ColorAttachment1);
+        new(SupportedSamplesCount, PixelInternalFormat.Rgb, FramebufferAttachment.ColorAttachment1);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition FogBufMultiDefinition =
         new(SupportedSamplesCount, PixelInternalFormat.R8ui, FramebufferAttachment.ColorAttachment2);
@@ -239,31 +239,16 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
 
     public uint GetPickingId(int x, int y) => GetPickingIds(x, y, 1, 1)[0];
 
-    public void RipFramebuffer(ReadBufferMode readBufferMode, string outputPath, bool noAlpha = false)
-    {
-        byte[] readPixels = ReadPixels(readBufferMode, 0, _lastResolution.Y, _lastResolution.X, _lastResolution.Y);
-
-        if (noAlpha)
-        {
-            for (int i = 3; i < readPixels.Length; i += 4)
-                readPixels[i] = 0xFF;
-        }
-
-        var image = Image.LoadPixelData<Rgba32>(readPixels, _lastResolution.X, _lastResolution.Y);
-        image.Mutate(x => x.Flip(FlipMode.Vertical));
-        image.SaveAsPng(outputPath);
-    }
-
     public uint[] GetPickingIds(int x, int y, int width, int height)
     {
-        byte[] pickingIdBytes = ReadPixels(ReadBufferMode.ColorAttachment1, x, y, width, height);
+        byte[] pickingIdBytes = ReadPixels(PickingBufDefinition, x, y, width, height);
 
         var pickingIds = new HashSet<uint>();
 
-        for (int i = 0; i < pickingIdBytes.Length; i += 4)
+        for (int i = 0; i < pickingIdBytes.Length; i += 3)
         {
             uint pickingId = (uint)(pickingIdBytes[i] | pickingIdBytes[i + 1] << 8 | pickingIdBytes[i + 2] << 16 |
-                                    pickingIdBytes[i + 3] << 24);
+                                    0xFF << 24);
 
             pickingIds.Add(pickingId);
         }
@@ -271,22 +256,21 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
         return pickingIds.ToArray();
     }
 
-    private byte[] ReadPixels(ReadBufferMode readBufferMode, int x, int y, int width, int height)
+    private byte[] ReadPixels(GLTextureAttachmentDefinition buffer, int x, int y, int width, int height)
     {
         if (_framebuffer is null)
             throw new Exception();
 
         _framebuffer.Framebuffer.Bind(FramebufferTarget.ReadFramebuffer);
-        GL.ReadBuffer(readBufferMode);
-
-        var format = readBufferMode == ReadBufferMode.ColorAttachment1 ? PixelFormat.RgbaInteger : PixelFormat.Rgba;
+        buffer.SetAsReadBuffer();
 
         //Clamp values to avoid weird operations
         width  = Math.Max(0, width);
         height = Math.Max(0, height);
 
-        byte[] readBytes = new byte[4 * width * height];
-        GL.ReadPixels(x, _lastResolution.Y - y - 1, width, height, format, PixelType.UnsignedByte,
+        byte[] readBytes = new byte[3 * width * height];
+        GL.ReadPixels(x, _lastResolution.Y - y - 1, width, height,
+            buffer.TexturePixelFormat, buffer.TexturePixelType,
             readBytes);
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

@@ -29,7 +29,7 @@ public class ViewportContext
     public bool IsHovered(object obj, int subIndex = -1)
         => HoverObject != null && HoverObject.Object == obj && (subIndex == -1 || HoverObject.SubIndex == subIndex);
 
-    //Add 1 to the Group ID to fix an issue where Alpha = 0 pixels would be discarded on some GPUs
     public static uint GetPickingId(int groupId, int index, int subIndex = -1)
-        => ((uint)(groupId + 1) & 0xFF) << 24 | ((uint)(subIndex + 1) & 0x1F) << 19 | (uint)index & 0x7FFFF;
+        => ((uint)(groupId) & 0x7F) << 17 | ((uint)(subIndex + 1) & 0xF) << 13 | (uint)index & 0x1FFF;
+        //=> ((uint)(groupId + 1) & 0xFF) << 24 | ((uint)(subIndex + 1) & 0x1F) << 19 | (uint)index & 0x7FFFF;
 }
