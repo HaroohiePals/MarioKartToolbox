@@ -16,9 +16,9 @@ internal static class MktbRendererUtil
     private const int DEFAULT_INDEX_GROUP_ID = -1;
     private const int DEFAULT_SUB_INDEX = -1;
 
-    public static uint GetPickingId(int i, int pickingGroupId, int indexGroupIdShift = DEFAULT_INDEX_GROUP_ID_SHIFT,
+    public static uint GetPickingId(ViewportContext context, int i, int pickingGroupId, int indexGroupIdShift = DEFAULT_INDEX_GROUP_ID_SHIFT,
         int indexMask = DEFAULT_INDEX_MASK, int indexGroupId = DEFAULT_INDEX_GROUP_ID, int subIndex = DEFAULT_SUB_INDEX)
-        => ViewportContext.GetPickingId(pickingGroupId, indexGroupId != -1 ? indexGroupId << indexGroupIdShift | i & indexMask : i & indexMask, subIndex);
+        => context.GetPickingId(pickingGroupId, indexGroupId != -1 ? indexGroupId << indexGroupIdShift | i & indexMask : i & indexMask, subIndex);
 
     public static InstancedPoint[] GetMapDataPoints(IEnumerable<IPoint> points, Vector3d scale, Color4 color, ViewportContext context,
         int pickingGroupId, int indexGroupIdShift = DEFAULT_INDEX_GROUP_ID_SHIFT,
@@ -26,7 +26,7 @@ internal static class MktbRendererUtil
     {
         return points.Select((x, i) =>
         {
-            uint pickingId = GetPickingId(i, pickingGroupId, indexGroupIdShift, indexMask, indexGroupId, subIndex);
+            uint pickingId = GetPickingId(context, i, pickingGroupId, indexGroupIdShift, indexMask, indexGroupId, subIndex);
 
             bool isHovered = context.IsHovered(x, subIndex);
             bool isSelected = context.IsSelected(x, subIndex);

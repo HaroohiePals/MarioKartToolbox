@@ -5,7 +5,7 @@ namespace HaroohiePals.Gui.Viewport;
 
 public class ViewportContext
 {
-    public const uint InvalidPickingId = ~0u;
+    public const uint InvalidPickingId = 0xFF000000;
 
     public bool ForceCustomProjectionMatrix = false;
     public Matrix4 CustomProjectionMatrix { get; set; } = Matrix4.Identity;
@@ -23,13 +23,37 @@ public class ViewportContext
 
     public PickingResult PickingResult { get; set; }
 
+    private Dictionary<PickingResult, uint> _pickingResultPickingIdMap = new();
+    private Dictionary<uint, PickingResult> _pickingIdPickingResultMap = new();
+    private uint _lastPickingId = InvalidPickingId + 1;
+
     public bool IsSelected(object obj, int subIndex = -1)
         => SceneObjectHolder.IsSubIndexSelected(obj, subIndex);
 
     public bool IsHovered(object obj, int subIndex = -1)
         => HoverObject != null && HoverObject.Object == obj && (subIndex == -1 || HoverObject.SubIndex == subIndex);
 
-    public static uint GetPickingId(int groupId, int index, int subIndex = -1)
-        => ((uint)(groupId) & 0x7F) << 17 | ((uint)(subIndex + 1) & 0xF) << 13 | (uint)index & 0x1FFF;
-        //=> ((uint)(groupId + 1) & 0xFF) << 24 | ((uint)(subIndex + 1) & 0x1F) << 19 | (uint)index & 0x7FFFF;
+    public uint GetPickingId(int groupId, int index, int subIndex = -1)
+    {
+        if (_lastPickingId < InvalidPickingId)
+            return InvalidPickingId;
+
+        var pickingResult = new PickingResult(groupId, index, subIndex);
+        if (_pickingResultPickingIdMap.ContainsKey(pickingResult))
+        {
+            return _pickingResultPickingIdMap[pickingResult];
+        }
+        _pickingResultPickingIdMap.Add(pickingResult, _lastPickingId);
+        _pickingIdPickingResultMap.Add(_lastPickingId, pickingResult);
+        return _lastPickingId++;
+    }
+
+    public PickingResult GetPickingResult(uint pickingId)
+    {
+        if (_pickingIdPickingResultMap.ContainsKey(pickingId))
+        {
+            return _pickingIdPickingResultMap[pickingId];
+        }
+        return PickingResult.Invalid;
+    }
 }

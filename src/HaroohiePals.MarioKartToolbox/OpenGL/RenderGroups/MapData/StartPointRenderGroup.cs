@@ -31,7 +31,7 @@ internal class StartPointRenderGroup : KartPointRenderGroup<MkdsStartPoint>
     protected sealed override InstancedPoint[] GetPoints(ViewportContext context)
     {
         if (_mapData.StartPoints?.Count() == 0)
-            return new InstancedPoint[0];
+            return [];
 
         try
         {
@@ -41,7 +41,7 @@ internal class StartPointRenderGroup : KartPointRenderGroup<MkdsStartPoint>
             {
                 var ktps = MkdsMapDataUtil.GetStartPosition(_mapData, _raceConfig, i, out var calcPos, out var calcRot);
 
-                uint pickingId = MktbRendererUtil.GetPickingId(i, PickingGroupId);
+                uint pickingId = MktbRendererUtil.GetPickingId(context, i, PickingGroupId);
                 bool isSelected = context.IsSelected(ktps);
                 bool isHovered = context.IsHovered(ktps);
 
@@ -55,7 +55,7 @@ internal class StartPointRenderGroup : KartPointRenderGroup<MkdsStartPoint>
         catch
         {
             _lastPoints = null;
-            return new InstancedPoint[0];
+            return [];
         }
     }
 

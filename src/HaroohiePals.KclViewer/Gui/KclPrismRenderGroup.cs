@@ -146,7 +146,6 @@ internal class KclPrismRenderGroup : RenderGroup, IDisposable
                 color2 = SelectedColor;
             }
 
-
             uint pickingId = ViewportContext.GetPickingId(PickingGroupId, i);
             AddVertex(new PrismVtx
             {

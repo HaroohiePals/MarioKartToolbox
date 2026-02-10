@@ -247,9 +247,8 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
 
         for (int i = 0; i < pickingIdBytes.Length; i += 3)
         {
-            uint pickingId = (uint)(pickingIdBytes[i] | pickingIdBytes[i + 1] << 8 | pickingIdBytes[i + 2] << 16 |
-                                    0xFF << 24);
-
+            uint pickingId = (uint)(pickingIdBytes[i] | pickingIdBytes[i + 1] << 8 | 
+                pickingIdBytes[i + 2] << 16 | 0xFF << 24);
             pickingIds.Add(pickingId);
         }
 

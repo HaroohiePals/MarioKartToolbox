@@ -56,7 +56,8 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
                     _dotRenderer.Points = path.Points.Select((pathPoint, pointIndex) =>
                     {
                         int subIndex = (int)CheckPointPickingSubIndex.Point1;
-                        uint pickingId = MktbRendererUtil.GetPickingId(pointIndex, PickingGroupId, PathIdShift, PointIdMask, i, subIndex);
+                        uint pickingId = MktbRendererUtil.GetPickingId(context, pointIndex, 
+                            PickingGroupId, PathIdShift, PointIdMask, i, subIndex);
                         bool isSelected = context.IsSelected(pathPoint, subIndex);
                         bool isHovered = context.IsHovered(pathPoint, subIndex);
 
@@ -70,7 +71,8 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
                     _dotRenderer.Points = path.Points.Select((pathPoint, pointIndex) =>
                     {
                         int subIndex = (int)CheckPointPickingSubIndex.Point2;
-                        uint pickingId = MktbRendererUtil.GetPickingId(pointIndex, PickingGroupId, PathIdShift, PointIdMask, i, subIndex);
+                        uint pickingId = MktbRendererUtil.GetPickingId(context, pointIndex, 
+                            PickingGroupId, PathIdShift, PointIdMask, i, subIndex);
                         bool isSelected = context.IsSelected(pathPoint, subIndex);
                         bool isHovered = context.IsHovered(pathPoint, subIndex);
 
@@ -85,7 +87,8 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
                     _arrowRenderer.Points = path.Points.Select((point, pointIndex) =>
                     {
                         int subIndex = (int)CheckPointPickingSubIndex.Point1;
-                        uint pickingId = MktbRendererUtil.GetPickingId(pointIndex, PickingGroupId, PathIdShift, PointIdMask, i, subIndex);
+                        uint pickingId = MktbRendererUtil.GetPickingId(context, pointIndex, 
+                            PickingGroupId, PathIdShift, PointIdMask, i, subIndex);
                         bool isSelected = context.IsSelected(point, subIndex);
                         bool isHovered = context.IsHovered(point, subIndex);
 
