@@ -3,9 +3,6 @@ using HaroohiePals.Graphics3d;
 using HaroohiePals.Graphics3d.OpenGL;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using System.Diagnostics.CodeAnalysis;
 
 namespace HaroohiePals.Gui.Viewport.Framebuffers;
@@ -16,7 +13,7 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
     public const int FogBufferId = 2;
 
     private static readonly bool IsMetalAppleSilicon = GL.GetString(StringName.Version).Contains("Metal");
-    private static readonly int SupportedSamplesCount = IsMetalAppleSilicon ? 1 : 4;
+    private static readonly int SupportedSamplesCount = IsMetalAppleSilicon ? 0 : 4;
 
     private static readonly GLTextureAttachmentDefinition ImageBufDefinition =
         new(PixelInternalFormat.Rgb, PixelFormat.Rgb, PixelType.UnsignedByte,
