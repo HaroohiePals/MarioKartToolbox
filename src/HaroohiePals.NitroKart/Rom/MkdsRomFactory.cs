@@ -82,13 +82,13 @@ public class MkdsRomFactory
         }
     }
 
-    private async Task<ReadOverlayFilesResult> ReadOverlayFilesAsync(NdsRomOverlayTable overlayTable, string[] overlayPaths, string workingDirPath, int version)
+    private async Task<ReadOverlayFilesResult> ReadOverlayFilesAsync(NdsRomOverlayTable overlayTable, string[] overlayPaths, string workingDirPath, uint version)
     {
         var fatEntries = new List<FatEntry>();
         var fileData = new List<byte[]>();
 
         int currFileId = 0;
-        if(version != 0)
+        if (version > 0)
         {
             while (currFileId < overlayTable.Length)
             {

@@ -36,7 +36,7 @@ public class MkdsRomProjectFactory
             Arm7OverlaysPaths = arm7OverlaysPaths
         };
 
-        var version = 1;
+        uint version = 1;
 
         var project = new MkdsRomProject
         {

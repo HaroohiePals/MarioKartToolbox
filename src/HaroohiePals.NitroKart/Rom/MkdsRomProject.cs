@@ -10,5 +10,5 @@ public class MkdsRomProject
 {
     public string Name { get; set; }
     public NdsRomInfo RomInfo { get; set; } = new();
-    public int Version { get; set; } = 0;
+    public uint Version { get; set; } = 0;
 }
