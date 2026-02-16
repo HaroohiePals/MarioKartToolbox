@@ -36,10 +36,13 @@ public class MkdsRomProjectFactory
             Arm7OverlaysPaths = arm7OverlaysPaths
         };
 
+        var version = 1;
+
         var project = new MkdsRomProject
         {
             Name = projectName,
-            RomInfo = romInfo
+            RomInfo = romInfo,
+            Version = version
         };
 
         Directory.CreateDirectory(outputPath);
