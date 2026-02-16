@@ -27,8 +27,8 @@ class InteractiveViewportPanel : ViewportPanel
             _perspectiveScene.FramebufferProvider is IPickableFramebufferProvider pickableFramebufferProvider)
         {
             var mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
-            Context.PickingResult =
-                new PickingResult(pickableFramebufferProvider.GetPickingId((int)mousePos.X, (int)mousePos.Y));
+            Context.PickingResult = Context.GetPickingResult(
+                pickableFramebufferProvider.GetPickingId((int)mousePos.X, (int)mousePos.Y));
         }
         else
             Context.PickingResult = PickingResult.Invalid;

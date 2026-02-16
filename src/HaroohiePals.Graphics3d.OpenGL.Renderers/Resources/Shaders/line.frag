@@ -1,7 +1,7 @@
 ﻿#version 400 core
 
 layout (location = 0) out vec4 fragColor;
-layout (location = 1) out uvec4 outPickingId;
+layout (location = 1) out vec4 outPickingId;
 layout (location = 2) out uint outFogBit;
 
 uniform uint uPickingId;
@@ -11,10 +11,10 @@ void main()
 {
     fragColor = uColor;
 
-    outPickingId.r = uPickingId & 0xFFu;
-    outPickingId.g = (uPickingId >> 8) & 0xFFu;
-    outPickingId.b = (uPickingId >> 16) & 0xFFu;
-    outPickingId.a = (uPickingId >> 24) & 0xFFu;
+    outPickingId.r = float(uPickingId & 0xFFu) / 255.0;
+    outPickingId.g = float((uPickingId >> 8) & 0xFFu) / 255.0;
+    outPickingId.b = float((uPickingId >> 16) & 0xFFu) / 255.0;
+    outPickingId.a = 1.0;
 
     outFogBit = 0;
 }

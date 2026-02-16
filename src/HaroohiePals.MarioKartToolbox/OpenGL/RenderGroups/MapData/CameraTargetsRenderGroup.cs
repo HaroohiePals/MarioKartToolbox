@@ -61,7 +61,8 @@ class CameraTargetsRenderGroup : RenderGroup, IColoredRenderGroup, IDisposable
     {
         var points = cameras.Select((x, i) =>
         {
-            uint pickingId = MktbRendererUtil.GetPickingId(i, PickingGroupId, subIndex: targetB ? TargetBSubIndex : TargetASubIndex);
+            uint pickingId = MktbRendererUtil.GetPickingId(context, i, 
+                PickingGroupId, subIndex: targetB ? TargetBSubIndex : TargetASubIndex);
             bool isSelected = context.IsSelected(x);
             bool isHovered = context.IsHovered(x);
 
