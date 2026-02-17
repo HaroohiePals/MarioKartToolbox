@@ -36,8 +36,8 @@ public class MkdsRomFactory
         byte[] arm9Binary = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.Arm9Path)).ConfigureAwait(false);
         byte[] arm7Binary = await File.ReadAllBytesAsync(Path.Combine(workingDirPath, project.RomInfo.Arm7Path)).ConfigureAwait(false);
 
-        var arm9Overlays = await ReadOverlayFilesAsync(arm9OverlayTable, project.RomInfo.Arm9OverlaysPaths, workingDirPath).ConfigureAwait(false);
-        var arm7Overlays = await ReadOverlayFilesAsync(arm7OverlayTable, project.RomInfo.Arm7OverlaysPaths, workingDirPath).ConfigureAwait(false);
+        var arm9Overlays = await ReadOverlayFilesAsync(arm9OverlayTable, project.RomInfo.Arm9OverlaysPaths, workingDirPath, project.Version).ConfigureAwait(false);
+        var arm7Overlays = await ReadOverlayFilesAsync(arm7OverlayTable, project.RomInfo.Arm7OverlaysPaths, workingDirPath, project.Version).ConfigureAwait(false);
 
         var fatEntries = arm9Overlays.FatEntries.Concat(arm7Overlays.FatEntries).ToArray();
         var fileData = arm9Overlays.FileData.Concat(arm7Overlays.FileData).ToArray();
@@ -82,20 +82,42 @@ public class MkdsRomFactory
         }
     }
 
-    private async Task<ReadOverlayFilesResult> ReadOverlayFilesAsync(NdsRomOverlayTable overlayTable, string[] overlayPaths, string workingDirPath)
+    private async Task<ReadOverlayFilesResult> ReadOverlayFilesAsync(NdsRomOverlayTable overlayTable, string[] overlayPaths, string workingDirPath, uint version)
     {
         var fatEntries = new List<FatEntry>();
         var fileData = new List<byte[]>();
 
-        int i = 0;
-
-        foreach (var entry in overlayTable.Entries)
+        int currFileId = 0;
+        if (version > 0)
         {
-            string overlayPath = overlayPaths[i++];
-            string targetFilePath = Path.Combine(workingDirPath, overlayPath);
+            while (currFileId < overlayTable.Length)
+            {
+                int i = 0;
+                foreach (var entry in overlayTable.Entries)
+                {
+                    string overlayPath = overlayPaths[i++];
+                    string targetFilePath = Path.Combine(workingDirPath, overlayPath);
 
-            fatEntries.Add(new FatEntry(0, 0));
-            fileData.Add(await File.ReadAllBytesAsync(targetFilePath));
+                    if(entry.FileId == currFileId)
+                    {
+                        fatEntries.Add(new FatEntry(0, 0));
+                        fileData.Add(await File.ReadAllBytesAsync(targetFilePath));
+                        currFileId++;
+                    }
+                }
+            }
+        }
+        else
+        {
+            int i = 0;
+            foreach (var entry in overlayTable.Entries)
+            {
+                string overlayPath = overlayPaths[i++];
+                string targetFilePath = Path.Combine(workingDirPath, overlayPath);
+
+                fatEntries.Add(new FatEntry(0, 0));
+                fileData.Add(await File.ReadAllBytesAsync(targetFilePath));
+            }
         }
 
         return new ReadOverlayFilesResult(fatEntries, fileData);

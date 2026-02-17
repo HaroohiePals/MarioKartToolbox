@@ -36,10 +36,13 @@ public class MkdsRomProjectFactory
             Arm7OverlaysPaths = arm7OverlaysPaths
         };
 
+        uint version = 1;
+
         var project = new MkdsRomProject
         {
             Name = projectName,
-            RomInfo = romInfo
+            RomInfo = romInfo,
+            Version = version
         };
 
         Directory.CreateDirectory(outputPath);
@@ -78,7 +81,7 @@ public class MkdsRomProjectFactory
             string targetFilePath = Path.Combine(outputPath, overlayPath);
 
             new FileInfo(targetFilePath).Directory?.Create();
-            await File.WriteAllBytesAsync(targetFilePath, rom.FileData[entry.Id]).ConfigureAwait(false);
+            await File.WriteAllBytesAsync(targetFilePath, rom.FileData[entry.FileId]).ConfigureAwait(false);
         }
     }
 
