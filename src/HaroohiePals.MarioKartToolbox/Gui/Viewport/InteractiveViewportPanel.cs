@@ -66,7 +66,8 @@ abstract class InteractiveViewportPanel : ViewportPanel
             Context.PickingResult = PickingResult.Invalid;
 
         HandleSelectionRectangle();
-        RenderGizmos();
+        if (!_selectionRect.Dragging)
+            RenderGizmos();
         if (Context.SceneObjectHolder.SelectionSize == 0 || (!_gizmo.IsUsing && !_gizmo.IsOver && !_gizmo.IsUsingDrawTool))
             HandlePickingResult();
         _sideToolbar.Draw(Context, _gizmo);
