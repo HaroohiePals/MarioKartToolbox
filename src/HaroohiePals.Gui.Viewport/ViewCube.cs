@@ -25,19 +25,21 @@ internal class ViewCube
 
     private bool _wasMouseDown = false;
 
+    public bool IsUsing => _isDragging || _isClicking;
+
     private static readonly System.Numerics.Vector2[] PanelPosition =
-    {
-            new(0.75f, 0.75f), new(0.25f, 0.75f), new(0, 0.75f),
-            new(0.75f, 0.25f), new(0.25f, 0.25f), new(0, 0.25f),
-            new(0.75f, 0), new(0.25f, 0), new(0, 0)
-        };
+    [
+        new(0.75f, 0.75f), new(0.25f, 0.75f), new(0, 0.75f),
+        new(0.75f, 0.25f), new(0.25f, 0.25f), new(0, 0.25f),
+        new(0.75f, 0), new(0.25f, 0), new(0, 0)
+    ];
 
     private static readonly System.Numerics.Vector2[] PanelSize =
-    {
-            new(0.25f, 0.25f), new(0.5f, 0.25f), new(0.25f, 0.25f),
-            new(0.25f, 0.5f), new(0.5f, 0.5f), new(0.25f, 0.5f),
-            new(0.25f, 0.25f), new(0.5f, 0.25f), new(0.25f, 0.25f)
-        };
+    [
+        new(0.25f, 0.25f), new(0.5f, 0.25f), new(0.25f, 0.25f),
+        new(0.25f, 0.5f), new(0.5f, 0.5f), new(0.25f, 0.5f),
+        new(0.25f, 0.25f), new(0.5f, 0.25f), new(0.25f, 0.25f)
+    ];
 
     public void ViewManipulate(ref Matrix4 view, float length, Vector2 position, Vector2 size, uint backgroundColor)
     {
@@ -173,7 +175,7 @@ internal class ViewCube
         }
 
         _isInside = ImGui.IsWindowHovered() &&
-                    new Box2(position, position + size).Contains((io.MousePos.X, io.MousePos.Y));
+                    new Box2(position, position + size).ContainsInclusive((io.MousePos.X, io.MousePos.Y));
 
         if (ImGui.IsMouseDragging(ImGuiMouseButton.Left, 5))
             _isClicking = false;

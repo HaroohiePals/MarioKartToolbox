@@ -26,6 +26,7 @@ class InteractivePerspectiveViewportPanel : InteractiveViewportPanel
 
         _cameraControls.Update(Context, deltaTime);
         _cameraControls.ViewportKeyBindings = _applicationSettings.Settings.KeyBindings.Viewport.ToViewportKeyBindings();
+        _canUseSelectionRectangle = !_cameraControls.IsUsingViewCube;
     }
 
     public override void RenderControls()

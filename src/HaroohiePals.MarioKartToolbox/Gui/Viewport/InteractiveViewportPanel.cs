@@ -79,9 +79,6 @@ abstract class InteractiveViewportPanel : ViewportPanel
 
     private void RenderGizmos()
     {
-        //if (!ImGui.IsWindowFocused())
-        //    return;
-
         _gizmo.Draw(Context);
     }
 

@@ -14,6 +14,7 @@ public class PerspectiveCameraControls
     public ViewportKeyBindings ViewportKeyBindings { get; set; } = new();
 
     public bool ShowViewCube { get; set; } = true;
+    public bool IsUsingViewCube => _viewCube.IsUsing;
 
     public void Update(ViewportContext context, float deltaTime)
     {
