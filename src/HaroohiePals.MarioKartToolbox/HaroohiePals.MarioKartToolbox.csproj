@@ -127,10 +127,6 @@
 		</None>
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ReferencePathWithRefAssemblies Update="\Users\ermii\.nuget\packages\nativefiledialogs.autogen\1.1.0\lib\net8.0\NativeFileDialogs.AutoGen.dll" />
-	</ItemGroup>
-
 	<Target Name="SetSourceRevisionId" BeforeTargets="InitializeSourceControlInformation">
 		<Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="True" IgnoreExitCode="False">
 			<Output PropertyName="SourceRevisionId" TaskParameter="ConsoleOutput" />
