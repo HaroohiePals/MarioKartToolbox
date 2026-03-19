@@ -24,8 +24,7 @@
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="6.5.0" />
 		<PackageReference Include="DiscordRichPresence" Version="1.1.3.18" />
-		<PackageReference Include="NativeFileDialogs.AutoGen" Version="1.2.1" />
-		<PackageReference Include="NativeFileDialogs.Net" Version="1.3.0" />
+		<PackageReference Include="NativeFileDialogs.Net" Version="1.3.0.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="OpenTK" Version="4.9.4" />
 		<PackageReference Include="TextCopy" Version="6.2.1" />
