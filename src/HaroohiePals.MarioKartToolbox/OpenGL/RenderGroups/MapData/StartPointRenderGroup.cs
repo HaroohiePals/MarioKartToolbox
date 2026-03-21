@@ -12,34 +12,37 @@ using System.Linq;
 
 namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData;
 
-internal class StartPointRenderGroup : KartPointRenderGroup<MkdsStartPoint>
+sealed class StartPointRenderGroup : KartPointRenderGroup<MkdsStartPoint>
 {
-    private RaceConfig _raceConfig;
-    private MkdsMapData _mapData;
-    private const int _driverCount = 8;
+    private const int DRIVER_COUNT = 8;
+
+    private readonly RaceConfig _raceConfig;
+    private readonly MkdsMapData _mapData;
+
+    private IEnumerable<InstancedPoint> _lastPoints;
 
     public StartPointRenderGroup(MkdsMapData mapData, Color color, bool render2d,
         IRendererFactory rendererFactory)
         : base(mapData.StartPoints, color, render2d, rendererFactory)
     {
         _mapData = mapData;
-        _raceConfig = new RaceConfig(_driverCount, _mapData.IsMgStage ? RaceMode.MiniGame : RaceMode.Versus, RaceDisplayMode.Default);
+        _raceConfig = new RaceConfig(DRIVER_COUNT,
+            _mapData.IsMgStage ? RaceMode.MiniGame : RaceMode.Versus, RaceDisplayMode.Default);
     }
 
-    private IEnumerable<InstancedPoint> _lastPoints = null;
-
-    protected sealed override InstancedPoint[] GetPoints(ViewportContext context)
+    protected override InstancedPoint[] GetPoints(ViewportContext context)
     {
-        if (_mapData.StartPoints?.Count() == 0)
+        if (_mapData.StartPoints?.Count == 0)
             return [];
 
         try
         {
             var points = new List<InstancedPoint>();
 
-            for (int i = 0; i < _driverCount; i++)
+            for (int i = 0; i < DRIVER_COUNT; i++)
             {
-                var ktps = MkdsMapDataUtil.GetStartPosition(_mapData, _raceConfig, i, out var calcPos, out var calcRot);
+                var ktps = MkdsMapDataUtil.GetStartPosition(_mapData, 
+                    _raceConfig, i, out var calcPos, out var calcRot);
 
                 uint pickingId = MktbRendererUtil.GetPickingId(context, i, PickingGroupId);
                 bool isSelected = context.IsSelected(ktps);
@@ -59,5 +62,5 @@ internal class StartPointRenderGroup : KartPointRenderGroup<MkdsStartPoint>
         }
     }
 
-    public override object GetObject(int index) => _lastPoints?.ElementAt(index).Source ?? null;
+    public override object GetObject(int index) => _lastPoints?.ElementAt(index).Source;
 }
