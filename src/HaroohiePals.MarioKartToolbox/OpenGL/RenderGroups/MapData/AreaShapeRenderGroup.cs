@@ -14,35 +14,31 @@ using System.Linq;
 
 namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData;
 
-internal class AreaShapeRenderGroup : RenderGroup, IColoredRenderGroup, IDisposable
+sealed class AreaShapeRenderGroup(
+    MapDataCollection<MkdsArea> collection,
+    Color color,
+    IRendererFactory rendererFactory)
+    : RenderGroup, IColoredRenderGroup, IDisposable
 {
     private const int AREA_SHAPE_SUB_INDEX = 0;
 
-    protected readonly MapDataCollection<MkdsArea> _collection;
-    public Color Color { get; set; }
+    public Color Color { get; set; } = color;
+    public bool ShowAll { get; set; }
 
-    private MeshRenderer _boxRenderer;
-    private MeshRenderer _cylinderRenderer;
+    private readonly MeshRenderer _boxRenderer = rendererFactory.CreateBoxAreaRenderer(false);
+    private readonly MeshRenderer _cylinderRenderer = rendererFactory.CreateCylinderAreaRenderer(false);
 
-    public bool ShowAll = false;
-
-    public AreaShapeRenderGroup(MapDataCollection<MkdsArea> collection, Color color, bool render2d, IRendererFactory rendererFactory)
-    {
-        Color = color;
-        _collection = collection;
-        _cylinderRenderer = rendererFactory.CreateCylinderAreaRenderer(false);
-        _boxRenderer = rendererFactory.CreateBoxAreaRenderer(false);
-    }
-
-    private InstancedPoint[] SetupPoints(ViewportContext context, IEnumerable<MkdsArea> visibleAreas, MkdsAreaShapeType shape)
+    private InstancedPoint[] SetupPoints(ViewportContext context, IEnumerable<MkdsArea> visibleAreas,
+        MkdsAreaShapeType shape)
     {
         var points = visibleAreas.Where(x => x.Shape == shape).Select(x =>
         {
-            uint pickingId = context.GetPickingId(PickingGroupId, _collection.IndexOf(x), AREA_SHAPE_SUB_INDEX);
+            uint pickingId = context.GetPickingId(PickingGroupId, collection.IndexOf(x), AREA_SHAPE_SUB_INDEX);
             bool isSelected = context.IsSelected(x, AREA_SHAPE_SUB_INDEX);
             bool isHovered = context.IsHovered(x, AREA_SHAPE_SUB_INDEX);
 
-            return new InstancedPoint(x.GetTransformMatrix(), Color, false, x, pickingId, isHovered, isSelected);
+            return new InstancedPoint(
+                x.GetTransformMatrix(), Color, false, x, pickingId, isHovered, isSelected);
         }).ToArray();
 
         return points;
@@ -53,7 +49,9 @@ internal class AreaShapeRenderGroup : RenderGroup, IColoredRenderGroup, IDisposa
         if (!context.TranslucentPass)
             return;
 
-        var visibleAreas = ShowAll ? _collection : context.SceneObjectHolder.GetSelection().OfType<MkdsArea>();
+        var visibleAreas = ShowAll
+            ? collection.ToList()
+            : context.SceneObjectHolder.GetSelection().OfType<MkdsArea>().ToList();
 
         //Box
         _boxRenderer.Points = SetupPoints(context, visibleAreas, MkdsAreaShapeType.Box);
@@ -65,10 +63,10 @@ internal class AreaShapeRenderGroup : RenderGroup, IColoredRenderGroup, IDisposa
     }
 
     public override object GetObject(int index)
-        => _collection[index];
+        => collection[index];
 
-    public override bool ContainsObject(object obj) 
-        => obj is MkdsArea instance && _collection.Contains(instance);
+    public override bool ContainsObject(object obj)
+        => obj is MkdsArea instance && collection.Contains(instance);
 
     public override bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
     {
