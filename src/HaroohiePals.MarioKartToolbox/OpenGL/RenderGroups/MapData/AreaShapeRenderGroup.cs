@@ -38,7 +38,7 @@ internal class AreaShapeRenderGroup : RenderGroup, IColoredRenderGroup, IDisposa
     {
         var points = visibleAreas.Where(x => x.Shape == shape).Select(x =>
         {
-            uint pickingId = context.GetPickingId(PickingGroupId, _collection.IndexOf(x), AREA_SHAPE_SUB_INDEX); // MktbRendererUtil.GetPickingId(i, PickingGroupId, ShapeShift, PointIdMask, (int)shape, 0);
+            uint pickingId = context.GetPickingId(PickingGroupId, _collection.IndexOf(x), AREA_SHAPE_SUB_INDEX);
             bool isSelected = context.IsSelected(x, AREA_SHAPE_SUB_INDEX);
             bool isHovered = context.IsHovered(x, AREA_SHAPE_SUB_INDEX);
 
