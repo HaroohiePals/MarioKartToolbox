@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.PropertyGrid;
 
@@ -20,7 +21,7 @@ class MkdsCollisionVariantEditor : IPropertyEditor
         if (obj is MkdsKclAttributeAdapter adapter)
             return adapter.Type;
 
-        if (obj is MaterialAttribute materialAttribute)
+        if (obj is CollisionImportMaterialAttribute materialAttribute)
             return materialAttribute.Type;
 
         throw new Exception();
@@ -31,7 +32,7 @@ class MkdsCollisionVariantEditor : IPropertyEditor
         if (obj is MkdsKclAttributeAdapter adapter)
             return adapter.Variant;
 
-        if (obj is MaterialAttribute materialAttribute)
+        if (obj is CollisionImportMaterialAttribute materialAttribute)
             return materialAttribute.Variant;
 
         throw new Exception();

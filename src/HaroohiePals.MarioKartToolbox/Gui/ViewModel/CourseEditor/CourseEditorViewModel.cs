@@ -11,17 +11,14 @@ using System.Linq;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 
-class CourseEditorViewModel
+class CourseEditorViewModel(
+    IMkdsCourse course,
+    IModalService modalService,
+    IMkdsCourseValidatorFactory courseValidatorFactory,
+    IMkdsMapObjDatabase mobjDatabase,
+    IMapDataClipboard mapDataClipboard)
 {
-    private readonly IModalService _modalService;
-
-    public ICourseEditorContext Context { get; }
-
-    public CourseEditorViewModel(IMkdsCourse course, IModalService modalService, IMkdsCourseValidatorFactory courseValidatorFactory, IMkdsMapObjDatabase mobjDatabase, IMapDataClipboard mapDataClipboard)
-    {
-        Context = new CourseEditorContext(course, courseValidatorFactory, mobjDatabase, mapDataClipboard);
-        _modalService = modalService;
-    }
+    public ICourseEditorContext Context { get; } = new CourseEditorContext(course, courseValidatorFactory, mobjDatabase, mapDataClipboard);
 
     public void SaveFile()
     {
@@ -49,7 +46,7 @@ class CourseEditorViewModel
 
     public bool PerformRedo()
     {
-        if (_modalService.IsAnyModalOpen || !Context.ActionStack.CanRedo)
+        if (modalService.IsAnyModalOpen || !Context.ActionStack.CanRedo)
             return false;
 
         Context.CancelOperations();
@@ -66,7 +63,7 @@ class CourseEditorViewModel
         if (Context.CancelOperations())
             return false;
 
-        if (_modalService.IsAnyModalOpen || !Context.ActionStack.CanUndo)
+        if (modalService.IsAnyModalOpen || !Context.ActionStack.CanUndo)
             return false;
 
         bool clearSelection = Context.ActionStack.IsLastActionCreateOrDelete;
@@ -83,24 +80,22 @@ class CourseEditorViewModel
 
     public void ShowMapDataGenerator()
     {
-        _modalService.ShowModal(new MapDataGeneratorModalView(new MapDataGeneratorViewModel(Context)));
+        modalService.ShowModal(new MapDataGeneratorModalView(new MapDataGeneratorViewModel(Context)));
     }
 
     public void ShowImportCollision()
     {
-        _modalService.ShowModal(new CollisionImportModalView(Context));
+        modalService.ShowModal(new CollisionImportModalView(Context));
     }
 
     public void ShowImportCourseModel()
     {
         Console.WriteLine("Not implemented");
-        //throw new NotImplementedException();
     }
 
     public void ShowImportCourseModelV()
     {
         Console.WriteLine("Not implemented");
-        //throw new NotImplementedException();
     }
 
     public void ClearRequests()

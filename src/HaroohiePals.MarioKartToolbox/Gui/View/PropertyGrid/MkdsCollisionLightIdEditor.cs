@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.PropertyGrid;
 
@@ -29,7 +30,7 @@ class MkdsCollisionLightIdEditor : IPropertyEditor
         if (obj is MkdsKclAttributeAdapter adapter)
             return adapter.LightId;
 
-        if (obj is MaterialAttribute materialAttribute)
+        if (obj is CollisionImportMaterialAttribute materialAttribute)
             return materialAttribute.LightId;
 
         throw new Exception();

@@ -43,44 +43,45 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
     [
         new("File")
         {
-            Items = new()
-            {
+            Items =
+            [
                 new("Save", _viewModel.SaveFile),
                 new("Import")
                 {
-                    Items = new()
-                    {
+                    Items =
+                    [
                         new("Import Collision", _viewModel.ShowImportCollision),
                         new("Import Course Model", _viewModel.ShowImportCourseModel),
                         new("Import Skybox Model", _viewModel.ShowImportCourseModelV)
-                    }
+                    ]
                 },
+
                 new() { Separator = true },
                 new("Close Editor", Close)
-            }
+            ]
         },
         new("Edit")
         {
-            Items =
-                {
-                    new("Undo", PerformUndo, _applicationSettings.Settings.KeyBindings.Shortcuts.Undo),
-                    new("Redo", PerformRedo, _applicationSettings.Settings.KeyBindings.Shortcuts.Redo),
-                    new MenuItem { Separator = true },
-                    new("Cut", _viewModel.Cut, _applicationSettings.Settings.KeyBindings.Shortcuts.Cut),
-                    new("Copy", _viewModel.Copy, _applicationSettings.Settings.KeyBindings.Shortcuts.Copy),
-                    new("Paste", _viewModel.Paste,  _applicationSettings.Settings.KeyBindings.Shortcuts.Paste),
-                    new("Insert", _viewModel.Insert, _applicationSettings.Settings.KeyBindings.Shortcuts.Insert),
-                    new("Delete", _viewModel.DeleteSelected, _applicationSettings.Settings.KeyBindings.Shortcuts.Delete),
-                    new MenuItem { Separator = true },
-                    new("Select All", _viewModel.SelectAll, _applicationSettings.Settings.KeyBindings.Shortcuts.SelectAll)
-                }
+            Items = 
+            [
+                new("Undo", PerformUndo, _applicationSettings.Settings.KeyBindings.Shortcuts.Undo),
+                new("Redo", PerformRedo, _applicationSettings.Settings.KeyBindings.Shortcuts.Redo),
+                new MenuItem { Separator = true },
+                new("Cut", _viewModel.Cut, _applicationSettings.Settings.KeyBindings.Shortcuts.Cut),
+                new("Copy", _viewModel.Copy, _applicationSettings.Settings.KeyBindings.Shortcuts.Copy),
+                new("Paste", _viewModel.Paste,  _applicationSettings.Settings.KeyBindings.Shortcuts.Paste),
+                new("Insert", _viewModel.Insert, _applicationSettings.Settings.KeyBindings.Shortcuts.Insert),
+                new("Delete", _viewModel.DeleteSelected, _applicationSettings.Settings.KeyBindings.Shortcuts.Delete),
+                new MenuItem { Separator = true },
+                new("Select All", _viewModel.SelectAll, _applicationSettings.Settings.KeyBindings.Shortcuts.SelectAll)
+            ]
         },
         new("Tools")
         {
             Items =
-                {
-                    new ("Map Data Generator (Experimental)", _viewModel.ShowMapDataGenerator)
-                }
+            [
+                new ("Map Data Generator (Experimental)", _viewModel.ShowMapDataGenerator)
+            ]
         }
     ];
 
