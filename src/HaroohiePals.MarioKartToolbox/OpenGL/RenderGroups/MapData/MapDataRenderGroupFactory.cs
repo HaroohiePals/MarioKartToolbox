@@ -80,7 +80,7 @@ class MapDataRenderGroupFactory
             MapDataCollection<MkdsItemPath> itemPathCollection => new IpoiEpoiRadiusRenderGroup<MkdsItemPath, MkdsItemPoint>(
                 itemPathCollection, GetMapDataColor<MkdsItemPoint>(), _rendererFactory),
             MapDataCollection<MkdsArea> areaCollection => new AreaShapeRenderGroup(
-                areaCollection, GetMapDataColor<MkdsArea>(), render2d, _rendererFactory),
+                areaCollection, GetMapDataColor<MkdsArea>(), _rendererFactory),
             _ => throw new ArgumentException(nameof(collection))
         };
     }

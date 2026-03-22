@@ -59,11 +59,13 @@ abstract class InteractiveViewportPanel : ViewportPanel
             _renderGroupScene.FramebufferProvider is IPickableFramebufferProvider pickableFramebufferProvider)
         {
             var mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
-            Context.PickingResult =
-                new PickingResult(pickableFramebufferProvider.GetPickingId((int)mousePos.X, (int)mousePos.Y));
+            Context.PickingResult = Context.GetPickingResult(
+                pickableFramebufferProvider.GetPickingId((int)mousePos.X, (int)mousePos.Y));
         }
         else
+        {
             Context.PickingResult = PickingResult.Invalid;
+        }
 
         HandleSelectionRectangle();
         if (!_selectionRect.Dragging)
@@ -97,7 +99,8 @@ abstract class InteractiveViewportPanel : ViewportPanel
         {
             var ids = pickableFramebufferProvider.GetPickingIds(_selectionRect.TopLeft.X, _selectionRect.BottomRight.Y,
                 _selectionRect.Size.X, _selectionRect.Size.Y);
-            var pickingResults = ids.Select(x => new PickingResult(x)).Where(x => !x.IsInvalid).ToArray();
+            var pickingResults = ids.Select(Context.GetPickingResult)
+                .Where(x => !x.IsInvalid).ToArray();
             HandlePickingResults(pickingResults);
         }
     }

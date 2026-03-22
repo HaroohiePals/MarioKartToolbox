@@ -201,7 +201,7 @@ internal class KclPrismRenderGroup : RenderGroup, IDisposable
             }
 
             uint pickingId = Wireframe ? ViewportContext.InvalidPickingId
-                : ViewportContext.GetPickingId(PickingGroupId, i);
+                : context.GetPickingId(PickingGroupId, i);
 
             AddVertex(new PrismVtx
             {

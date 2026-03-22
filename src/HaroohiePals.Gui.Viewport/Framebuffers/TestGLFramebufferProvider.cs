@@ -3,9 +3,6 @@ using HaroohiePals.Graphics3d;
 using HaroohiePals.Graphics3d.OpenGL;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using System.Diagnostics.CodeAnalysis;
 
 namespace HaroohiePals.Gui.Viewport.Framebuffers;
@@ -13,74 +10,77 @@ namespace HaroohiePals.Gui.Viewport.Framebuffers;
 public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
 {
     public const int PickingBufferId = 1;
-    public const int FogBufferId     = 2;
+    public const int FogBufferId = 2;
+
+    private static readonly bool IsMetalAppleSilicon = GL.GetString(StringName.Version).Contains("Metal");
+    private static readonly int SupportedSamplesCount = IsMetalAppleSilicon ? 0 : 4;
 
     private static readonly GLTextureAttachmentDefinition ImageBufDefinition =
         new(PixelInternalFormat.Rgb, PixelFormat.Rgb, PixelType.UnsignedByte,
             TextureFilterMode.Linear, FramebufferAttachment.ColorAttachment0);
 
     private static readonly GLTextureAttachmentDefinition PickingBufDefinition =
-        new(PixelInternalFormat.Rgba8ui, PixelFormat.RgbaInteger, PixelType.UnsignedByte,
+        new(PixelInternalFormat.Rgb, PixelFormat.Rgb, PixelType.UnsignedByte,
             TextureFilterMode.Nearest, FramebufferAttachment.ColorAttachment1);
 
     private static readonly GLRenderbufferAttachmentDefinition DepthBufDefinition =
         new(RenderbufferStorage.Depth24Stencil8, FramebufferAttachment.DepthStencilAttachment);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition ImageBufMultiDefinition =
-        new(4, PixelInternalFormat.Rgb, FramebufferAttachment.ColorAttachment0);
+        new(SupportedSamplesCount, PixelInternalFormat.Rgb, FramebufferAttachment.ColorAttachment0);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition PickingBufMultiDefinition =
-        new(4, PixelInternalFormat.Rgba8ui, FramebufferAttachment.ColorAttachment1);
+        new(SupportedSamplesCount, PixelInternalFormat.Rgb, FramebufferAttachment.ColorAttachment1);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition FogBufMultiDefinition =
-        new(4, PixelInternalFormat.R8ui, FramebufferAttachment.ColorAttachment2);
+        new(SupportedSamplesCount, PixelInternalFormat.R8ui, FramebufferAttachment.ColorAttachment2);
 
     private static readonly GLMultiSampleTextureAttachmentDefinition DepthBufMultiDefinition =
-        new(4, PixelInternalFormat.Depth24Stencil8, FramebufferAttachment.DepthStencilAttachment);
+        new(SupportedSamplesCount, PixelInternalFormat.Depth24Stencil8, FramebufferAttachment.DepthStencilAttachment);
 
     private static readonly Vector2[] ScreenQuadVertices =
-    {
+    [
         (0, 0),
         (1, 0),
         (1, 1),
         (0, 1)
-    };
+    ];
 
     private static readonly uint[] ScreenQuadIndices =
-    {
+    [
         0, 1, 2,
         0, 2, 3
-    };
+    ];
 
     private readonly GLFramebufferDefinition _framebufferDefinition;
     private readonly GLFramebufferDefinition _multiFramebufferDefinition;
-    private readonly bool                    _withPickingBuffer;
-    private readonly bool                    _withFogBuffer;
+    private readonly bool _withPickingBuffer;
+    private readonly bool _withFogBuffer;
 
     private GLCompleteFramebuffer? _framebuffer;
     private GLCompleteFramebuffer? _multiFramebuffer;
 
-    private bool     _isInBegin = false;
+    private bool _isInBegin = false;
     private Vector2i _lastResolution;
     private Vector2i _lastResolutionMulti;
 
-    private GLShader?          _idBlitShader;
-    private GLVertexArray?     _idBlitVertexArray;
+    private GLShader? _idBlitShader;
+    private GLVertexArray? _idBlitVertexArray;
     private GLBuffer<Vector2>? _idBlitVertexBuffer;
-    private GLBuffer<uint>?    _idBlitElementBuffer;
+    private GLBuffer<uint>? _idBlitElementBuffer;
 
     public Color4 BgColor { get; set; }
 
-    public GLTexture ImageBufferMultiTex => _multiFramebuffer.GetTextureAttachment(ImageBufMultiDefinition.Attachment);
-    public GLTexture DepthBufferMultiTex => _multiFramebuffer.GetTextureAttachment(DepthBufMultiDefinition.Attachment);
-    public GLTexture FogBufferMultiTex => _multiFramebuffer.GetTextureAttachment(FogBufMultiDefinition.Attachment);
+    public GLTexture ImageBufferMultiTex => _multiFramebuffer!.GetTextureAttachment(ImageBufMultiDefinition.Attachment);
+    public GLTexture DepthBufferMultiTex => _multiFramebuffer!.GetTextureAttachment(DepthBufMultiDefinition.Attachment);
+    public GLTexture FogBufferMultiTex => _multiFramebuffer!.GetTextureAttachment(FogBufMultiDefinition.Attachment);
 
     public TestGLFramebufferProvider(Color4 bgColor, bool withPickingBuffer, bool withFogBuffer)
     {
-        BgColor                     = bgColor;
-        _withPickingBuffer          = withPickingBuffer;
-        _withFogBuffer              = withFogBuffer;
-        _framebufferDefinition      = CreateFramebufferDefinition(withPickingBuffer);
+        BgColor = bgColor;
+        _withPickingBuffer = withPickingBuffer;
+        _withFogBuffer = withFogBuffer;
+        _framebufferDefinition = CreateFramebufferDefinition(withPickingBuffer);
         _multiFramebufferDefinition = CreateMultiFramebufferDefinition(withPickingBuffer, withFogBuffer);
     }
 
@@ -192,32 +192,44 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
         ImageBufMultiDefinition.SetAsReadBuffer();
         _framebuffer.Framebuffer.Bind(FramebufferTarget.DrawFramebuffer);
         ImageBufDefinition.SetAsDrawBuffer();
-        GL.BlitFramebuffer(0, 0, _lastResolution.X, _lastResolution.Y, 0, 0, _lastResolution.X, _lastResolution.Y,
-            ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
+        GL.BlitFramebuffer(0, 0, _lastResolution.X, _lastResolution.Y, 0, 0, _lastResolution.X,
+            _lastResolution.Y, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
 
         if (_withPickingBuffer)
         {
-            if (_idBlitShader is null)
-                InitIdBlit();
+            if (IsMetalAppleSilicon)
+            {
+                _multiFramebuffer.Framebuffer.Bind(FramebufferTarget.ReadFramebuffer);
+                PickingBufMultiDefinition.SetAsReadBuffer();
+                _framebuffer.Framebuffer.Bind(FramebufferTarget.DrawFramebuffer);
+                PickingBufDefinition.SetAsDrawBuffer();
+                GL.BlitFramebuffer(0, 0, _lastResolution.X, _lastResolution.Y, 0, 0, _lastResolution.X,
+                    _lastResolution.Y, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
+            }
+            else
+            {
+                if (_idBlitShader is null)
+                    InitIdBlit();
 
-            _framebuffer.Framebuffer.Bind(FramebufferTarget.Framebuffer);
-            PickingBufDefinition.SetAsDrawBuffer();
-            GL.Disable(EnableCap.DepthTest);
-            GL.DepthMask(false);
-            GL.ActiveTexture(TextureUnit.Texture0);
-            _multiFramebuffer.GetTextureAttachment(PickingBufDefinition.Attachment).Use();
-            _idBlitVertexArray!.Bind();
-            GL.EnableVertexAttribArray(0);
+                _framebuffer.Framebuffer.Bind(FramebufferTarget.Framebuffer);
+                PickingBufDefinition.SetAsDrawBuffer();
+                GL.Disable(EnableCap.DepthTest);
+                GL.DepthMask(false);
+                GL.ActiveTexture(TextureUnit.Texture0);
+                _multiFramebuffer.GetTextureAttachment(PickingBufDefinition.Attachment).Use();
+                _idBlitVertexArray!.Bind();
+                GL.EnableVertexAttribArray(0);
 
-            _idBlitShader.Use();
-            _idBlitShader.SetMatrix4("projMtxScreenQuad", Matrix4.CreateOrthographicOffCenter(
-                0.0f, _lastResolution.X, _lastResolution.Y, 0.0f, -1.0f, 1.0f));
-            _idBlitShader.SetVector2("viewportSize", _lastResolution);
+                _idBlitShader.Use();
+                _idBlitShader.SetMatrix4("projMtxScreenQuad", Matrix4.CreateOrthographicOffCenter(
+                    0.0f, _lastResolution.X, _lastResolution.Y, 0.0f, -1.0f, 1.0f));
+                _idBlitShader.SetVector2("viewportSize", _lastResolution);
 
-            GL.DrawElements(BeginMode.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+                GL.DrawElements(BeginMode.Triangles, 6, DrawElementsType.UnsignedInt, 0);
 
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2DMultisample, 0);
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.BindTexture(TextureTarget.Texture2DMultisample, 0);
+            }
         }
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
@@ -237,31 +249,16 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
 
     public uint GetPickingId(int x, int y) => GetPickingIds(x, y, 1, 1)[0];
 
-    public void RipFramebuffer(ReadBufferMode readBufferMode, string outputPath, bool noAlpha = false)
-    {
-        byte[] readPixels = ReadPixels(readBufferMode, 0, _lastResolution.Y, _lastResolution.X, _lastResolution.Y);
-
-        if (noAlpha)
-        {
-            for (int i = 3; i < readPixels.Length; i += 4)
-                readPixels[i] = 0xFF;
-        }
-
-        var image = Image.LoadPixelData<Rgba32>(readPixels, _lastResolution.X, _lastResolution.Y);
-        image.Mutate(x => x.Flip(FlipMode.Vertical));
-        image.SaveAsPng(outputPath);
-    }
-
     public uint[] GetPickingIds(int x, int y, int width, int height)
     {
-        byte[] pickingIdBytes = ReadPixels(ReadBufferMode.ColorAttachment1, x, y, width, height);
-
+        byte[] pickingIdBytes = ReadPixels(PickingBufDefinition, x, y, width, height);
+    
         var pickingIds = new HashSet<uint>();
 
-        for (int i = 0; i < pickingIdBytes.Length; i += 4)
+        for (int i = 0; i < width * height * 3; i += 3)
         {
-            uint pickingId = (uint)(pickingIdBytes[i] | pickingIdBytes[i + 1] << 8 | pickingIdBytes[i + 2] << 16 |
-                                    pickingIdBytes[i + 3] << 24);
+            uint pickingId = (uint)(pickingIdBytes[i] | pickingIdBytes[i + 1] << 8 |
+                                    pickingIdBytes[i + 2] << 16 | 0xFF << 24);
 
             pickingIds.Add(pickingId);
         }
@@ -269,22 +266,23 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
         return pickingIds.ToArray();
     }
 
-    private byte[] ReadPixels(ReadBufferMode readBufferMode, int x, int y, int width, int height)
+    private byte[] ReadPixels(GLTextureAttachmentDefinition buffer, int x, int y, int width, int height)
     {
         if (_framebuffer is null)
             throw new Exception();
 
         _framebuffer.Framebuffer.Bind(FramebufferTarget.ReadFramebuffer);
-        GL.ReadBuffer(readBufferMode);
-
-        var format = readBufferMode == ReadBufferMode.ColorAttachment1 ? PixelFormat.RgbaInteger : PixelFormat.Rgba;
+        buffer.SetAsReadBuffer();
 
         //Clamp values to avoid weird operations
-        width  = Math.Max(0, width);
+        width = Math.Max(0, width);
         height = Math.Max(0, height);
-
-        byte[] readBytes = new byte[4 * width * height];
-        GL.ReadPixels(x, _lastResolution.Y - y - 1, width, height, format, PixelType.UnsignedByte,
+        
+        // Even though there are 3 colors now, we make the buffer aligned to 4 bytes to avoid memory access violations
+        int byteCount = width * height * 4;
+        byte[] readBytes = new byte[byteCount];
+        GL.ReadPixels(x, _lastResolution.Y - y - 1, width, height,
+            buffer.TexturePixelFormat, buffer.TexturePixelType,
             readBytes);
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
@@ -294,12 +292,11 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
 
     private void ClearBuffers()
     {
-        GL.DrawBuffers(3, new[]
-        {
+        GL.DrawBuffers(3, [
             (DrawBuffersEnum)ImageBufMultiDefinition.Attachment,
             (DrawBuffersEnum)PickingBufMultiDefinition.Attachment,
             (DrawBuffersEnum)FogBufMultiDefinition.Attachment
-        });
+        ]);
 
         var invalidPickingId = new uint[4]
         {
@@ -320,11 +317,10 @@ public sealed class TestGLFramebufferProvider : IPickableFramebufferProvider
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit |
                  ClearBufferMask.StencilBufferBit);
 
-        GL.DrawBuffers(2, new[]
-        {
+        GL.DrawBuffers(2, [
             (DrawBuffersEnum)ImageBufMultiDefinition.Attachment,
-            (DrawBuffersEnum)PickingBufMultiDefinition.Attachment,
-        });
+            (DrawBuffersEnum)PickingBufMultiDefinition.Attachment
+        ]);
 
         GL.BlendFunc(1, BlendingFactorSrc.One, BlendingFactorDest.Zero);
         GL.BlendEquation(1, BlendEquationMode.FuncAdd);

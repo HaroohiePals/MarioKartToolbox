@@ -9,6 +9,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Image = SixLabors.ImageSharp.Image;
 using TextureWrapMode = HaroohiePals.Graphics3d.TextureWrapMode;
 
@@ -32,27 +33,31 @@ internal sealed class ImGuiController : IDisposable
     private int _windowWidth;
     private int _windowHeight;
 
-    private List<ImGuiIconGlyph> _icons = new();
-    private IReadOnlyCollection<ImGuiFont> _fonts;
-    private ImGuiFont _iconFont;
+    private readonly List<ImGuiIconGlyph> _icons = [];
+    private readonly IReadOnlyCollection<ImGuiFont> _fonts;
+    private readonly ImGuiFont _iconFont;
 
-    private System.Numerics.Vector2 _scaleFactor = System.Numerics.Vector2.One;
+    private readonly System.Numerics.Vector2 _scaleFactor = System.Numerics.Vector2.One;
 
-    private float _uiScale = 1.0f;
+    private readonly float _uiScale;
+    private readonly float _monitorScaleX;
+    private readonly float _monitorScaleY;
 
-    private Dictionary<Keys, ImGuiKey> _imguiKeyMap = new Dictionary<Keys, ImGuiKey>();
-    private readonly List<char> _pressedInputChars = new List<char>();
+    private readonly Dictionary<Keys, ImGuiKey> _imguiKeyMap = new();
+    private readonly List<char> _pressedInputChars = [];
 
     /// <summary>
     /// Constructs a new ImGuiController.
     /// </summary>
-    public ImGuiController(int width, int height, ImGuiGameWindowSettings settings)
+    public ImGuiController(int width, int height, float monitorScaleX, float monitorScaleY, ImGuiGameWindowSettings settings)
     {
         _fonts = settings.Fonts;
         _iconFont = settings.IconFont;
-        _uiScale = settings.UiScale;
+        _uiScale = settings.IgnoreDpiScaling ? settings.UiScale : settings.UiScale * monitorScaleX;
         _windowWidth = width;
         _windowHeight = height;
+        _monitorScaleX = monitorScaleX;
+        _monitorScaleY = monitorScaleY;
 
         IntPtr context = ImGui.CreateContext();
         ImGui.SetCurrentContext(context);
@@ -75,7 +80,7 @@ internal sealed class ImGuiController : IDisposable
         SetPerFrameImGuiData(1f / 60f);
 
         ImGui.NewFrame();
-        //ImGuizmo.BeginFrame();
+        
         _frameBegun = true;
     }
 
@@ -88,63 +93,6 @@ internal sealed class ImGuiController : IDisposable
     public void DestroyDeviceObjects()
     {
         Dispose();
-    }
-
-    public void CreateDeviceResources()
-    {
-        _vertexArray = new GLVertexArray();
-
-        _vertexBufferSize = 500;
-        _indexBufferSize = 1000;
-
-        _vertexBuffer = new(_vertexBufferSize, BufferUsageHint.DynamicDraw);
-        _indexBuffer = new(_indexBufferSize, BufferUsageHint.DynamicDraw);
-
-        RecreateFontDeviceTexture();
-
-        string VertexSource = @"#version 330 core
-uniform mat4 projection_matrix;
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_texCoord;
-layout(location = 2) in vec4 in_color;
-out vec4 color;
-out vec2 texCoord;
-void main()
-{
-    gl_Position = projection_matrix * vec4(in_position, 0, 1);
-    color = in_color;
-    texCoord = in_texCoord;
-}";
-        string FragmentSource = @"#version 330 core
-uniform sampler2D in_fontTexture;
-in vec4 color;
-in vec2 texCoord;
-out vec4 outputColor;
-void main()
-{
-    outputColor = color * texture(in_fontTexture, texCoord);
-}";
-        _shader = new GLShader(VertexSource, FragmentSource);
-
-        _vertexArray.Bind();
-        _vertexBuffer.Bind(BufferTarget.ArrayBuffer);
-        _indexBuffer.Bind(BufferTarget.ElementArrayBuffer);
-
-        int stride = Unsafe.SizeOf<ImDrawVert>();
-
-        GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, stride, 0);
-        GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 8);
-        GL.EnableVertexAttribArray(2);
-        GL.VertexAttribPointer(2, 4, VertexAttribPointerType.UnsignedByte, true, stride, 16);
-
-        GL.BindVertexArray(0);
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        // We don't need to unbind the element buffer as that is connected to the vertex array
-        // And you should not touch the element buffer when there is no vertex array bound.
-
-        Util.CheckGLError("End of ImGui setup");
     }
 
     /// <summary>
@@ -175,7 +123,6 @@ void main()
 
         _frameBegun = true;
         ImGui.NewFrame();
-        //ImGuizmo.BeginFrame();
     }
 
     /// <summary>
@@ -193,6 +140,63 @@ void main()
 
     internal void PressInputChar(char keyChar)
         => _pressedInputChars.Add(keyChar);
+
+    private void CreateDeviceResources()
+    {
+        _vertexArray = new GLVertexArray();
+
+        _vertexBufferSize = 500;
+        _indexBufferSize = 1000;
+
+        _vertexBuffer = new(_vertexBufferSize, BufferUsageHint.DynamicDraw);
+        _indexBuffer = new(_indexBufferSize, BufferUsageHint.DynamicDraw);
+
+        RecreateFontDeviceTexture();
+
+        string vertexSource = @"#version 330 core
+uniform mat4 projection_matrix;
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_texCoord;
+layout(location = 2) in vec4 in_color;
+out vec4 color;
+out vec2 texCoord;
+void main()
+{
+    gl_Position = projection_matrix * vec4(in_position, 0, 1);
+    color = in_color;
+    texCoord = in_texCoord;
+}";
+        string fragmentSource = @"#version 330 core
+uniform sampler2D in_fontTexture;
+in vec4 color;
+in vec2 texCoord;
+out vec4 outputColor;
+void main()
+{
+    outputColor = color * texture(in_fontTexture, texCoord);
+}";
+        _shader = new GLShader(vertexSource, fragmentSource);
+
+        _vertexArray.Bind();
+        _vertexBuffer.Bind(BufferTarget.ArrayBuffer);
+        _indexBuffer.Bind(BufferTarget.ElementArrayBuffer);
+
+        int stride = Unsafe.SizeOf<ImDrawVert>();
+
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, stride, 0);
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 8);
+        GL.EnableVertexAttribArray(2);
+        GL.VertexAttribPointer(2, 4, VertexAttribPointerType.UnsignedByte, true, stride, 16);
+
+        GL.BindVertexArray(0);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        // We don't need to unbind the element buffer as that is connected to the vertex array
+        // And you should not touch the element buffer when there is no vertex array bound.
+
+        Util.CheckGLError("End of ImGui setup");
+    }
 
     private int RegisterIcon(char character, int size)
     {
@@ -278,7 +282,7 @@ void main()
             registeredIcons.Add(icon, RegisterIcon(icon.CodePoint, 16));
         }
 
-        io.Fonts.GetTexDataAsRGBA32(out IntPtr pixels, out int width, out int height, out int bytesPerPixel);
+        io.Fonts.GetTexDataAsRGBA32(out IntPtr pixels, out int width, out int height, out _);
 
         foreach (var icon in _icons)
         {
@@ -297,17 +301,15 @@ void main()
     {
         var io = ImGui.GetIO();
 
-        using (var icon = Image.Load<Bgra32>(iconBytes))
+        using var icon = Image.Load<Bgra32>(iconBytes);
+        uint* pixPtr = (uint*)pixels;
+        var rect = io.Fonts.GetCustomRectByIndex(rectId);
+        for (int y = 0; y < rect.Height; y++)
         {
-            uint* pixPtr = (uint*)pixels;
-            var rect = io.Fonts.GetCustomRectByIndex(rectId);
-            for (int y = 0; y < rect.Height; y++)
+            uint* p = pixPtr + (rect.Y + y) * width + (rect.X);
+            for (int x = 0; x < rect.Width; x++)
             {
-                uint* p = pixPtr + (rect.Y + y) * width + (rect.X);
-                for (int x = 0; x < rect.Width; x++)
-                {
-                    p[x] = icon[x, y].PackedValue;
-                }
+                p[x] = icon[x, y].PackedValue;
             }
         }
     }
@@ -333,7 +335,16 @@ void main()
         var mouseState = wnd.MouseState;
         var keyboardState = wnd.KeyboardState;
 
-        io.AddMousePosEvent(mouseState.X, mouseState.Y);
+        // Handle mouse offset caused by retina scaling
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            io.AddMousePosEvent(mouseState.X * _monitorScaleX, mouseState.Y * _monitorScaleY);
+        }
+        else
+        {
+            io.AddMousePosEvent(mouseState.X, mouseState.Y);
+        }
+        
         io.AddMouseButtonEvent(0, mouseState.IsButtonDown(MouseButton.Left));
         io.AddMouseButtonEvent(1, mouseState.IsButtonDown(MouseButton.Right));
         io.AddMouseButtonEvent(2, mouseState.IsButtonDown(MouseButton.Middle));
@@ -470,7 +481,7 @@ void main()
             int vertexSize = cmdList.VtxBuffer.Size;
             if (vertexSize > _vertexBufferSize)
             {
-                int newSize = (int)System.Math.Max(_vertexBufferSize * 1.5f, vertexSize);
+                int newSize = (int)Math.Max(_vertexBufferSize * 1.5f, vertexSize);
                 _vertexBuffer.BufferData(newSize, BufferUsageHint.DynamicDraw);
                 _vertexBufferSize = newSize;
             }
@@ -478,7 +489,7 @@ void main()
             int indexSize = cmdList.IdxBuffer.Size;
             if (indexSize > _indexBufferSize)
             {
-                int newSize = (int)System.Math.Max(_indexBufferSize * 1.5f, indexSize);
+                int newSize = (int)Math.Max(_indexBufferSize * 1.5f, indexSize);
                 _indexBuffer.BufferData(newSize, BufferUsageHint.DynamicDraw);
                 _indexBufferSize = newSize;
             }
@@ -519,35 +530,35 @@ void main()
             _indexBuffer.BufferSubData(0, cmdList.IdxBuffer.Data, cmdList.IdxBuffer.Size);
             Util.CheckGLError($"Data Idx {n}");
 
-            for (int cmd_i = 0; cmd_i < cmdList.CmdBuffer.Size; cmd_i++)
+            for (int cmdIndex = 0; cmdIndex < cmdList.CmdBuffer.Size; cmdIndex++)
             {
-                ImDrawCmdPtr pcmd = cmdList.CmdBuffer[cmd_i];
-                if (pcmd.UserCallback != IntPtr.Zero)
+                ImDrawCmdPtr pCmd = cmdList.CmdBuffer[cmdIndex];
+                if (pCmd.UserCallback != IntPtr.Zero)
                 {
                     throw new NotImplementedException();
                 }
                 else
                 {
                     GL.ActiveTexture(TextureUnit.Texture0);
-                    GL.BindTexture(TextureTarget.Texture2D, (int)pcmd.TextureId);
+                    GL.BindTexture(TextureTarget.Texture2D, (int)pCmd.TextureId);
                     Util.CheckGLError("Texture");
 
                     // We do _windowHeight - (int)clip.W instead of (int)clip.Y because gl has flipped Y when it comes to these coordinates
-                    var clip = pcmd.ClipRect;
+                    var clip = pCmd.ClipRect;
                     GL.Scissor((int)clip.X, _windowHeight - (int)clip.W, (int)(clip.Z - clip.X),
                         (int)(clip.W - clip.Y));
                     Util.CheckGLError("Scissor");
 
                     if ((io.BackendFlags & ImGuiBackendFlags.RendererHasVtxOffset) != 0)
                     {
-                        GL.DrawElementsBaseVertex(PrimitiveType.Triangles, (int)pcmd.ElemCount,
-                            DrawElementsType.UnsignedShort, (IntPtr)(pcmd.IdxOffset * sizeof(ushort)),
-                            (int)pcmd.VtxOffset);
+                        GL.DrawElementsBaseVertex(PrimitiveType.Triangles, (int)pCmd.ElemCount,
+                            DrawElementsType.UnsignedShort, (IntPtr)(pCmd.IdxOffset * sizeof(ushort)),
+                            (int)pCmd.VtxOffset);
                     }
                     else
                     {
-                        GL.DrawElements(BeginMode.Triangles, (int)pcmd.ElemCount, DrawElementsType.UnsignedShort,
-                            (int)pcmd.IdxOffset * sizeof(ushort));
+                        GL.DrawElements(BeginMode.Triangles, (int)pCmd.ElemCount, DrawElementsType.UnsignedShort,
+                            (int)pCmd.IdxOffset * sizeof(ushort));
                     }
 
                     Util.CheckGLError("Draw");

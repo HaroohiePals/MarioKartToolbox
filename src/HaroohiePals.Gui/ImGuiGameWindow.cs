@@ -11,6 +11,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Image = OpenTK.Windowing.Common.Input.Image;
 
 namespace HaroohiePals.Gui;
@@ -38,7 +39,13 @@ public abstract class ImGuiGameWindow(ImGuiGameWindowSettings settings) : GameWi
 
         GLContext.Current = new GLContext();
 
-        _controller = new ImGuiController(ClientSize.X, ClientSize.Y, settings);
+        if (!TryGetCurrentMonitorScale(out float currentMonitorScaleX, out float currentMonitorScaleY))
+        {
+            currentMonitorScaleX = currentMonitorScaleY = 1f;
+        }
+
+        _controller = new ImGuiController(FramebufferSize.X, FramebufferSize.Y, 
+            currentMonitorScaleX, currentMonitorScaleY, settings);
 
         ImGuiThemeManager.Init();
 
@@ -56,7 +63,7 @@ public abstract class ImGuiGameWindow(ImGuiGameWindowSettings settings) : GameWi
         if (_controller is null)
             return;
 
-        _controller.WindowResized(ClientSize.X, ClientSize.Y);
+        _controller.WindowResized(FramebufferSize.X, FramebufferSize.Y);
 
         _controller.Update(this, (float)args.Time);
 
@@ -90,6 +97,11 @@ public abstract class ImGuiGameWindow(ImGuiGameWindowSettings settings) : GameWi
         if (Environment.OSVersion.Platform == PlatformID.Unix &&
             Environment.GetEnvironmentVariable("XDG_SESSION_TYPE")?.ToLowerInvariant() == "wayland")
             return;
+        
+        // Similarly to Wayland, macOS doesn't allow clients to set window icons
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            return;
+        
         Icon = new WindowIcon(iconFiles.Select(GetImage).ToArray());
     }
 
