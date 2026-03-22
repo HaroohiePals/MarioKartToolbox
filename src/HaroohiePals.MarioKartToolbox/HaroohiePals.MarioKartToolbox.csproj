@@ -121,7 +121,7 @@
 		<None Update="Themes\Classic Steam.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="Themes\RiiStudio - Raikiri.json">
+		<None Update="Themes\Raikiri.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

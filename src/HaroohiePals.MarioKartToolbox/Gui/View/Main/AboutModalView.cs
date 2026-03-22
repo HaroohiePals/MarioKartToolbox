@@ -14,10 +14,10 @@ class AboutModalView : ModalView
     private const string WINDOW_TITLE = "About Mario Kart Toolbox";
     private const string CAPTION = "Mario Kart Toolbox";
     private const string GITHUB_LINK = "https://github.com/HaroohiePals/MarioKartToolbox";
-    private const string COPYRIGHT_INFO = "© 2015-2025 HaroohiePals";
+    private const string COPYRIGHT_INFO = "© 2015-2026 HaroohiePals";
     
     private GLTexture _iconTexture;
-    private bool _autoResized = false;
+    private bool _autoResized;
 
     public AboutModalView()
         : base(WINDOW_TITLE, new System.Numerics.Vector2(ImGuiEx.CalcUiScaledValue(400), ImGuiEx.CalcUiScaledValue(470)))
@@ -27,22 +27,20 @@ class AboutModalView : ModalView
 
     private void LoadIconTexture()
     {
-        using (var texImage = Image.Load<Rgba32>(Resources.Icons.main))
-        {
-            var data = new byte[texImage.Width * texImage.Height * 8];
-            texImage.CopyPixelDataTo(data);
-            _iconTexture = new GLTexture(PixelInternalFormat.Rgba8, texImage.Width, texImage.Height, PixelFormat.Rgba,
-                PixelType.UnsignedByte, data);
-            _iconTexture.Use();
-            _iconTexture.SetWrapMode(Graphics3d.TextureWrapMode.Clamp, Graphics3d.TextureWrapMode.Clamp);
-            GL.TexParameter(TextureTarget.Texture2D,
-                TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-            GL.TexParameter(TextureTarget.Texture2D,
-                TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, -2.0f);
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-        }
+        using var texImage = Image.Load<Rgba32>(Resources.Icons.main);
+        byte[] data = new byte[texImage.Width * texImage.Height * 8];
+        texImage.CopyPixelDataTo(data);
+        _iconTexture = new GLTexture(PixelInternalFormat.Rgba8, texImage.Width, texImage.Height, PixelFormat.Rgba,
+            PixelType.UnsignedByte, data);
+        _iconTexture.Use();
+        _iconTexture.SetWrapMode(Graphics3d.TextureWrapMode.Clamp, Graphics3d.TextureWrapMode.Clamp);
+        GL.TexParameter(TextureTarget.Texture2D,
+            TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+        GL.TexParameter(TextureTarget.Texture2D,
+            TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, -2.0f);
+        GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        GL.BindTexture(TextureTarget.Texture2D, 0);
     }
 
     protected override void DrawContent()
@@ -107,11 +105,6 @@ class AboutModalView : ModalView
             ImGui.SameLine(0, 0);
             ImGui.TextLinkOpenURL("https://github.com/CedricGuillemet/ImGuizmo");
 
-
-            ImGui.BulletText($"RiiStudio: ");
-            ImGui.SameLine(0, 0);
-            ImGui.TextLinkOpenURL("https://github.com/riidefi/RiiStudio");
-            
             ImGui.BulletText($"A complete Credits list can be found on the GitHub page.");
         }
     }

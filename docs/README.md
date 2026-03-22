@@ -35,14 +35,13 @@ Planned features will be added in the issues of this repository.
 ## Credits
 
 ### Assets
-- [Logo](./assets/img/icon.png) design by [Daniel @kaasiand.cool](https://bsky.app/profile/kaasiand.cool)
+- [Logo](./assets/img/icon.png) and icons designed by [Daniel @kaasiand.cool](https://bsky.app/profile/kaasiand.cool)
 - Placeholder Item Box model by [Jacanapes @jacanapes_](https://x.com/jacanapes_)
 
 ### Software
 - [Dear ImGui](https://github.com/ocornut/imgui)
 - [ImGui.NET](https://github.com/ImGuiNET/ImGui.NET)
 - [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
-- [RiiStudio](https://github.com/riidefi/RiiStudio)
 - [OpenTK](https://github.com/opentk/opentk)
 - [Autofac](https://github.com/autofac/Autofac)
 - [coverlet.collector](https://github.com/coverlet-coverage/coverlet)
