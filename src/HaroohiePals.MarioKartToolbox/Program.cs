@@ -18,13 +18,20 @@ using TextCopy;
 
 namespace HaroohiePals.MarioKartToolbox;
 
-class Program
+static class Program
 {
     private const string APPLICATION_SETTINGS_FILE_PATH = "Preferences.json";
+    private const string IMGUI_INI_FILE_PATH = "imgui.ini";
+    private const string WORKING_DIR_NAME = "MarioKartToolbox";
     private const string DISCORD_CLIENT_ID = "1040294010071298129";
     private const string DISCORD_DEFAULT_GAME_NAME = "Mario Kart DS";
 
-    static void Main(string[] args)
+    public static string GetApplicationSettingsFullPath()
+    {
+        return Path.Combine(GetWorkingDir(), APPLICATION_SETTINGS_FILE_PATH);
+    }
+    
+    private static void Main(string[] args)
     {
         InitializeWorkingDir();
 
@@ -54,9 +61,6 @@ class Program
         builder.RegisterType<OSMapDataClipboard>()
             .As<IMapDataClipboard>()
             .SingleInstance();
-        // builder.RegisterType<ListMapDataClipboard>()
-        //     .As<IMapDataClipboard>()
-        //     .SingleInstance();
         builder.RegisterType<MkdsMapObjDatabase>()
             .As<IMkdsMapObjDatabase>()
             .SingleInstance();
@@ -73,37 +77,39 @@ class Program
         builder.RegisterType<MainWindow>();
         var container = builder.Build();
 
-        using (var scope = container.BeginLifetimeScope())
-        {
-            var discordRichPresenceService = scope.Resolve<IApplicationDiscordRichPresenceService>();
-            discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.Idle);
-            discordRichPresenceService.SetGameName(DISCORD_DEFAULT_GAME_NAME);
-            var mainWindow = scope.Resolve<MainWindow>();
-            mainWindow.Run();
-        }
+        using var scope = container.BeginLifetimeScope();
+        var discordRichPresenceService = scope.Resolve<IApplicationDiscordRichPresenceService>();
+        discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.Idle);
+        discordRichPresenceService.SetGameName(DISCORD_DEFAULT_GAME_NAME);
+        var mainWindow = scope.Resolve<MainWindow>();
+        mainWindow.Run();
     }
-
+    
+    private static string GetWorkingDir()
+    {
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), WORKING_DIR_NAME);
+    }
+    
     private static void InitializeWorkingDir()
     {
         //Create working dir
-        string baseDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string workingDir = Path.Combine(baseDir, "MarioKartToolbox");
+        string workingDir = GetWorkingDir();
         Directory.CreateDirectory(workingDir);
 
         //Set working dir
         Directory.SetCurrentDirectory(workingDir);
 
         //Copy default imgui.ini inside this folder
-        if (!File.Exists("imgui.ini"))
-            File.WriteAllText("imgui.ini", Config.ImGuiIni);
+        if (!File.Exists(IMGUI_INI_FILE_PATH))
+            File.WriteAllText(IMGUI_INI_FILE_PATH, Config.ImGuiIni);
 
         //Copy theme files (I don't really like this, it's kinda hacky)
-        if (!Directory.Exists("Themes"))
-        {
-            Directory.CreateDirectory("Themes");
-            string themesPath = Path.Combine(AppContext.BaseDirectory, "Themes");
-            foreach (var file in Directory.EnumerateFiles(themesPath, "*.json"))
-                File.Copy(file, Path.Combine("Themes", new FileInfo(file).Name));
-        }
+        if (Directory.Exists("Themes")) 
+            return;
+        
+        Directory.CreateDirectory("Themes");
+        string themesPath = Path.Combine(AppContext.BaseDirectory, "Themes");
+        foreach (string file in Directory.EnumerateFiles(themesPath, "*.json"))
+            File.Copy(file, Path.Combine("Themes", new FileInfo(file).Name));
     }
 }

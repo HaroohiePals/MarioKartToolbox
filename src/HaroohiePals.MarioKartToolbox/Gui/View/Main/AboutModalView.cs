@@ -14,7 +14,7 @@ class AboutModalView : ModalView
     private const string WINDOW_TITLE = "About Mario Kart Toolbox";
     private const string CAPTION = "Mario Kart Toolbox";
     private const string GITHUB_LINK = "https://github.com/HaroohiePals/MarioKartToolbox";
-    private const string COPYRIGHT_INFO = "© 2015-2026 HaroohiePals";
+    private const string COPYRIGHT_INFO = "2015-2026 HaroohiePals";
     
     private GLTexture _iconTexture;
     private bool _autoResized;

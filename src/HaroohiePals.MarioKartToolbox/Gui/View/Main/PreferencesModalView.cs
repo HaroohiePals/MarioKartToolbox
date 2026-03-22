@@ -5,39 +5,40 @@ using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
 using ImGuiNET;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.Main;
 
-internal class PreferencesModalView : ModalView
+class PreferencesModalView : ModalView
 {
-    internal record PreferencesTab(string Label, Action Draw);
+    public Action OnCloseAfterSaved;
 
     private readonly IApplicationSettingsService _applicationSettings;
-
-    private PreferencesTab[] _tabs;
+    private readonly PreferencesTab[] _tabs;
+    private readonly string _preferencesJsonPath = Program.GetApplicationSettingsFullPath();
 
     private ApplicationSettings _prefs;
-    private bool _isDirty = false;
-    private bool _hasSaved = false;
-
-    private bool _showStyleEditor = false;
-
-    public Action OnCloseAfterSaved;
+    private bool _isDirty;
+    private bool _hasSaved;
+    private bool _showStyleEditor;
+    private string _keyBindingCurrentLabel;
 
     public PreferencesModalView(IApplicationSettingsService applicationSettings) : base("Preferences",
         new Vector2(ImGuiEx.CalcUiScaledValue(600), ImGuiEx.CalcUiScaledValue(400)))
     {
         _applicationSettings = applicationSettings;
-        _tabs = new PreferencesTab[]
-        {
+        _tabs =
+        [
             new("General", DrawGeneral),
             new("Viewport", DrawViewport),
             new("Key Bindings", DrawKeyBindings),
-        };
+            new("Paths", DrawPaths)
+        ];
     }
 
     protected override void OnOpen()
@@ -61,6 +62,7 @@ internal class PreferencesModalView : ModalView
             {
                 ImGui.ShowStyleEditor();
             }
+
             ImGui.End();
         }
 
@@ -70,11 +72,10 @@ internal class PreferencesModalView : ModalView
         {
             foreach (var tab in _tabs)
             {
-                if (ImGui.BeginTabItem(tab.Label))
-                {
-                    selectedTab = tab;
-                    ImGui.EndTabItem();
-                }
+                if (!ImGui.BeginTabItem(tab.Label))
+                    continue;
+                selectedTab = tab;
+                ImGui.EndTabItem();
             }
 
             ImGui.EndTabBar();
@@ -82,14 +83,17 @@ internal class PreferencesModalView : ModalView
 
         var region = ImGui.GetContentRegionAvail();
 
-        if (ImGui.BeginChild("##TabContent_Preferences", new Vector2(region.X, region.Y - ImGuiEx.CalcUiScaledValue(30))))
+        if (ImGui.BeginChild("##TabContent_Preferences",
+                new Vector2(region.X, region.Y - ImGuiEx.CalcUiScaledValue(30))))
         {
             selectedTab?.Draw();
         }
+
         ImGui.EndChild();
 
         var windowContentRegionMax = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();
-        ImGui.SetCursorPosX(windowContentRegionMax.X - 1 * ImGuiEx.CalcUiScaledValue(80) - ImGui.GetStyle().ItemSpacing.X);
+        ImGui.SetCursorPosX(windowContentRegionMax.X - 1 * ImGuiEx.CalcUiScaledValue(80) -
+                            ImGui.GetStyle().ItemSpacing.X);
 
         bool wasDirty = _isDirty;
 
@@ -140,11 +144,13 @@ internal class PreferencesModalView : ModalView
                     ImGui.PopTextWrapPos();
                     ImGui.EndTooltip();
                 }
+
                 ImGui.NextColumn();
                 if (ImGui.Checkbox("##AutofixInvalidNkmRef", ref _prefs.CourseEditor.AutoFixInvalidNkmReferences))
                 {
                     _isDirty = true;
                 }
+
                 ImGui.NextColumn();
             }
 
@@ -183,12 +189,14 @@ internal class PreferencesModalView : ModalView
 
                 if (ImGui.Button($"{FontAwesome6.FloppyDisk}##Save Custom.json"))
                 {
+                    const string customThemeName = "Custom";
                     _isDirty = true;
-                    _prefs.Appearance.Theme = "Custom";
-                    string json = ImGuiTheme.Create("Custom").ToJson();
-                    File.WriteAllText($"Themes/Custom.json", json);
+                    _prefs.Appearance.Theme = customThemeName;
+                    string json = ImGuiTheme.Create(customThemeName).ToJson();
+                    File.WriteAllText($"Themes/{customThemeName}.json", json);
                     ImGuiThemeManager.Init();
                 }
+
                 ImGui.NextColumn();
             }
 
@@ -256,38 +264,6 @@ internal class PreferencesModalView : ModalView
 
     private void DrawViewport()
     {
-        void drawColorEdit(string label, ref Color color)
-        {
-            var vec = new Vector3(color.R / 255f, color.G / 255f, color.B / 255f);
-
-            if (ImGui.ColorEdit3(label, ref vec))
-            {
-                color = Color.FromArgb((int)(vec.X * 255), (int)(vec.Y * 255), (int)(vec.Z * 255));
-                _isDirty = true;
-            }
-        }
-
-        //if (ImGui.CollapsingHeader("Camera Control##Viewport_Preferences", ImGuiTreeNodeFlags.DefaultOpen))
-        //{
-        //    ImGui.Columns(2, "##Columns_Camera Control##Viewport_Preferences");
-
-        //    ImGui.Text("Mode");
-        //    ImGui.NextColumn();
-
-        //    var mode = (object)_prefs.Viewport.CameraControl.Mode;
-        //    ImGui.PushItemWidth(200);
-        //    if (ImGuiEx.ComboEnum("##CameraMode", ref mode))
-        //    {
-        //        _prefs.Viewport.CameraControl.Mode = (Preferences.ViewportPrefs.CameraControlPrefs.CameraMode)mode;
-        //        _isDirty = true;
-        //    }
-        //    ImGui.PopItemWidth();
-
-        //    ImGui.NextColumn();
-
-        //    ImGui.Columns(1);
-        //}
-
         if (ImGui.CollapsingHeader("Various##Viewport_Prefs_Various", ImGuiTreeNodeFlags.DefaultOpen))
         {
             if (ImGui.Checkbox("Show Camera and Tool Controls Hints", ref _prefs.Viewport.ShowToolCameraHint))
@@ -296,21 +272,32 @@ internal class PreferencesModalView : ModalView
 
         if (ImGui.CollapsingHeader("Colors##Viewport_Preferences", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            drawColorEdit("Map Objects", ref _prefs.Viewport.Colors.MapObjects);
-            drawColorEdit("Paths", ref _prefs.Viewport.Colors.Paths);
-            drawColorEdit("Start Points", ref _prefs.Viewport.Colors.StartPoints);
-            drawColorEdit("Respawn Points", ref _prefs.Viewport.Colors.RespawnPoints);
-            drawColorEdit("Kart Point 2D", ref _prefs.Viewport.Colors.KartPoint2D);
-            drawColorEdit("Cannon Points", ref _prefs.Viewport.Colors.CannonPoints);
-            drawColorEdit("Mission Points", ref _prefs.Viewport.Colors.KartPointMission);
-            drawColorEdit("Enemy Paths", ref _prefs.Viewport.Colors.EnemyPaths);
-            drawColorEdit("Battle Enemy Paths", ref _prefs.Viewport.Colors.MgEnemyPaths);
-            drawColorEdit("Item Paths", ref _prefs.Viewport.Colors.ItemPaths);
-            drawColorEdit("Check Points", ref _prefs.Viewport.Colors.CheckPoint);
-            drawColorEdit("Key Check Points", ref _prefs.Viewport.Colors.KeyCheckPoint);
-            drawColorEdit("Areas", ref _prefs.Viewport.Colors.Areas);
-            drawColorEdit("Cameras", ref _prefs.Viewport.Colors.Cameras);
+            DrawColorEdit("Map Objects", ref _prefs.Viewport.Colors.MapObjects);
+            DrawColorEdit("Paths", ref _prefs.Viewport.Colors.Paths);
+            DrawColorEdit("Start Points", ref _prefs.Viewport.Colors.StartPoints);
+            DrawColorEdit("Respawn Points", ref _prefs.Viewport.Colors.RespawnPoints);
+            DrawColorEdit("Kart Point 2D", ref _prefs.Viewport.Colors.KartPoint2D);
+            DrawColorEdit("Cannon Points", ref _prefs.Viewport.Colors.CannonPoints);
+            DrawColorEdit("Mission Points", ref _prefs.Viewport.Colors.KartPointMission);
+            DrawColorEdit("Enemy Paths", ref _prefs.Viewport.Colors.EnemyPaths);
+            DrawColorEdit("Battle Enemy Paths", ref _prefs.Viewport.Colors.MgEnemyPaths);
+            DrawColorEdit("Item Paths", ref _prefs.Viewport.Colors.ItemPaths);
+            DrawColorEdit("Check Points", ref _prefs.Viewport.Colors.CheckPoint);
+            DrawColorEdit("Key Check Points", ref _prefs.Viewport.Colors.KeyCheckPoint);
+            DrawColorEdit("Areas", ref _prefs.Viewport.Colors.Areas);
+            DrawColorEdit("Cameras", ref _prefs.Viewport.Colors.Cameras);
         }
+    }
+
+    private void DrawColorEdit(string label, ref Color color)
+    {
+        var vec = new Vector3(color.R / 255f, color.G / 255f, color.B / 255f);
+
+        if (!ImGui.ColorEdit3(label, ref vec))
+            return;
+
+        color = Color.FromArgb((int)(vec.X * 255), (int)(vec.Y * 255), (int)(vec.Z * 255));
+        _isDirty = true;
     }
 
     private void DrawKeyBindings()
@@ -358,8 +345,6 @@ internal class PreferencesModalView : ModalView
         }
     }
 
-    private string _keyBindingCurrentLabel;
-
     private static ImGuiKey? GetPressedKey()
     {
         for (ImGuiKey key = ImGuiKey.NamedKey_BEGIN; key < ImGuiKey.MouseLeft; key++)
@@ -396,12 +381,10 @@ internal class PreferencesModalView : ModalView
                 if (newInput.HasValue)
                 {
                     //Assign new input here
-
                     if (allowModifierKeys)
                         value = new KeyBinding(newInput.Value, io.KeyCtrl, io.KeyShift, io.KeyAlt);
                     else
                         value = new KeyBinding(newInput.Value);
-
 
                     _keyBindingCurrentLabel = null;
                     _isDirty = true;
@@ -411,7 +394,8 @@ internal class PreferencesModalView : ModalView
             ImGui.BeginDisabled();
         }
 
-        if (!active ? ImGui.Button($"{value}##{label}_Button", buttonSize)
+        if (!active
+                ? ImGui.Button($"{value}##{label}_Button", buttonSize)
                 : ImGui.Button($"Press a key combination...##{label}_Button", buttonSize))
         {
             _keyBindingCurrentLabel = label;
@@ -423,5 +407,65 @@ internal class PreferencesModalView : ModalView
         }
 
         ImGui.NextColumn();
+    }
+
+    private void DrawPaths()
+    {
+        if (!ImGui.CollapsingHeader("Paths##Paths_Preferences", ImGuiTreeNodeFlags.DefaultOpen)) 
+            return;
+        
+        ImGui.Columns(2, "##Columns_Paths_Paths");
+        ImGui.Text("Preferences Path (Not editable)");
+        ImGui.NextColumn();
+        string path = _preferencesJsonPath;
+        ImGui.InputText("##PreferencesPath", ref path, 10000);
+        ImGui.SameLine();
+        DrawRevealPathButton($"Reveal File##RevealPreferencesPath", path);
+        ImGui.Columns(1);
+    }
+    
+    private void DrawRevealPathButton(string label, string filePath)
+    {
+        if (!ImGui.Button(label))
+            return;
+    
+        try
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // /select highlights the file in Explorer
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\"{filePath}\"",
+                    UseShellExecute = true
+                });
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // -R flag reveals the file in Finder
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "open",
+                    Arguments = $"-R \"{filePath}\"",
+                    UseShellExecute = true
+                });
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // Extract folder and open it
+                string folderPath = Path.GetDirectoryName(filePath);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "xdg-open",
+                    Arguments = $"\"{folderPath}\"",
+                    UseShellExecute = true
+                });
+            }
+        }
+        catch
+        {
+            // ignored
+        }
     }
 }
