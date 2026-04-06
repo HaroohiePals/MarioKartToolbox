@@ -79,8 +79,7 @@ class RomExplorerViewModel
         }
     }
 
-    public void BuildRom()
-        => Task.Factory.StartNew(BuildRomAsync);
+    public void BuildRom() => BuildRomAsync().GetAwaiter().GetResult();
 
     private async Task BuildRomAsync()
     {
