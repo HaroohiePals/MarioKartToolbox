@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿#nullable enable
 namespace HaroohiePals.NitroKart.Rom;
 
 public class MkdsRomProject
 {
-    public string Name { get; set; }
+    public required string Name { get; set; }
     public NdsRomInfo RomInfo { get; set; } = new();
+    public string[] IgnoreFilePatterns { get; set; } = [];
     public uint Version { get; set; } = 0;
 }

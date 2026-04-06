@@ -2,7 +2,7 @@
   "profiles": {
     "HaroohiePals.MarioKartToolbox.CommandLineInterface": {
       "commandName": "Project",
-      "commandLineArgs": "create testfiles/rom.nds romproj -o testfiles/proj"
+      "commandLineArgs": "build /Volumes/SSD/projects/mkds/mkds-project/mkds.json -o /Volumes/SSD/projects/mkds/mkds-project/mkds.nds"
     }
   }
 }

@@ -30,7 +30,7 @@ sealed class BuildMkdsRomCommand : Command
 
         var fileInfo = new FileInfo(inputPath);
         var romFactory = new MkdsRomFactory();
-        var project = JsonConvert.DeserializeObject<MkdsRomProject>(File.ReadAllText(inputPath));
+        var project = JsonConvert.DeserializeObject<MkdsRomProject>(await File.ReadAllTextAsync(inputPath));
 
         if (project is null)
         {
@@ -38,11 +38,10 @@ sealed class BuildMkdsRomCommand : Command
             return;
         }
 
-        if (outputFileName is null)
-            outputFileName = $"{project.Name}.nds";
+        outputFileName ??= $"{project.Name}.nds";
 
         var rom = await romFactory.CreateAsync(project, fileInfo.DirectoryName);
 
-        File.WriteAllBytes(outputFileName, rom.Write(true));
+        await File.WriteAllBytesAsync(outputFileName, rom.Write(true));
     }
 }
