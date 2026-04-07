@@ -3,6 +3,7 @@ using HaroohiePals.MarioKartToolbox.Application.Settings;
 using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 using HaroohiePals.MarioKartToolbox.Gui.Viewport;
 using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData;
+using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
 using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.NitroSystem;
 using ImGuiNET;
 
@@ -25,8 +26,9 @@ class MinimapViewportView : CourseViewportView
         var scene = new NitroKartRenderGroupSceneTopDown();
         _courseModelRenderGroup = new CourseModelRenderGroup();
         _courseModelRenderGroup.Load(Context.Course);
-        _courseModelRenderGroup.EnableCourseModelV = false;
         scene.RenderGroups.Add(_courseModelRenderGroup);
+        scene.RenderGroups.Add(new LocalMapRenderGroup(context.Course));
+        scene.RenderGroups.Add(new GlobalMapRenderGroup(context.Course));
         
         _scene = scene;
         _viewportPanel = new MinimapViewportPanel(scene, applicationSettings);

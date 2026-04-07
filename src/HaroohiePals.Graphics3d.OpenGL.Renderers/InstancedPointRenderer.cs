@@ -25,6 +25,31 @@ public abstract class InstancedPointRenderer : IDisposable
     private readonly GLVertexArray _vertexArray;
     private GLBuffer<VertexData> _vertexBuffer;
 
+    public InstancedPointRenderer(GLShader shader, bool render2d, bool renderTranslucentPass, VertexData[] vertices, GLTexture texture)
+    {
+        _shader = shader;
+        _render2d = render2d;
+        _renderTranslucentPass = renderTranslucentPass;
+        _texture = texture;
+
+        // 1. bind Vertex Array Object
+        _vertexArray = new GLVertexArray();
+        _vertexArray.Bind();
+
+        _vtxCount = vertices.Length;
+
+        // 2. copy our vertices array in a buffer for OpenGL to use
+        _vertexBuffer = new GLBuffer<VertexData>(vertices, BufferUsageHint.StaticDraw);
+        _vertexBuffer.Bind(BufferTarget.ArrayBuffer);
+
+        // 3. Setup vertex attribute pointers
+        GLVertexData.SetupVertexAttribPointers();
+
+        _instanceBuffer = new GLBuffer<InstancedPointGlData>();
+        _instanceBuffer.Bind(BufferTarget.ArrayBuffer);
+        GLUtil.SetupVertexAttribPointers<InstancedPointGlData>(VertexData.MtxIdIdx + 1, 1);
+    }
+    
     public InstancedPointRenderer(GLShader shader, bool render2d, bool renderTranslucentPass, VertexData[] vertices, byte[] texData = null)
     {
         _shader = shader;

@@ -110,5 +110,17 @@ namespace HaroohiePals.Graphics3d.OpenGL.Renderers.Resources {
                 return ResourceManager.GetString("LineVertex", resourceCulture);
             }
         }
+        
+        internal static string QuadFragment {
+            get {
+                return ResourceManager.GetString("QuadFragment", resourceCulture);
+            }
+        }
+        
+        internal static string QuadVertex {
+            get {
+                return ResourceManager.GetString("QuadVertex", resourceCulture);
+            }
+        }
     }
 }

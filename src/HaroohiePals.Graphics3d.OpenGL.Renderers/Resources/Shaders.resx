@@ -151,4 +151,10 @@
   <data name="LineVertex" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Shaders\line.vert;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="QuadFragment" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Shaders\quad.frag;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="QuadVertex" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Shaders\quad.vert;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
 </root>

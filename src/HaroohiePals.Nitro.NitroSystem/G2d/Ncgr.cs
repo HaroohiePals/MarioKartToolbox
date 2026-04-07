@@ -30,7 +30,7 @@ namespace HaroohiePals.Nitro.NitroSystem.G2d
                 if (Header.DataBlocks > 1)
                 {
                     //TODO: Character Position Data Block
-                    throw new NotImplementedException("Character position data block not supported yet");
+                    //throw new NotImplementedException("Character position data block not supported yet");
                 }
             }
         }
