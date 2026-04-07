@@ -31,7 +31,9 @@ class GlobalMapRenderGroup : RenderGroup
             return;
         
         var color = Color4.White;
-        _quadRenderer.Points = [new InstancedPoint(new Vector3(0, 3000, 300), Vector3.Zero, new Vector3(100), color, true, null, ViewportContext.InvalidPickingId, false, false)];
+        _quadRenderer.Points = [new InstancedPoint(new Vector3(0, 3000, 300), Vector3.Zero, 
+            new Vector3(100), color, true, null, ViewportContext.InvalidPickingId, 
+            false, false)];
         _quadRenderer.Render(context);
     }
 
