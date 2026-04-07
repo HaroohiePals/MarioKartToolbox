@@ -12,6 +12,7 @@ interface ICourseEditorViewFactory
     IView CreateTopDownViewportView(ICourseEditorContext context);
     PerspectiveViewportView CreatePerspectiveViewportView(ICourseEditorContext context);
     IView CreateCameraPreviewView(ICourseEditorContext context);
+    IView CreateMinimapViewportView(ICourseEditorContext context);
     IView CreateValidationPaneView(ICourseEditorContext context);
     IView CreateTimelinePaneView(ICourseEditorContext context);
 }
