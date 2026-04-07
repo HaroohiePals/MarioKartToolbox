@@ -19,12 +19,16 @@ class LocalMapRenderGroup : RenderGroup
     private readonly IMkdsCourse _course;
     
     private bool _isExtendedMap;
-
+    
+    // hardcoded cross_course values
+    public Vector2 TopLeft = new Vector2(-6000, -3002);
+    public Vector2 BottomRight = new Vector2(0, 2998);
+    
     public LocalMapRenderGroup(IMkdsCourse course)
     {
         _course = course;
 
-        var texture = CreateTexture();
+        var texture = CreateTexture(true);
 
         _quadRenderer = texture is null ? null : new QuadRenderer(texture);
     }
@@ -33,9 +37,16 @@ class LocalMapRenderGroup : RenderGroup
     {
         if (_quadRenderer is null)
             return;
+        
+        float leftWidth = BottomRight.X - TopLeft.X;
+        float height = BottomRight.Y - TopLeft.Y;
+        float totalWidth = _isExtendedMap ? leftWidth * 2 : leftWidth;
 
-        var position = new Vector3(0, 2500, 0);
-        var scale = new Vector3(_isExtendedMap ? 200 : 100, 100, 100);
+        float centerX = TopLeft.X + totalWidth * 0.5f;
+        float centerY = (TopLeft.Y + BottomRight.Y) * 0.5f;
+
+        var position = new Vector3(centerX, 2500, centerY);
+        var scale = new Vector3(totalWidth / 10 * 0.5f, 1, height / 10 * 0.5f);
         
         _quadRenderer.Points =
         [

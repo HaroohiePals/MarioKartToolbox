@@ -1,5 +1,8 @@
+using System.Numerics;
 using HaroohiePals.Gui.Viewport;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
+using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
+using ImGuiNET;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.Viewport;
 
@@ -23,6 +26,24 @@ class MinimapViewportPanel : InteractiveViewportPanel
     
     public override void RenderControls()
     {
+        foreach (var renderGroup in _scene.RenderGroups)
+        {
+            switch (renderGroup)
+            {
+                case LocalMapRenderGroup localMapRenderGroup:
+                    var tl = new Vector2(localMapRenderGroup.TopLeft.X, localMapRenderGroup.TopLeft.Y);
+                    var br = new Vector2(localMapRenderGroup.BottomRight.X, localMapRenderGroup.BottomRight.Y);
+
+                    ImGui.SliderFloat2("Local Map Top Left XY", ref tl, short.MinValue, short.MaxValue);
+                    ImGui.SliderFloat2("Local Map Bottom Right XY", ref br, short.MinValue, short.MaxValue);
+                    
+                    localMapRenderGroup.TopLeft.X = tl.X;
+                    localMapRenderGroup.TopLeft.Y = tl.Y;
+                    localMapRenderGroup.BottomRight.X = br.X;
+                    localMapRenderGroup.BottomRight.Y = br.Y;
+                    break;
+            }
+        }
     }
 
     protected override void RenderTopToolbar()
