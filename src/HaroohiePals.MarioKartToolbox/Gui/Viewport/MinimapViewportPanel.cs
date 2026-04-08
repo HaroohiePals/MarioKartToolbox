@@ -8,7 +8,7 @@ class MinimapViewportPanel : InteractiveViewportPanel
     private readonly TopDownCameraControls _cameraControls;
 
     public MinimapViewportPanel(NitroKartRenderGroupSceneTopDown scene, IApplicationSettingsService applicationSettings)
-        : base("CameraPreview", scene, applicationSettings)
+        : base("MinimapViewport", scene, applicationSettings, [GizmoTool.Translate, GizmoTool.Scale])
     {
         _gizmo.IsOrthographic = true;
         _cameraControls = new TopDownCameraControls(scene.OrthographicProjection, 64, 8192);
@@ -22,5 +22,6 @@ class MinimapViewportPanel : InteractiveViewportPanel
 
     protected override void RenderTopToolbar()
     {
+        
     }
 }

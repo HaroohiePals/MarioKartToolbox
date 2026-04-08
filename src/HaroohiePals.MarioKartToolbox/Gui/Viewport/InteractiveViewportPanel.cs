@@ -1,8 +1,10 @@
-﻿using HaroohiePals.Gui.Viewport;
+﻿#nullable enable
+using HaroohiePals.Gui.Viewport;
 using HaroohiePals.Gui.Viewport.Framebuffers;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
 using ImGuiNET;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.Viewport;
@@ -20,13 +22,13 @@ abstract class InteractiveViewportPanel : ViewportPanel
     private readonly ViewportSideToolbar _sideToolbar = new();
     private readonly ViewportCameraToolInfo _helpInfo;
 
-    public DrawTool DrawTool
+    public DrawTool? DrawTool
     {
         get => _gizmo.DrawTool;
         set => _gizmo.DrawTool = value;
     }
 
-    public IViewportCollision ViewportCollision
+    public IViewportCollision? ViewportCollision
     {
         get => _gizmo.ViewportCollision;
         set => _gizmo.ViewportCollision = value;
@@ -35,11 +37,11 @@ abstract class InteractiveViewportPanel : ViewportPanel
     public bool IsGizmoStarted => _gizmo is { Started: true };
 
     protected InteractiveViewportPanel(string visibilityPreferencesKey, RenderGroupScene scene,
-        IApplicationSettingsService applicationSettingsService)
+        IApplicationSettingsService applicationSettingsService, IReadOnlyList<GizmoTool>? enabledGizmoTools = null)
         : base(scene)
     {
         _renderGroupScene = scene;
-        _gizmo = new Gizmo(scene);
+        _gizmo = new Gizmo(scene, enabledGizmoTools);
         _applicationSettings = applicationSettingsService;
         _visibilityManager = new RenderGroupVisibilityManager(
             scene, visibilityPreferencesKey, applicationSettingsService);

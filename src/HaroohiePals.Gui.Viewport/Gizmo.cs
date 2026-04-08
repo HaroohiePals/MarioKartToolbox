@@ -1,4 +1,5 @@
-﻿using HaroohiePals.Actions;
+﻿#nullable enable
+using HaroohiePals.Actions;
 using HaroohiePals.Gui.Viewport.Actions;
 using HaroohiePals.Mathematics;
 using ImGuiNET;
@@ -15,9 +16,10 @@ public sealed class Gizmo
     public ImGuizmoMode Mode = ImGuizmoMode.World;
     public GizmoRotateScaleMode RotateScaleMode = GizmoRotateScaleMode.MedianPoint;
 
-    public DrawTool DrawTool;
-    public IViewportCollision ViewportCollision;
+    public DrawTool? DrawTool;
+    public IViewportCollision? ViewportCollision;
 
+    public IReadOnlyList<GizmoTool> EnabledTools { get; private set; }
     public bool Started { get; private set; } = false;
     public bool IsOrthographic { get; set; } = false;
     public bool IsUsing => Started || _imGuizmo.IsUsing;
@@ -34,13 +36,17 @@ public sealed class Gizmo
     private Vector3d _currentRotation = Vector3.Zero;
     private Box3d? _currentBounds = null;
 
-    public Gizmo(RenderGroupScene renderGroupScene)
+    public Gizmo(RenderGroupScene renderGroupScene, IReadOnlyList<GizmoTool>? enabledTools = null)
     {
         _renderGroupScene = renderGroupScene;
+        EnabledTools = enabledTools ?? [GizmoTool.Draw, GizmoTool.Translate, GizmoTool.Rotate, GizmoTool.Scale];
     }
 
     public void Draw(ViewportContext context)
     {
+        if (!EnabledTools.Contains(Tool))
+            return;
+
         try
         {
             TryFinishGizmoTransform(context);
@@ -417,7 +423,7 @@ public sealed class Gizmo
             _imGuizmo.OverrideValue = Math.Clamp(value, min, max);
 
             if (outOfRange)
-                _inputOverrideValue = _imGuizmo.OverrideValue?.ToString(CultureInfo.InvariantCulture);
+                _inputOverrideValue = _imGuizmo.OverrideValue?.ToString(CultureInfo.InvariantCulture) ?? "";
         }
     }
 
@@ -447,6 +453,9 @@ public sealed class Gizmo
 
     private bool HandleTranslationShortcuts()
     {
+        if (!EnabledTools.Contains(GizmoTool.Translate))
+            return false;
+
         bool result = false;
 
         if (KeyBindings.ToolsTranslate.IsPressed())
@@ -495,6 +504,9 @@ public sealed class Gizmo
 
     private bool HandleRotationShortcuts()
     {
+        if (!EnabledTools.Contains(GizmoTool.Rotate))
+            return false;
+
         bool result = false;
 
         if (KeyBindings.ToolsRotate.IsPressed())
@@ -528,6 +540,9 @@ public sealed class Gizmo
 
     private bool HandleScaleShortcuts()
     {
+        if (!EnabledTools.Contains(GizmoTool.Scale))
+            return false;
+
         bool result = false;
 
         if (KeyBindings.ToolsScale.IsPressed())

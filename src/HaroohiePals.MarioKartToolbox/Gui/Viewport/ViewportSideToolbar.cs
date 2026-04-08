@@ -1,6 +1,7 @@
 ﻿using HaroohiePals.Gui;
 using HaroohiePals.Gui.Viewport;
 using ImGuiNET;
+using System.Linq;
 using System.Numerics;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.Viewport;
@@ -33,38 +34,50 @@ internal class ViewportSideToolbar
 
             int i = 1;
 
-            if (gizmo.Tool == GizmoTool.Draw)
-                ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-            if (ImGui.Button($"{FontAwesome6.Pencil}##Draw", new(btnSize)))
-                targetTool = GizmoTool.Draw;
-            if (gizmo.Tool == GizmoTool.Draw)
-                ImGui.PopStyleColor();
+            if (gizmo.EnabledTools.Contains(GizmoTool.Draw))
+            {
+                if (gizmo.Tool == GizmoTool.Draw)
+                    ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
+                if (ImGui.Button($"{FontAwesome6.Pencil}##Draw", new(btnSize)))
+                    targetTool = GizmoTool.Draw;
+                if (gizmo.Tool == GizmoTool.Draw)
+                    ImGui.PopStyleColor();
 
-            ImGui.SetCursorPosY((btnSize + spacing) * i++);
+                ImGui.SetCursorPosY((btnSize + spacing) * i++);
+            }
 
-            if (gizmo.Tool == GizmoTool.Translate)
-                ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-            if (ImGui.Button($"{FontAwesome6.UpDownLeftRight}##Translate", new(btnSize)))
-                targetTool = GizmoTool.Translate;
-            if (gizmo.Tool == GizmoTool.Translate)
-                ImGui.PopStyleColor();
+            if (gizmo.EnabledTools.Contains(GizmoTool.Translate))
+            {
+                if (gizmo.Tool == GizmoTool.Translate)
+                    ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
+                if (ImGui.Button($"{FontAwesome6.UpDownLeftRight}##Translate", new(btnSize)))
+                    targetTool = GizmoTool.Translate;
+                if (gizmo.Tool == GizmoTool.Translate)
+                    ImGui.PopStyleColor();
 
-            ImGui.SetCursorPosY((btnSize + spacing) * i++);
+                ImGui.SetCursorPosY((btnSize + spacing) * i++);
+            }
 
-            if (gizmo.Tool == GizmoTool.Rotate)
-                ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-            if (ImGui.Button($"{FontAwesome6.ArrowsRotate}##Rotate", new(btnSize)))
-                targetTool = GizmoTool.Rotate;
-            if (gizmo.Tool == GizmoTool.Rotate)
-                ImGui.PopStyleColor();
-            ImGui.SetCursorPosY((btnSize + spacing) * i++);
+            if (gizmo.EnabledTools.Contains(GizmoTool.Rotate))
+            {
+                if (gizmo.Tool == GizmoTool.Rotate)
+                    ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
+                if (ImGui.Button($"{FontAwesome6.ArrowsRotate}##Rotate", new(btnSize)))
+                    targetTool = GizmoTool.Rotate;
+                if (gizmo.Tool == GizmoTool.Rotate)
+                    ImGui.PopStyleColor();
+                ImGui.SetCursorPosY((btnSize + spacing) * i++);
+            }
 
-            if (gizmo.Tool == GizmoTool.Scale)
-                ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
-            if (ImGui.Button($"{FontAwesome6.UpRightAndDownLeftFromCenter}##Scale", new(btnSize)))
-                targetTool = GizmoTool.Scale;
-            if (gizmo.Tool == GizmoTool.Scale)
-                ImGui.PopStyleColor();
+            if (gizmo.EnabledTools.Contains(GizmoTool.Scale))
+            {
+                if (gizmo.Tool == GizmoTool.Scale)
+                    ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
+                if (ImGui.Button($"{FontAwesome6.UpRightAndDownLeftFromCenter}##Scale", new(btnSize)))
+                    targetTool = GizmoTool.Scale;
+                if (gizmo.Tool == GizmoTool.Scale)
+                    ImGui.PopStyleColor();
+            }
         }
         ImGui.EndChild();
 

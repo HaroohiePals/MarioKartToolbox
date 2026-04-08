@@ -12,7 +12,7 @@ internal class CameraPreviewViewportPanel : InteractiveViewportPanel
     public bool EnableCameraControls = false;
 
     public CameraPreviewViewportPanel(RenderGroupScene scene, IApplicationSettingsService applicationSettings)
-        : base("CameraPreview", scene, applicationSettings)
+        : base("CameraPreview", scene, applicationSettings, [])
     {
         _gizmo.IsOrthographic = false;
         _scene = scene;
