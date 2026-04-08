@@ -22,7 +22,7 @@ class GlobalMapRenderGroup : RenderGroup
         
         var texture = CreateTexture();
         
-        _quadRenderer = texture is null ? null : new QuadRenderer(texture);
+        _quadRenderer = texture is null ? null : new QuadRenderer(texture, true, false);
     }
     
     public override void Render(ViewportContext context)

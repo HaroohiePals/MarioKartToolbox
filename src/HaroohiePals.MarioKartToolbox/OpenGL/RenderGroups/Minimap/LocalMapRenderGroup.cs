@@ -1,6 +1,4 @@
 #nullable enable
-using System;
-using HaroohiePals.Graphics;
 using HaroohiePals.Graphics3d;
 using HaroohiePals.Graphics3d.OpenGL;
 using HaroohiePals.Graphics3d.OpenGL.Renderers;
@@ -16,44 +14,90 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
 
 class LocalMapRenderGroup : RenderGroup
 {
-    private const int LOCAL_MAP_SUB_INDEX = 0;
+    private const string MAP_2D_FOLDER_NAME = "Map2D";
+    private const string TILES_FILENAME = $"{MAP_2D_FOLDER_NAME}/local.ncgr";
+    private const string PALETTE_FILENAME = $"{MAP_2D_FOLDER_NAME}/local.nclr";
+    private const string FIRST_SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/local2.nscr";
+    private const string SECOND_SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/local3.nscr";
+
+    private const int LOCAL_MAP_FIRST_SCREEN_SUB_INDEX = 0;
+    private const int LOCAL_MAP_SECOND_SCREEN_SUB_INDEX = 1;
     private const float QUAD_HEIGHT_Y = 2500f;
 
-    private readonly QuadRenderer? _quadRenderer;
+    private readonly QuadRenderer? _firstLocalMapRenderer;
+    private readonly QuadRenderer? _secondLocalMapRenderer;
     private readonly IMkdsCourse _course;
 
-    private bool _isExtendedMap;
-    private readonly LocalMapCoordsData _mapCoords = new();
+    private readonly MkdsLocalMapSettings _mapCoords = new();
+
+    public bool RenderTranslucent { get; set; } = false;
 
     public LocalMapRenderGroup(IMkdsCourse course)
     {
         _course = course;
 
-        var texture = CreateTexture(true);
+        var texture1 = CreateTexture(RenderTranslucent, false);
+        var texture2 = CreateTexture(RenderTranslucent, true);
 
-        _quadRenderer = texture is null ? null : new QuadRenderer(texture);
+        _firstLocalMapRenderer = texture1 is null ? null : new QuadRenderer(texture1, true, RenderTranslucent);
+        _secondLocalMapRenderer = texture2 is null ? null : new QuadRenderer(texture2, true, RenderTranslucent);
     }
 
     public override void Render(ViewportContext context)
     {
-        if (_quadRenderer is null)
-            return;
+        // Render second screen first because its less prioritary
+        if (_secondLocalMapRenderer is not null && _mapCoords.Mode == MkdsLocalMapMode.Extended)
+        {
+            if (_mapCoords.Mode == MkdsLocalMapMode.Extended)
+            {
+                var transform = GetCurrentTransform(LOCAL_MAP_SECOND_SCREEN_SUB_INDEX);
 
-        var transform = GetCurrentTransform();
+                var position = (Vector3)transform.Translation;
+                var scale = (Vector3)transform.Scale / 10;
 
-        var position = (Vector3)transform.Translation;
-        var scale = (Vector3)transform.Scale / 10;
+                uint pickingId = context.GetPickingId(PickingGroupId, 0, LOCAL_MAP_SECOND_SCREEN_SUB_INDEX);
+                bool isHovered = context.IsHovered(_mapCoords, LOCAL_MAP_SECOND_SCREEN_SUB_INDEX);
 
-        uint pickingId = context.GetPickingId(PickingGroupId, 0, LOCAL_MAP_SUB_INDEX);
-        //bool isSelected = context.IsSelected(_mapCoords, LOCAL_MAP_SUB_INDEX);
-        bool isHovered = context.IsHovered(_mapCoords, LOCAL_MAP_SUB_INDEX);
+                _secondLocalMapRenderer.Points =
+                [
+                    new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapCoords,
+                    pickingId, isHovered, false)
+                ];
+                _secondLocalMapRenderer.Render(context);
+            }
+            else
+            {
+                var transform = GetCurrentTransform(LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
 
-        _quadRenderer.Points =
-        [
-            new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapCoords,
-                pickingId, isHovered, false)
-        ];
-        _quadRenderer.Render(context);
+                var position = (Vector3)transform.Translation;
+                var scale = (Vector3)transform.Scale / 10;
+
+                _secondLocalMapRenderer.Points =
+                [
+                    new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapCoords,
+                        ViewportContext.InvalidPickingId, false, false)
+                ];
+                _secondLocalMapRenderer.Render(context);
+            }
+        }
+
+        if (_firstLocalMapRenderer is not null)
+        {
+            var transform = GetCurrentTransform(LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
+
+            var position = (Vector3)transform.Translation;
+            var scale = (Vector3)transform.Scale / 10;
+
+            uint pickingId = context.GetPickingId(PickingGroupId, 0, LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
+            bool isHovered = context.IsHovered(_mapCoords, LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
+
+            _firstLocalMapRenderer.Points =
+            [
+                new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapCoords,
+                    pickingId, isHovered, false)
+            ];
+            _firstLocalMapRenderer.Render(context);
+        }
     }
 
     public override object GetObject(int index) => _mapCoords;
@@ -62,19 +106,21 @@ class LocalMapRenderGroup : RenderGroup
 
     public override bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
     {
-        if (subIndex != LOCAL_MAP_SUB_INDEX || obj != _mapCoords)
+        if (!(subIndex == LOCAL_MAP_FIRST_SCREEN_SUB_INDEX || subIndex == LOCAL_MAP_SECOND_SCREEN_SUB_INDEX) ||
+            obj != _mapCoords)
         {
             transform = Transform.Identity;
             return false;
         }
 
-        transform = GetCurrentTransform();
+        transform = GetCurrentTransform(subIndex);
         return true;
     }
 
     public override bool TrySetObjectTransform(object obj, int subIndex, in Transform transform)
     {
-        if (subIndex != LOCAL_MAP_SUB_INDEX || obj != _mapCoords)
+        if (!(subIndex == LOCAL_MAP_FIRST_SCREEN_SUB_INDEX || subIndex == LOCAL_MAP_SECOND_SCREEN_SUB_INDEX) ||
+            obj != _mapCoords)
             return false;
 
         double halfTotalWidth = transform.Scale.X;
@@ -83,41 +129,63 @@ class LocalMapRenderGroup : RenderGroup
         double centerY = transform.Translation.Z;
 
         double totalWidth = halfTotalWidth * 2f;
-        double leftWidth = _isExtendedMap ? totalWidth * 0.5f : totalWidth;
+        double leftWidth = totalWidth;
         double height = halfHeight * 2f;
 
         double leftEdge = centerX - totalWidth * 0.5;
         double topEdge = centerY - height * 0.5;
 
-        _mapCoords.TopLeft = new Vector2d(leftEdge, topEdge);
-        _mapCoords.BottomRight = new Vector2d(leftEdge + leftWidth, topEdge + height);
+        switch (subIndex)
+        {
+            case LOCAL_MAP_FIRST_SCREEN_SUB_INDEX:
+                _mapCoords.TopLeft = new Vector2d(leftEdge, topEdge);
+                _mapCoords.BottomRight = new Vector2d(leftEdge + leftWidth, topEdge + height);
+                break;
+            case LOCAL_MAP_SECOND_SCREEN_SUB_INDEX:
+                if (_mapCoords.Mode == MkdsLocalMapMode.Extended)
+                {
+                    _mapCoords.ExtendedTopLeft = new Vector2d(leftEdge, topEdge);
+                    _mapCoords.ExtendedBottomRight = new Vector2d(leftEdge + leftWidth, topEdge + height);
+                }
+                break;
+        }
 
         return true;
     }
 
     public override bool TryGetLocalObjectBounds(object obj, int subIndex, out Box3d bounds)
     {
-        if (subIndex != LOCAL_MAP_SUB_INDEX || obj != _mapCoords)
+        if (!(subIndex == LOCAL_MAP_FIRST_SCREEN_SUB_INDEX || subIndex == LOCAL_MAP_SECOND_SCREEN_SUB_INDEX) ||
+            obj != _mapCoords)
         {
             bounds = new Box3d();
             return false;
         }
 
-        var scale = GetCurrentTransform().Scale;
+        var scale = GetCurrentTransform(subIndex).Scale;
         bounds = new Box3d(
             new Vector3d(-scale.X, 0, -scale.Z),
             new Vector3d(scale.X, 0, scale.Z));
         return true;
     }
 
-    private Transform GetCurrentTransform()
+    private Transform GetCurrentTransform(int subIndex)
     {
-        double leftWidth = _mapCoords.BottomRight.X - _mapCoords.TopLeft.X;
-        double height = _mapCoords.BottomRight.Y - _mapCoords.TopLeft.Y;
-        double totalWidth = _isExtendedMap ? leftWidth * 2 : leftWidth;
+        var topLeft = _mapCoords.TopLeft;
+        var bottomRight = _mapCoords.BottomRight;
+        
+        if (subIndex == LOCAL_MAP_SECOND_SCREEN_SUB_INDEX)
+        {
+            topLeft = _mapCoords.ExtendedTopLeft;
+            bottomRight = _mapCoords.ExtendedBottomRight;
+        }
 
-        double centerX = _mapCoords.TopLeft.X + totalWidth * 0.5;
-        double centerY = (_mapCoords.TopLeft.Y + _mapCoords.BottomRight.Y) * 0.5;
+        double leftWidth = bottomRight.X - topLeft.X;
+        double height = bottomRight.Y - topLeft.Y;
+        double totalWidth = leftWidth;
+
+        double centerX = topLeft.X + totalWidth * 0.5;
+        double centerY = (topLeft.Y + bottomRight.Y) * 0.5;
 
         return new Transform(
             new Vector3d(centerX, QUAD_HEIGHT_Y, centerY),
@@ -125,44 +193,22 @@ class LocalMapRenderGroup : RenderGroup
             new Vector3d(totalWidth * 0.5f, 1, height * 0.5f));
     }
 
-    private GLTexture? CreateTexture(bool translucent = false)
+    private GLTexture? CreateTexture(bool translucent, bool loadSecondMap)
     {
-        var tiles = _course.GetTexFileOrDefault<Ncgr>("Map2D/local.ncgr");
-        var palette = _course.GetTexFileOrDefault<Nclr>("Map2D/local.nclr");
-        var map1 = _course.GetTexFileOrDefault<Nscr>("Map2D/local2.nscr");
-        var map2 = _course.GetTexFileOrDefault<Nscr>("Map2D/local3.nscr");
+        var tiles = _course.GetTexFileOrDefault<Ncgr>(TILES_FILENAME);
+        var palette = _course.GetTexFileOrDefault<Nclr>(PALETTE_FILENAME);
+        var map = _course.GetTexFileOrDefault<Nscr>(loadSecondMap ? 
+            SECOND_SCREEN_FILENAME : FIRST_SCREEN_FILENAME);
+
+        if (tiles is null || palette is null || map is null)
+            return null;
 
         var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
-            map1.Screen.ScreenData, ImageFormat.Pltt256, MapFormat.Text, map1.Screen.Width,
-            map1.Screen.Height, true);
+            map.Screen.ScreenData, ImageFormat.Pltt256, MapFormat.Text, map.Screen.Width,
+            map.Screen.Height, true);
 
         if (decoded is null)
             return null;
-
-        // load extended map on the right
-        if (map2 is not null)
-        {
-            _isExtendedMap = true;
-            var decoded2 = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
-                map2.Screen.ScreenData, ImageFormat.Pltt256, MapFormat.Text, map1.Screen.Width,
-                map1.Screen.Height, true);
-
-            if (decoded2 is not null)
-            {
-                var combined = new Rgba8Bitmap(decoded.Width + decoded2.Width, decoded.Height);
-
-                for (int y = 0; y < combined.Height; y++)
-                {
-                    for (int x = 0; x < decoded.Width; x++)
-                        combined[x, y] = decoded[x, y];
-
-                    for (int x = 0; x < decoded2.Width; x++)
-                        combined[decoded.Width + x, y] = decoded2[x, y];
-                }
-
-                decoded = combined;
-            }
-        }
 
         if (translucent)
         {
@@ -177,21 +223,4 @@ class LocalMapRenderGroup : RenderGroup
 
         return texture;
     }
-}
-
-// todo: temp
-public class LocalMapCoordsData
-{
-    // hardcoded cross_course values
-    public Vector2d TopLeft { get; set; } = new(-6000, -3002);
-    public Vector2d BottomRight { get; set; } = new(0, 2998);
-    public LocalMapMode Mode { get; set; } = LocalMapMode.HorizontallyExtended;
-}
-
-public enum LocalMapMode
-{
-    Single,
-    Layered,
-    HorizontallyExtended,
-    VerticallyExtended,
 }

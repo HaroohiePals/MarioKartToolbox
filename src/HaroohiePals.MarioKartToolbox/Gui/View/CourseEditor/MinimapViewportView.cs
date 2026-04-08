@@ -28,7 +28,7 @@ class MinimapViewportView : CourseViewportView
         _courseModelRenderGroup.Load(Context.Course);
         scene.RenderGroups.Add(_courseModelRenderGroup);
         scene.RenderGroups.Add(new LocalMapRenderGroup(context.Course));
-        scene.RenderGroups.Add(new GlobalMapRenderGroup(context.Course));
+        //scene.RenderGroups.Add(new GlobalMapRenderGroup(context.Course));
         
         _scene = scene;
         _viewportPanel = new MinimapViewportPanel(scene, applicationSettings);
