@@ -15,10 +15,10 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
 class LocalMapRenderGroup : RenderGroup
 {
     private const string MAP_2D_FOLDER_NAME = "Map2D";
-    private const string TILES_FILENAME = $"{MAP_2D_FOLDER_NAME}/local.ncgr";
-    private const string PALETTE_FILENAME = $"{MAP_2D_FOLDER_NAME}/local.nclr";
-    private const string FIRST_SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/local2.nscr";
-    private const string SECOND_SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/local3.nscr";
+    private const string TILES_FILENAME = $"{MAP_2D_FOLDER_NAME}/local.NCGR";
+    private const string PALETTE_FILENAME = $"{MAP_2D_FOLDER_NAME}/local.NCLR";
+    private const string FIRST_SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/local2.NSCR";
+    private const string SECOND_SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/local3.NSCR";
 
     private const int LOCAL_MAP_FIRST_SCREEN_SUB_INDEX = 0;
     private const int LOCAL_MAP_SECOND_SCREEN_SUB_INDEX = 1;
@@ -28,7 +28,7 @@ class LocalMapRenderGroup : RenderGroup
     private readonly QuadRenderer? _secondLocalMapRenderer;
     private readonly IMkdsCourse _course;
 
-    private readonly MkdsLocalMapSettings _mapCoords = new();
+    private readonly MkdsLocalMapSettings _mapSettings = new();
 
     public bool RenderTranslucent { get; set; } = false;
 
@@ -48,7 +48,7 @@ class LocalMapRenderGroup : RenderGroup
         // Render second screen first because its less prioritary
         if (_secondLocalMapRenderer is not null)
         {
-            if (_mapCoords.Mode == MkdsLocalMapMode.Extended)
+            if (_mapSettings.Mode == MkdsLocalMapMode.Extended)
             {
                 var transform = GetCurrentTransform(LOCAL_MAP_SECOND_SCREEN_SUB_INDEX);
 
@@ -56,11 +56,11 @@ class LocalMapRenderGroup : RenderGroup
                 var scale = (Vector3)transform.Scale / 10;
 
                 uint pickingId = context.GetPickingId(PickingGroupId, 0, LOCAL_MAP_SECOND_SCREEN_SUB_INDEX);
-                bool isHovered = context.IsHovered(_mapCoords, LOCAL_MAP_SECOND_SCREEN_SUB_INDEX);
+                bool isHovered = context.IsHovered(_mapSettings, LOCAL_MAP_SECOND_SCREEN_SUB_INDEX);
 
                 _secondLocalMapRenderer.Points =
                 [
-                    new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapCoords,
+                    new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapSettings,
                     pickingId, isHovered, false)
                 ];
                 _secondLocalMapRenderer.Render(context);
@@ -74,7 +74,7 @@ class LocalMapRenderGroup : RenderGroup
 
                 _secondLocalMapRenderer.Points =
                 [
-                    new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapCoords,
+                    new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapSettings,
                         ViewportContext.InvalidPickingId, false, false)
                 ];
                 _secondLocalMapRenderer.Render(context);
@@ -89,25 +89,25 @@ class LocalMapRenderGroup : RenderGroup
             var scale = (Vector3)transform.Scale / 10;
 
             uint pickingId = context.GetPickingId(PickingGroupId, 0, LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
-            bool isHovered = context.IsHovered(_mapCoords, LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
+            bool isHovered = context.IsHovered(_mapSettings, LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
 
             _firstLocalMapRenderer.Points =
             [
-                new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapCoords,
+                new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapSettings,
                     pickingId, isHovered, false)
             ];
             _firstLocalMapRenderer.Render(context);
         }
     }
 
-    public override object GetObject(int index) => _mapCoords;
+    public override object GetObject(int index) => _mapSettings;
 
-    public override bool ContainsObject(object obj) => obj == _mapCoords;
+    public override bool ContainsObject(object obj) => obj == _mapSettings;
 
     public override bool TryGetObjectTransform(object obj, int subIndex, out Transform transform)
     {
         if (!(subIndex == LOCAL_MAP_FIRST_SCREEN_SUB_INDEX || subIndex == LOCAL_MAP_SECOND_SCREEN_SUB_INDEX) ||
-            obj != _mapCoords)
+            obj != _mapSettings)
         {
             transform = Transform.Identity;
             return false;
@@ -120,7 +120,7 @@ class LocalMapRenderGroup : RenderGroup
     public override bool TrySetObjectTransform(object obj, int subIndex, in Transform transform)
     {
         if (!(subIndex == LOCAL_MAP_FIRST_SCREEN_SUB_INDEX || subIndex == LOCAL_MAP_SECOND_SCREEN_SUB_INDEX) ||
-            obj != _mapCoords)
+            obj != _mapSettings)
             return false;
 
         double halfTotalWidth = transform.Scale.X;
@@ -138,14 +138,14 @@ class LocalMapRenderGroup : RenderGroup
         switch (subIndex)
         {
             case LOCAL_MAP_FIRST_SCREEN_SUB_INDEX:
-                _mapCoords.TopLeft = new Vector2d(leftEdge, topEdge);
-                _mapCoords.BottomRight = new Vector2d(leftEdge + leftWidth, topEdge + height);
+                _mapSettings.TopLeft = new Vector2d(leftEdge, topEdge);
+                _mapSettings.BottomRight = new Vector2d(leftEdge + leftWidth, topEdge + height);
                 break;
             case LOCAL_MAP_SECOND_SCREEN_SUB_INDEX:
-                if (_mapCoords.Mode == MkdsLocalMapMode.Extended)
+                if (_mapSettings.Mode == MkdsLocalMapMode.Extended)
                 {
-                    _mapCoords.ExtendedTopLeft = new Vector2d(leftEdge, topEdge);
-                    _mapCoords.ExtendedBottomRight = new Vector2d(leftEdge + leftWidth, topEdge + height);
+                    _mapSettings.ExtendedTopLeft = new Vector2d(leftEdge, topEdge);
+                    _mapSettings.ExtendedBottomRight = new Vector2d(leftEdge + leftWidth, topEdge + height);
                 }
                 break;
         }
@@ -156,7 +156,7 @@ class LocalMapRenderGroup : RenderGroup
     public override bool TryGetLocalObjectBounds(object obj, int subIndex, out Box3d bounds)
     {
         if (!(subIndex == LOCAL_MAP_FIRST_SCREEN_SUB_INDEX || subIndex == LOCAL_MAP_SECOND_SCREEN_SUB_INDEX) ||
-            obj != _mapCoords)
+            obj != _mapSettings)
         {
             bounds = new Box3d();
             return false;
@@ -171,13 +171,13 @@ class LocalMapRenderGroup : RenderGroup
 
     private Transform GetCurrentTransform(int subIndex)
     {
-        var topLeft = _mapCoords.TopLeft;
-        var bottomRight = _mapCoords.BottomRight;
+        var topLeft = _mapSettings.TopLeft;
+        var bottomRight = _mapSettings.BottomRight;
         
         if (subIndex == LOCAL_MAP_SECOND_SCREEN_SUB_INDEX)
         {
-            topLeft = _mapCoords.ExtendedTopLeft;
-            bottomRight = _mapCoords.ExtendedBottomRight;
+            topLeft = _mapSettings.ExtendedTopLeft;
+            bottomRight = _mapSettings.ExtendedBottomRight;
         }
 
         double leftWidth = bottomRight.X - topLeft.X;

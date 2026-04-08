@@ -39,9 +39,9 @@ class GlobalMapRenderGroup : RenderGroup
 
     private GLTexture? CreateTexture()
     {
-        var tiles = _course.GetTexFileOrDefault<Ncgr>("Map2D/global.ncgr");
-        var palette = _course.GetTexFileOrDefault<Nclr>("Map2D/global.nclr");
-        var map = _course.GetTexFileOrDefault<Nscr>("Map2D/global1.nscr");
+        var tiles = _course.GetTexFileOrDefault<Ncgr>("Map2D/global.NCGR");
+        var palette = _course.GetTexFileOrDefault<Nclr>("Map2D/global.NCLR");
+        var map = _course.GetTexFileOrDefault<Nscr>("Map2D/global1.NSCR");
 
         var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
             map.Screen.ScreenData, ImageFormat.Pltt16, MapFormat.Text, map.Screen.Width, 
