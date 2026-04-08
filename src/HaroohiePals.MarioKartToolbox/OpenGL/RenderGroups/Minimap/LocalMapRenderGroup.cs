@@ -46,7 +46,7 @@ class LocalMapRenderGroup : RenderGroup
     public override void Render(ViewportContext context)
     {
         // Render second screen first because its less prioritary
-        if (_secondLocalMapRenderer is not null && _mapCoords.Mode == MkdsLocalMapMode.Extended)
+        if (_secondLocalMapRenderer is not null)
         {
             if (_mapCoords.Mode == MkdsLocalMapMode.Extended)
             {
