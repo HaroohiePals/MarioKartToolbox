@@ -39,7 +39,7 @@ public abstract class ImGuiGameWindow(ImGuiGameWindowSettings settings) : GameWi
 
         GLContext.Current = new GLContext();
 
-        if (!TryGetCurrentMonitorScale(out float currentMonitorScaleX, out float currentMonitorScaleY))
+        if (!TryGetCurrentMonitorScaleSafe(out float currentMonitorScaleX, out float currentMonitorScaleY))
         {
             currentMonitorScaleX = currentMonitorScaleY = 1f;
         }
@@ -94,12 +94,11 @@ public abstract class ImGuiGameWindow(ImGuiGameWindowSettings settings) : GameWi
         // Wayland explicitly does not allow clients to set window icons like they can on X11 or Windows.
         // Instead, icons are typically handled by the desktop environment based on application metadata
         // (like .desktop files on Linux).
-        if (Environment.OSVersion.Platform == PlatformID.Unix &&
-            Environment.GetEnvironmentVariable("XDG_SESSION_TYPE")?.ToLowerInvariant() == "wayland")
+        if (IsPlatformWayland())
             return;
         
         // Similarly to Wayland, macOS doesn't allow clients to set window icons
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        if (IsPlatformMacOs())
             return;
         
         Icon = new WindowIcon(iconFiles.Select(GetImage).ToArray());
@@ -107,7 +106,7 @@ public abstract class ImGuiGameWindow(ImGuiGameWindowSettings settings) : GameWi
 
     private void SetWindowsDarkTitleBar()
     {
-        if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+        if (!IsPlatformWindows())
             return;
 
         try
@@ -180,4 +179,34 @@ public abstract class ImGuiGameWindow(ImGuiGameWindowSettings settings) : GameWi
             _ => MouseCursor.Default
         };
     }
+
+    private bool TryGetCurrentMonitorScaleSafe(out float scaleX, out float scaleY)
+    {
+        scaleX = scaleY = 1f;
+
+        if (IsPlatformWayland())
+        {
+            // Wayland does not provide a way for clients to query the current monitor's scale factor.
+            return false;
+        }
+
+        try
+        {
+            return TryGetCurrentMonitorScale(out scaleX, out scaleY);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private bool IsPlatformWindows()
+        => Environment.OSVersion.Platform == PlatformID.Win32NT;
+
+    private bool IsPlatformWayland()
+        => Environment.OSVersion.Platform == PlatformID.Unix &&
+           Environment.GetEnvironmentVariable("XDG_SESSION_TYPE")?.ToLowerInvariant() == "wayland";
+
+    private bool IsPlatformMacOs()
+        => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 }
