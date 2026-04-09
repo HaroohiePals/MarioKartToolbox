@@ -1,10 +1,9 @@
 ﻿using HaroohiePals.Actions;
-using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 using HaroohiePals.NitroKart.Course;
 using OpenTK.Mathematics;
 using System;
 
-namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
+namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 
 sealed class MinimapViewportViewModel(ICourseEditorContext context)
 {

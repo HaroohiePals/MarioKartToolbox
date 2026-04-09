@@ -1,4 +1,4 @@
-﻿namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
+﻿namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 
 enum MinimapLocalMapExtensionDirection
 {

@@ -1,14 +1,14 @@
 using System.Numerics;
 using HaroohiePals.Gui;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
-using HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
+using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 using HaroohiePals.MarioKartToolbox.Gui.Viewport;
 using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData;
 using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
 using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.NitroSystem;
 using ImGuiNET;
 
-namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
+namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
 sealed class MinimapViewportView : CourseViewportView
 {
