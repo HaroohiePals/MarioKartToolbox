@@ -33,7 +33,7 @@ class CourseEditorViewFactory : ICourseEditorViewFactory
         => new CameraPreviewView(context, _applicationSettings);
     
     public IView CreateMinimapViewportView(ICourseEditorContext context)
-        => new MinimapViewportView(context, _applicationSettings);
+        => new MinimapViewportView(new MinimapViewportViewModel(context), _applicationSettings);
 
     public IView CreateValidationPaneView(ICourseEditorContext context)
         => new ValidationPaneView(new ValidationPaneViewModel(context));

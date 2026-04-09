@@ -19,7 +19,7 @@ abstract class InteractiveViewportPanel : ViewportPanel
 
     private readonly SelectionRectangle _selectionRect = new();
     private readonly RenderGroupScene _renderGroupScene;
-    private readonly ViewportSideToolbar _sideToolbar = new();
+    private readonly ViewportSideToolbar _sideToolbar;
     private readonly ViewportCameraToolInfo _helpInfo;
 
     public DrawTool? DrawTool
@@ -37,7 +37,9 @@ abstract class InteractiveViewportPanel : ViewportPanel
     public bool IsGizmoStarted => _gizmo is { Started: true };
 
     protected InteractiveViewportPanel(string visibilityPreferencesKey, RenderGroupScene scene,
-        IApplicationSettingsService applicationSettingsService, IReadOnlyList<GizmoTool>? enabledGizmoTools = null)
+        IApplicationSettingsService applicationSettingsService, 
+        IReadOnlyList<GizmoTool>? enabledGizmoTools = null,
+        IReadOnlyList<ViewportSideToolbarExtraTool>? extraTools = null)
         : base(scene)
     {
         _renderGroupScene = scene;
@@ -46,6 +48,7 @@ abstract class InteractiveViewportPanel : ViewportPanel
         _visibilityManager = new RenderGroupVisibilityManager(
             scene, visibilityPreferencesKey, applicationSettingsService);
         _helpInfo = new ViewportCameraToolInfo(applicationSettingsService);
+        _sideToolbar = new ViewportSideToolbar(extraTools);
     }
 
     public override void UpdateControls(float deltaTime)
