@@ -30,6 +30,7 @@ public sealed class Gizmo
     private readonly RenderGroupScene _renderGroupScene;
     private readonly Dictionary<(object obj, int subIndex), Transform> _oldTransforms = new();
     private readonly Dictionary<(object obj, int subIndex), Transform> _currentTransforms = new();
+    private readonly Dictionary<(object obj, int subIndex), Box3d> _currentLocalBounds = new();
 
     private string _inputOverrideValue = "";
     private Vector3d _oldAveragePos = Vector3.Zero;
@@ -128,6 +129,7 @@ public sealed class Gizmo
     private void UpdateCurrentTransformsAndBounds(ViewportContext context, bool updateBounds)
     {
         _currentTransforms.Clear();
+        _currentLocalBounds.Clear();
         _currentBounds = null;
 
         foreach (object obj in context.SceneObjectHolder.GetSelection())
@@ -141,9 +143,49 @@ public sealed class Gizmo
                     _currentTransforms.Add((obj, i), transform);
 
                 if (updateBounds && _renderGroupScene.RenderGroups.TryGetLocalObjectBounds(obj, i, out var bounds))
-                    _currentBounds = bounds;
+                    _currentLocalBounds[(obj, i)] = bounds;
             }
         }
+
+        if (!updateBounds || _currentLocalBounds.Count == 0)
+            return;
+
+        if (_currentLocalBounds.Count == 1)
+        {
+            _currentBounds = _currentLocalBounds.Values.First();
+            return;
+        }
+
+        var worldMin = new Vector3d(double.MaxValue);
+        var worldMax = new Vector3d(double.MinValue);
+
+        foreach (var kv in _currentLocalBounds)
+        {
+            if (!_currentTransforms.TryGetValue(kv.Key, out var t))
+                continue;
+
+            var m = BuildTransformMatrix(t);
+            var b = kv.Value;
+
+            for (int c = 0; c < 8; c++)
+            {
+                var corner = new Vector3(
+                    (float)((c & 1) == 0 ? b.Min.X : b.Max.X),
+                    (float)((c & 2) == 0 ? b.Min.Y : b.Max.Y),
+                    (float)((c & 4) == 0 ? b.Min.Z : b.Max.Z));
+
+                var w = Vector3.TransformPosition(corner, m);
+
+                if (w.X < worldMin.X) worldMin.X = w.X;
+                if (w.Y < worldMin.Y) worldMin.Y = w.Y;
+                if (w.Z < worldMin.Z) worldMin.Z = w.Z;
+                if (w.X > worldMax.X) worldMax.X = w.X;
+                if (w.Y > worldMax.Y) worldMax.Y = w.Y;
+                if (w.Z > worldMax.Z) worldMax.Z = w.Z;
+            }
+        }
+
+        _currentBounds = new Box3d(worldMin, worldMax);
     }
 
     private Vector3d GetAveragePosition()
@@ -167,18 +209,24 @@ public sealed class Gizmo
 
         var guizmoOperation = _guizmoOperation;
 
-        var contentPos = ImGui.GetCursorScreenPos(); // + new System.Numerics.Vector2(20, 20);
+        var contentPos = ImGui.GetCursorScreenPos();
 
         _imGuizmo.SetOrthographic(IsOrthographic);
         _imGuizmo.BeginFrame();
         _imGuizmo.SetDrawlist();
         _imGuizmo.SetRect(contentPos.X, contentPos.Y, context.ViewportSize.X, context.ViewportSize.Y);
 
-        bool useLocalBounds = context.SceneObjectHolder.SelectionSize == 1 && Tool == GizmoTool.Scale;
+        bool useLocalBounds = context.SceneObjectHolder.SelectionSize >= 1 && Tool == GizmoTool.Scale;
 
         UpdateCurrentTransformsAndBounds(context, useLocalBounds);
 
         var averagePos = GetAveragePosition();
+
+        if (_currentTransforms.Count > 1 && _currentBounds is not null)
+        {
+            var b = _currentBounds.Value;
+            _currentBounds = new Box3d(b.Min - averagePos, b.Max - averagePos);
+        }
 
         if (!Started && context.SceneObjectHolder.SelectionSize > 1)
             _currentRotation = Vector3d.Zero;
@@ -246,7 +294,7 @@ public sealed class Gizmo
                     if (RotateScaleMode is GizmoRotateScaleMode.MedianPoint
                         or GizmoRotateScaleMode.IndividualOrigins)
                     {
-                        //Multiple selection
+                        // Multiple selection
                         if (_currentTransforms.Count > 1)
                         {
                             var oldMatrix =
@@ -268,6 +316,31 @@ public sealed class Gizmo
 
                     break;
                 case GizmoTool.Scale:
+                    if (_currentBounds is not null && _currentTransforms.Count > 1)
+                    {
+                        var s = (Vector3d)resultScale;
+                        var newCenter = (Vector3d)resultPosition;
+                        var oldCenter = _oldAveragePos;
+
+                        const float tolerance = 0.000000001f;
+
+                        Vector3d anchor;
+                        anchor.X = Math.Abs(s.X - 1.0) < tolerance
+                            ? oldCenter.X
+                            : (newCenter.X - s.X * oldCenter.X) / (1.0 - s.X);
+                        anchor.Y = Math.Abs(s.Y - 1.0) < tolerance
+                            ? oldCenter.Y
+                            : (newCenter.Y - s.Y * oldCenter.Y) / (1.0 - s.Y);
+                        anchor.Z = Math.Abs(s.Z - 1.0) < tolerance
+                            ? oldCenter.Z
+                            : (newCenter.Z - s.Z * oldCenter.Z) / (1.0 - s.Z);
+
+                        transform.Translation = ((oldTransform.Translation - anchor) * s) + anchor;
+                        transform.Scale = oldTransform.Scale * WorldToLocalScaleRatio(oldTransform.Rotation,
+                            new Vector3((float)s.X, (float)s.Y, (float)s.Z));
+                        break;
+                    }
+
                     if (_currentTransforms.Count != 1 &&
                         RotateScaleMode is GizmoRotateScaleMode.MedianPoint
                             or GizmoRotateScaleMode.MedianPointTranslateOnly)
@@ -279,7 +352,10 @@ public sealed class Gizmo
                         RotateScaleMode is GizmoRotateScaleMode.MedianPoint
                             or GizmoRotateScaleMode.IndividualOrigins)
                     {
-                        transform.Scale = oldTransform.Scale * resultScale;
+                        var localScale = _currentTransforms.Count == 1
+                            ? (Vector3d)resultScale
+                            : WorldToLocalScaleRatio(oldTransform.Rotation, resultScale);
+                        transform.Scale = oldTransform.Scale * localScale;
                     }
 
                     if (_currentBounds is not null)
@@ -572,6 +648,25 @@ public sealed class Gizmo
         }
 
         return result;
+    }
+
+    private Matrix4 BuildTransformMatrix(Transform t) =>
+        Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(t.Rotation.X)) *
+        Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(t.Rotation.Y)) *
+        Matrix4.CreateRotationZ((float)MathHelper.DegreesToRadians(t.Rotation.Z)) *
+        Matrix4.CreateTranslation((Vector3)t.Translation);
+
+    private Vector3d WorldToLocalScaleRatio(Vector3d rotationDeg, Vector3 worldScale)
+    {
+        var rot =
+            Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(rotationDeg.X)) *
+            Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(rotationDeg.Y)) *
+            Matrix4.CreateRotationZ((float)MathHelper.DegreesToRadians(rotationDeg.Z));
+
+        return new Vector3d(
+            new Vector3(rot.Row0.X * worldScale.X, rot.Row0.Y * worldScale.Y, rot.Row0.Z * worldScale.Z).Length,
+            new Vector3(rot.Row1.X * worldScale.X, rot.Row1.Y * worldScale.Y, rot.Row1.Z * worldScale.Z).Length,
+            new Vector3(rot.Row2.X * worldScale.X, rot.Row2.Y * worldScale.Y, rot.Row2.Z * worldScale.Z).Length);
     }
 
     private bool AreCurrentTransformsValid()
