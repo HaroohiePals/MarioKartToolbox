@@ -30,6 +30,7 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
         get => _collision;
         set => MainArchive.SetFileData(COURSE_COLLISION_PATH, value.Write());
     }
+    public MkdsCourseMetadata Metadata { get; private set; }
 
     protected MkdsBinaryCourse(Archive mainArchive, Archive? texArchive, string courseMapPath)
     {
@@ -49,6 +50,12 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
 
         UpdateMapData();
         _collision = MainArchive.GetFileOrDefault<MkdsKcl>(COURSE_COLLISION_PATH);
+
+        // todo: metadata may be loaded from arm9.bin or a json file in the course files
+        Metadata = new MkdsCourseMetadata
+        {
+            LocalMapSettings = new()
+        };
     }
 
     event IMkdsCourse.CourseFileUpdatedEventHandler IMkdsCourse.CourseFileUpdated

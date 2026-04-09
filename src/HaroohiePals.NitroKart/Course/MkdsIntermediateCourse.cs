@@ -23,6 +23,7 @@ public class MkdsIntermediateCourse : IMkdsCourse
         get => _collision;
         set => FileArchive.SetFileData(CourseCollisionPath, value.Write());
     }
+    public MkdsCourseMetadata Metadata { get; private set; }
 
     public MkdsIntermediateCourse(string basePath, string courseMapPath)
     {
@@ -37,6 +38,12 @@ public class MkdsIntermediateCourse : IMkdsCourse
 
         if (ExistsMainFile(CourseCollisionPath))
             UpdateCollision();
+
+        // todo: metadata may be loaded from arm9.bin or a json file in the course files
+        Metadata = new MkdsCourseMetadata
+        {
+            LocalMapSettings = new()
+        };
     }
 
     private event IMkdsCourse.CourseFileUpdatedEventHandler _courseFileUpdated;

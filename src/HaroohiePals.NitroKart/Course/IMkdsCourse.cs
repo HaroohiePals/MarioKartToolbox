@@ -7,14 +7,12 @@ public interface IMkdsCourse
 {
     MkdsMapData MapData { get; }
     MkdsKcl Collision { get; set; }
+    MkdsCourseMetadata Metadata { get; }
 
     bool Save();
 
     T GetMainFileOrDefault<T>(string path, T defaultValue = default);
     T GetTexFileOrDefault<T>(string path, T defaultValue = default);
-
-    //void SetMainFileData(string path, byte[] data);
-    //void SetTexFileData(string path, byte[] data);
 
     bool ExistsMainFile(string path);
     bool ExistsTexFile(string path);
