@@ -1,4 +1,5 @@
-﻿using HaroohiePals.IO.Archive;
+﻿#nullable enable
+using HaroohiePals.IO.Archive;
 using HaroohiePals.IO.Compression;
 using HaroohiePals.Nitro.NitroSystem.Fnd;
 using System.IO;
@@ -7,10 +8,10 @@ namespace HaroohiePals.NitroKart.Course;
 
 public sealed class MkdsCarcCourse(
     string mainPath,
-    string texPath,
+    string? texPath,
     string courseMapPath,
     MkdsCourseMetadataFactory mkdsCourseMetadataFactory)
-    : MkdsBinaryCourse(LoadCarc(mainPath), texPath == null ? null : LoadCarc(texPath),
+    : MkdsBinaryCourse(LoadCarc(mainPath), texPath is null ? null : LoadCarc(texPath),
         courseMapPath, mkdsCourseMetadataFactory)
 {
     private static MemoryArchive LoadCarc(string path)
