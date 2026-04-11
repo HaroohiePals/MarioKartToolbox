@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using HaroohiePals.Graphics3d;
 using HaroohiePals.Graphics3d.OpenGL;
 using HaroohiePals.Graphics3d.OpenGL.Renderers;
@@ -61,7 +62,7 @@ class LocalMapRenderGroup : RenderGroup
                 _secondLocalMapRenderer.Points =
                 [
                     new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapSettings,
-                    pickingId, isHovered, false)
+                        pickingId, isHovered, false)
                 ];
                 _secondLocalMapRenderer.Render(context);
             }
@@ -138,15 +139,17 @@ class LocalMapRenderGroup : RenderGroup
         switch (subIndex)
         {
             case LOCAL_MAP_FIRST_SCREEN_SUB_INDEX:
-                _mapSettings.TopLeft = new Vector2d(leftEdge, topEdge);
-                _mapSettings.BottomRight = new Vector2d(leftEdge + leftWidth, topEdge + height);
+                _mapSettings.TopLeft = new Vector2d(Math.Round(leftEdge), Math.Round(topEdge));
+                _mapSettings.BottomRight = new Vector2d(Math.Round(leftEdge + leftWidth), Math.Round(topEdge + height));
                 break;
             case LOCAL_MAP_SECOND_SCREEN_SUB_INDEX:
                 if (_mapSettings.Mode == MkdsLocalMapMode.Extended)
                 {
-                    _mapSettings.ExtendedTopLeft = new Vector2d(leftEdge, topEdge);
-                    _mapSettings.ExtendedBottomRight = new Vector2d(leftEdge + leftWidth, topEdge + height);
+                    _mapSettings.ExtendedTopLeft = new Vector2d(Math.Round(leftEdge), Math.Round(topEdge));
+                    _mapSettings.ExtendedBottomRight =
+                        new Vector2d(Math.Round(leftEdge + leftWidth), Math.Round(topEdge + height));
                 }
+
                 break;
         }
 
@@ -173,7 +176,7 @@ class LocalMapRenderGroup : RenderGroup
     {
         var topLeft = _mapSettings.TopLeft;
         var bottomRight = _mapSettings.BottomRight;
-        
+
         if (subIndex == LOCAL_MAP_SECOND_SCREEN_SUB_INDEX)
         {
             topLeft = _mapSettings.ExtendedTopLeft;
@@ -197,8 +200,7 @@ class LocalMapRenderGroup : RenderGroup
     {
         var tiles = _course.GetTexFileOrDefault<Ncgr>(TILES_FILENAME);
         var palette = _course.GetTexFileOrDefault<Nclr>(PALETTE_FILENAME);
-        var map = _course.GetTexFileOrDefault<Nscr>(loadSecondMap ? 
-            SECOND_SCREEN_FILENAME : FIRST_SCREEN_FILENAME);
+        var map = _course.GetTexFileOrDefault<Nscr>(loadSecondMap ? SECOND_SCREEN_FILENAME : FIRST_SCREEN_FILENAME);
 
         if (tiles is null || palette is null || map is null)
             return null;
