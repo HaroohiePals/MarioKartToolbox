@@ -15,6 +15,8 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
 sealed class CourseEditorContentView : WindowContentView, IDisposable
 {
+    private const bool SHOW_ARCHIVE_PANE = false;
+    
     private readonly IApplicationSettingsService _applicationSettings;
     private readonly IModalService _modalService;
     private readonly CourseEditorViewModel _viewModel;
@@ -127,7 +129,7 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
         _propertyGridPane = _subWindowFactory.CreatePropertyGridPaneView(_viewModel.Context);
         _views.Add(_propertyGridPane);
 
-        if (_viewModel.Context.Course is MkdsBinaryCourse binCourse)
+        if (SHOW_ARCHIVE_PANE && _viewModel.Context.Course is MkdsBinaryCourse binCourse)
             _views.Add(_subWindowFactory.CreateArchiveTreeView(binCourse.MainArchive));
         _views.Add(_subWindowFactory.CreateMapDataExplorerView(_viewModel.Context));
         _views.Add(_subWindowFactory.CreateCameraPreviewView(_viewModel.Context));
