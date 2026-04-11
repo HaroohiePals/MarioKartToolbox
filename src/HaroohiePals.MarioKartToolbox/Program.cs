@@ -14,6 +14,7 @@ using HaroohiePals.NitroKart.Validation.Course;
 using HaroohiePals.NitroKart.Validation.MapData;
 using System;
 using System.IO;
+using HaroohiePals.NitroKart.Course;
 using TextCopy;
 
 namespace HaroohiePals.MarioKartToolbox;
@@ -71,6 +72,9 @@ static class Program
             .SingleInstance();
         builder.RegisterType<MkdsMapDataValidatorFactory>()
             .As<IMkdsMapDataValidatorFactory>()
+            .SingleInstance();
+        builder.RegisterType<MkdsCourseFactory>()
+            .As<IMkdsCourseFactory>()
             .SingleInstance();
 
         builder.RegisterType<MainWindowViewModel>();

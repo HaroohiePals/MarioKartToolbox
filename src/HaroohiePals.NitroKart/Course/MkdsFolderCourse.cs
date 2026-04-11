@@ -2,8 +2,10 @@
 
 namespace HaroohiePals.NitroKart.Course;
 
-public class MkdsFolderCourse : MkdsBinaryCourse
-{
-    public MkdsFolderCourse(string mainPath, string texPath, string courseMapPath)
-        : base(new DiskArchive(mainPath), texPath == null ? null : new DiskArchive(texPath), courseMapPath) { }
-}
+public sealed class MkdsFolderCourse(
+    string mainPath,
+    string texPath,
+    string courseMapPath,
+    MkdsCourseMetadataFactory mkdsCourseMetadataFactory)
+    : MkdsBinaryCourse(new DiskArchive(mainPath), texPath == null ? null : new DiskArchive(texPath),
+        courseMapPath, mkdsCourseMetadataFactory);

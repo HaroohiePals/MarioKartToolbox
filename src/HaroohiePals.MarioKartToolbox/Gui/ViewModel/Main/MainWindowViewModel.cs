@@ -21,7 +21,8 @@ class MainWindowViewModel(
     IModalService modalService,
     IMainWindowFactory windowFactory,
     IApplicationDiscordRichPresenceService discordRichPresenceService,
-    IApplicationSettingsService applicationSettingsService)
+    IApplicationSettingsService applicationSettingsService,
+    IMkdsCourseFactory courseFactory)
 {
     private CourseEditorContentView _courseEditorView;
     private RomExplorerContentView _romExplorer;
@@ -149,7 +150,7 @@ class MainWindowViewModel(
             baseTexPath = null;
 
         _courseEditorView =
-            windowFactory.CreateCourseEditorView(new MkdsFolderCourse(basePath, baseTexPath, courseMapPath));
+            windowFactory.CreateCourseEditorView(courseFactory.CreateFromFolder(basePath, baseTexPath, courseMapPath));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
         SetMainWindowContent.Invoke(_courseEditorView);
@@ -168,8 +169,7 @@ class MainWindowViewModel(
         if (!nitroFsArchive.ExistsFile(baseTexPath))
             baseTexPath = null;
 
-        _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsRomCarcCourse(nitroFsArchive, path,
-            baseTexPath, "/course_map.nkm"));
+        _courseEditorView = windowFactory.CreateCourseEditorView(courseFactory.CreateFromRomCarc(nitroFsArchive, path, baseTexPath));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
         SetMainWindowContent.Invoke(_courseEditorView);
@@ -188,7 +188,7 @@ class MainWindowViewModel(
             baseTexPath = null;
 
         _courseEditorView =
-            windowFactory.CreateCourseEditorView(new MkdsCarcCourse(basePath, baseTexPath, "/course_map.nkm"));
+            windowFactory.CreateCourseEditorView(courseFactory.CreateFromCarc(basePath, baseTexPath));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
         SetMainWindowContent.Invoke(_courseEditorView);

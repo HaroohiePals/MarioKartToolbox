@@ -1,45 +1,40 @@
-﻿using HaroohiePals.IO.Archive;
+﻿#nullable enable
+using HaroohiePals.IO.Archive;
 using HaroohiePals.IO.Compression;
 using HaroohiePals.Nitro.Fs;
 using HaroohiePals.Nitro.NitroSystem.Fnd;
 
 namespace HaroohiePals.NitroKart.Course;
 
-public class MkdsRomCarcCourse : MkdsBinaryCourse
+public class MkdsRomCarcCourse(
+    NitroFsArchive romFs,
+    string mainPath,
+    string? texPath,
+    string courseMapPath,
+    MkdsCourseMetadataFactory mkdsCourseMetadataFactory)
+    : MkdsBinaryCourse(LoadCarc(romFs, mainPath), texPath is null ? null : LoadCarc(romFs, texPath), courseMapPath,
+        mkdsCourseMetadataFactory)
 {
-    private readonly NitroFsArchive _romFs;
-
-    public string MainPath { get; }
-    public string TexPath { get; }
-
     private static MemoryArchive LoadCarc(NitroFsArchive romFs, string path)
     {
-        var carcData = romFs.GetFileData(path);
-        var narcData = new Lz77CompressionAlgorithm().Decompress(carcData);
+        byte[]? carcData = romFs.GetFileData(path);
+        byte[]? narcData = new Lz77CompressionAlgorithm().Decompress(carcData);
         var narc = new Narc(narcData);
         return new MemoryArchive(narc.ToArchive());
-    }
-
-    public MkdsRomCarcCourse(NitroFsArchive romFs, string mainPath, string texPath, string courseMapPath)
-        : base(LoadCarc(romFs, mainPath), texPath == null ? null : LoadCarc(romFs, texPath), courseMapPath)
-    {
-        _romFs = romFs;
-        MainPath = mainPath;
-        TexPath = texPath;
     }
 
     public override bool Save()
     {
         bool result = base.Save();
 
-        if (result)
+        if (!result)
+            return true;
+
+        var lz77 = new Lz77CompressionAlgorithm();
+        romFs.SetFileData(mainPath, lz77.Compress(new Narc(_mainArchive).Write()));
+        if (texPath is not null)
         {
-            var lz77 = new Lz77CompressionAlgorithm();
-            _romFs.SetFileData(MainPath, lz77.Compress(new Narc(_mainArchive).Write()));
-            if (TexPath != null)
-            {
-                _romFs.SetFileData(TexPath, lz77.Compress(new Narc(_texArchive).Write()));
-            }
+            romFs.SetFileData(texPath, lz77.Compress(new Narc(_texArchive).Write()));
         }
 
         return true;

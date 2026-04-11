@@ -1,5 +1,4 @@
 ﻿#nullable enable
-
 using HaroohiePals.IO.Archive;
 using HaroohiePals.KCollision.Formats;
 using HaroohiePals.NitroKart.MapData.Binary;
@@ -9,7 +8,10 @@ namespace HaroohiePals.NitroKart.Course;
 
 public abstract class MkdsBinaryCourse : IMkdsCourse
 {
-    public const string COURSE_COLLISION_PATH = "/course_collision.kcl";
+    private const string COURSE_COLLISION_FILENAME = "course_collision.kcl";
+    private const string COURSE_METADATA_FILENAME = "metadata.json";
+    private const string COURSE_COLLISION_PATH = $"/{COURSE_COLLISION_FILENAME}";
+    private const string COURSE_METADATA_PATH = $"/{COURSE_METADATA_FILENAME}";
 
     private readonly string _courseMapPath;
 
@@ -30,32 +32,30 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
         get => _collision;
         set => MainArchive.SetFileData(COURSE_COLLISION_PATH, value.Write());
     }
+
     public MkdsCourseMetadata Metadata { get; private set; }
 
-    protected MkdsBinaryCourse(Archive mainArchive, Archive? texArchive, string courseMapPath)
+    protected MkdsBinaryCourse(Archive mainArchive, Archive? texArchive,
+        string courseMapPath, MkdsCourseMetadataFactory mkdsCourseMetadataFactory)
     {
         _courseMapPath = courseMapPath;
 
         _mainArchive = mainArchive;
         _texArchive = texArchive;
 
-        MainArchive = new(_mainArchive);
+        MainArchive = new CourseFileCache(_mainArchive);
         MainArchive.FileUpdated += FileUpdated;
 
         if (_texArchive is not null)
         {
-            TexArchive = new(_texArchive);
+            TexArchive = new CourseFileCache(_texArchive);
             TexArchive.FileUpdated += FileUpdated;
         }
 
         UpdateMapData();
         _collision = MainArchive.GetFileOrDefault<MkdsKcl>(COURSE_COLLISION_PATH);
 
-        // todo: metadata may be loaded from arm9.bin or a json file in the course files
-        Metadata = new MkdsCourseMetadata
-        {
-            LocalMapSettings = new()
-        };
+        Metadata = mkdsCourseMetadataFactory.Create(MainArchive);
     }
 
     event IMkdsCourse.CourseFileUpdatedEventHandler IMkdsCourse.CourseFileUpdated
@@ -97,15 +97,14 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
     public T? GetTexFileOrDefault<T>(string path, T? defaultValue = default)
         => TexArchive is null ? default : TexArchive.GetFileOrDefault(path, defaultValue);
 
-    //public void SetMainFileData(string path, byte[] data)
-    //    => MainArchive.SetFileData(path, data);
-
-    //public void SetTexFileData(string path, byte[] data)
-    //    => TexArchive.SetFileData(path, data);
-
     public bool ExistsMainFile(string path)
         => MainArchive.ExistsFile(path);
 
     public bool ExistsTexFile(string path)
         => TexArchive?.ExistsFile(path) ?? false;
+
+    private void SaveMetadata()
+    {
+        //todo
+    }
 }
