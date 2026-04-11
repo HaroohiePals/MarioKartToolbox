@@ -8,18 +8,18 @@ using Newtonsoft.Json.Converters;
 
 namespace HaroohiePals.NitroKart.Course;
 
-public class MkdsCourseMetadataFactory
+public class JsonMkdsCourseMetadataService : IMkdsCourseMetadataService
 {
     private const string COURSE_METADATA_FILENAME = "metadata.json";
-    public const string COURSE_METADATA_PATH = $"/{COURSE_METADATA_FILENAME}";
+    private const string COURSE_METADATA_PATH = $"/{COURSE_METADATA_FILENAME}";
 
-    public static readonly JsonSerializerSettings JsonSettings = new()
+    private readonly JsonSerializerSettings _jsonSettings = new()
     {
         Formatting = Formatting.Indented,
         Converters = { new Vector2dJsonConverter(), new StringEnumConverter() }
     };
 
-    public MkdsCourseMetadata Create(Archive mainArchive)
+    public MkdsCourseMetadata Load(Archive mainArchive)
     {
         if (!mainArchive.ExistsFile(COURSE_METADATA_PATH))
             return CreateDefault();
@@ -28,7 +28,7 @@ public class MkdsCourseMetadataFactory
         {
             byte[] data = mainArchive.GetFileData(COURSE_METADATA_PATH);
             string json = Encoding.UTF8.GetString(data);
-            var metadata = JsonConvert.DeserializeObject<MkdsCourseMetadata>(json, JsonSettings);
+            var metadata = JsonConvert.DeserializeObject<MkdsCourseMetadata>(json, _jsonSettings);
 
             return metadata ?? CreateDefault();
         }
@@ -36,6 +36,13 @@ public class MkdsCourseMetadataFactory
         {
             return CreateDefault();
         }
+    }
+
+    public void Save(Archive mainArchive, MkdsCourseMetadata metadata)
+    {
+        string json = JsonConvert.SerializeObject(metadata, _jsonSettings);
+        byte[] data = Encoding.UTF8.GetBytes(json);
+        mainArchive.SetFileData(COURSE_METADATA_PATH, data);
     }
 
     private static MkdsCourseMetadata CreateDefault() => new()

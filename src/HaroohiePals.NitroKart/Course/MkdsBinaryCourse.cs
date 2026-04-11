@@ -1,10 +1,8 @@
 ﻿#nullable enable
-using System.Text;
 using HaroohiePals.IO.Archive;
 using HaroohiePals.KCollision.Formats;
 using HaroohiePals.NitroKart.MapData.Binary;
 using HaroohiePals.NitroKart.MapData.Intermediate;
-using Newtonsoft.Json;
 
 namespace HaroohiePals.NitroKart.Course;
 
@@ -14,6 +12,7 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
     private const string COURSE_COLLISION_PATH = $"/{COURSE_COLLISION_FILENAME}";
 
     private readonly string _courseMapPath;
+    private readonly IMkdsCourseMetadataService _metadataService;
 
     protected readonly Archive _mainArchive;
     protected readonly Archive? _texArchive;
@@ -36,9 +35,10 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
     public MkdsCourseMetadata Metadata { get; private set; }
 
     protected MkdsBinaryCourse(Archive mainArchive, Archive? texArchive,
-        string courseMapPath, MkdsCourseMetadataFactory mkdsCourseMetadataFactory)
+        string courseMapPath, IMkdsCourseMetadataService metadataService)
     {
         _courseMapPath = courseMapPath;
+        _metadataService = metadataService;
 
         _mainArchive = mainArchive;
         _texArchive = texArchive;
@@ -55,7 +55,7 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
         UpdateMapData();
         _collision = MainArchive.GetFileOrDefault<MkdsKcl>(COURSE_COLLISION_PATH);
 
-        Metadata = mkdsCourseMetadataFactory.Create(MainArchive);
+        Metadata = _metadataService.Load(MainArchive);
     }
 
     event IMkdsCourse.CourseFileUpdatedEventHandler IMkdsCourse.CourseFileUpdated
@@ -70,7 +70,7 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
         MainArchive.Flush();
         _mainArchive.SetFileData(_courseMapPath, NkmdFactory.FromMapData(MapData).Write());
         _mainArchive.SetFileData(COURSE_COLLISION_PATH, Collision.Write());
-        SaveMetadata();
+        _metadataService.Save(_mainArchive, Metadata);
         TexArchive?.Flush();
 
         return true;
@@ -103,11 +103,4 @@ public abstract class MkdsBinaryCourse : IMkdsCourse
 
     public bool ExistsTexFile(string path)
         => TexArchive?.ExistsFile(path) ?? false;
-
-    private void SaveMetadata()
-    {
-        string json = JsonConvert.SerializeObject(Metadata, MkdsCourseMetadataFactory.JsonSettings);
-        byte[] data = Encoding.UTF8.GetBytes(json);
-        _mainArchive.SetFileData(MkdsCourseMetadataFactory.COURSE_METADATA_PATH, data);
-    }
 }

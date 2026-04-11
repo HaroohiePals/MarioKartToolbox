@@ -6,6 +6,6 @@ public sealed class MkdsFolderCourse(
     string mainPath,
     string texPath,
     string courseMapPath,
-    MkdsCourseMetadataFactory mkdsCourseMetadataFactory)
+    IMkdsCourseMetadataService metadataService)
     : MkdsBinaryCourse(new DiskArchive(mainPath), texPath == null ? null : new DiskArchive(texPath),
-        courseMapPath, mkdsCourseMetadataFactory);
+        courseMapPath, metadataService);

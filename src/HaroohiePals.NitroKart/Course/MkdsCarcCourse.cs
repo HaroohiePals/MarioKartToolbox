@@ -10,9 +10,9 @@ public sealed class MkdsCarcCourse(
     string mainPath,
     string? texPath,
     string courseMapPath,
-    MkdsCourseMetadataFactory mkdsCourseMetadataFactory)
+    IMkdsCourseMetadataService metadataService)
     : MkdsBinaryCourse(LoadCarc(mainPath), texPath is null ? null : LoadCarc(texPath),
-        courseMapPath, mkdsCourseMetadataFactory)
+        courseMapPath, metadataService)
 {
     private static MemoryArchive LoadCarc(string path)
     {

@@ -11,9 +11,9 @@ public class MkdsRomCarcCourse(
     string mainPath,
     string? texPath,
     string courseMapPath,
-    MkdsCourseMetadataFactory mkdsCourseMetadataFactory)
+    IMkdsCourseMetadataService metadataService)
     : MkdsBinaryCourse(LoadCarc(romFs, mainPath), texPath is null ? null : LoadCarc(romFs, texPath), courseMapPath,
-        mkdsCourseMetadataFactory)
+        metadataService)
 {
     private static MemoryArchive LoadCarc(NitroFsArchive romFs, string path)
     {
