@@ -75,10 +75,10 @@ abstract class InteractiveViewportPanel : ViewportPanel
         HandleSelectionRectangle();
         if (!_selectionRect.Dragging)
             RenderGizmos();
-        if (Context.SceneObjectHolder.SelectionSize == 0 || (!_gizmo.IsUsing && !_gizmo.IsOver && !_gizmo.IsUsingDrawTool))
+        if (Context.SceneObjectHolder.SelectionSize == 0 || _gizmo is { IsUsing: false, IsOver: false, IsUsingDrawTool: false })
             HandlePickingResult();
         _sideToolbar.Draw(Context, _gizmo);
-        _helpInfo.Draw(Context, _gizmo, this is InteractiveTopDownViewportPanel);
+        _helpInfo.Draw(Context, _gizmo, _renderGroupScene is RenderGroupSceneTopDown);
         RenderTopToolbar();
     }
 
