@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using HaroohiePals.Graphics;
 using HaroohiePals.Graphics3d;
 using HaroohiePals.Graphics3d.OpenGL;
 using HaroohiePals.Graphics3d.OpenGL.Renderers;
@@ -33,7 +34,8 @@ class GlobalMapRenderGroup : RenderGroup
         var textureTranslucent = CreateTexture(true);
 
         _quadRenderer = texture is null ? null : new QuadRenderer(texture, true, false);
-        _quadRendererTranslucent = textureTranslucent is null ? null : new QuadRenderer(textureTranslucent, true, false);
+        _quadRendererTranslucent =
+            textureTranslucent is null ? null : new QuadRenderer(textureTranslucent, true, false);
     }
 
     public override void Render(ViewportContext context)
@@ -51,8 +53,11 @@ class GlobalMapRenderGroup : RenderGroup
         uint pickingId = context.GetPickingId(PickingGroupId, 0);
         bool isHovered = context.IsHovered(_mapSettings);
 
-        renderer.Points = [new InstancedPoint(position, rotation, scale, Color4.White, true, _mapSettings,
-            pickingId, isHovered, false)];
+        renderer.Points =
+        [
+            new InstancedPoint(position, rotation, scale, Color4.White, true, _mapSettings,
+                pickingId, isHovered, false)
+        ];
         renderer.Render(context);
     }
 
@@ -131,9 +136,11 @@ class GlobalMapRenderGroup : RenderGroup
         var palette = _course.GetTexFileOrDefault<Nclr>("Map2D/global.NCLR");
         var map = _course.GetTexFileOrDefault<Nscr>("Map2D/global1.NSCR");
 
+        const int dsWidth = 256;
+        const int dsHeight = 192;
+
         var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
-            map.Screen.ScreenData, ImageFormat.Pltt16, MapFormat.Text, map.Screen.Width,
-            map.Screen.Height, true);
+            map.Screen.ScreenData, ImageFormat.Pltt16, MapFormat.Text, dsWidth, dsHeight, true);
 
         if (decoded is null)
             return null;
