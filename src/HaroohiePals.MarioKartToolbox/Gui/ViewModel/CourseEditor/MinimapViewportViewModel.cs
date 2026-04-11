@@ -8,6 +8,8 @@ namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 sealed class MinimapViewportViewModel(ICourseEditorContext context)
 {
     public ICourseEditorContext Context { get; } = context;
+    public bool ShowGlobalMap { get; private set; } = false;
+    public bool ShowTranslucent { get; private set; } = false;
 
     public void ExtendLeft() => ExtendLocalMap(MinimapLocalMapExtensionDirection.Left);
 
@@ -16,10 +18,13 @@ sealed class MinimapViewportViewModel(ICourseEditorContext context)
     public void ExtendDown() => ExtendLocalMap(MinimapLocalMapExtensionDirection.Down);
 
     public void ExtendUp() => ExtendLocalMap(MinimapLocalMapExtensionDirection.Up);
+    public bool IsExtendButtonVisible() => !ShowGlobalMap;
+    public void ToggleGlobalMap() => ShowGlobalMap = !ShowGlobalMap;
+    public void ToggleTranslucent() => ShowTranslucent = !ShowTranslucent;
 
     private void ExtendLocalMap(MinimapLocalMapExtensionDirection direction)
     {
-        var mapSettings = Context.Course.Metadata.LocalMapSettings;
+        var mapSettings = Context.Course.Metadata.LocalMapSettings!;
 
         var topLeft = mapSettings.TopLeft;
         var bottomRight = mapSettings.BottomRight;

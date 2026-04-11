@@ -29,7 +29,7 @@ class LocalMapRenderGroup : RenderGroup
     private readonly QuadRenderer? _secondLocalMapRenderer;
     private readonly IMkdsCourse _course;
 
-    private MkdsLocalMapSettings _mapSettings => _course.Metadata.LocalMapSettings;
+    private MkdsLocalMapSettings _mapSettings => _course.Metadata.LocalMapSettings!;
 
     public bool RenderTranslucent { get; set; } = false;
 

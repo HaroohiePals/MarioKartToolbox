@@ -20,7 +20,10 @@ sealed class ViewportSideToolbar(IReadOnlyList<ViewportSideToolbarExtraTool>? ex
         float btnSize = 24 * scale;
         float spacing = 2 * scale;
 
-        int itemCount = gizmo.EnabledTools.Count + (extraTools is null ? 0 : extraTools.Count);
+        var visibleExtraTools = extraTools?.Where(x => 
+            x.IsVisible?.Invoke() ?? true).ToList() ?? [];
+
+        int itemCount = gizmo.EnabledTools.Count + visibleExtraTools.Count;
 
         uint selectedColor = ImGui.GetColorU32(ImGuiCol.ButtonHovered) | 0xFF000000;
 
@@ -86,10 +89,14 @@ sealed class ViewportSideToolbar(IReadOnlyList<ViewportSideToolbarExtraTool>? ex
                     ImGui.SetCursorPosY((btnSize + spacing) * ++currentItemNumber);
             }
 
-            foreach (var extra in extraTools ?? Array.Empty<ViewportSideToolbarExtraTool>())
+            foreach (var extra in visibleExtraTools)
             {
+                if (extra.IsSelected?.Invoke() ?? false)
+                    ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
                 if (ImGui.Button($"{extra.Icon}##{extra.Name}", new(btnSize)))
                     clickedExtraTool = extra.Name;
+                if (extra.IsSelected?.Invoke() ?? false)
+                    ImGui.PopStyleColor();
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
@@ -98,10 +105,12 @@ sealed class ViewportSideToolbar(IReadOnlyList<ViewportSideToolbarExtraTool>? ex
                     ImGui.PopTextWrapPos();
                     ImGui.EndTooltip();
                 }
+
                 if (currentItemNumber < itemCount - 1)
                     ImGui.SetCursorPosY((btnSize + spacing) * ++currentItemNumber);
             }
         }
+
         ImGui.EndChild();
 
         ImGui.PopStyleColor();
