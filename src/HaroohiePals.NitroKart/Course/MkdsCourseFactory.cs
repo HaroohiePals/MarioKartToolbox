@@ -8,6 +8,7 @@ public class MkdsCourseFactory : IMkdsCourseFactory
     private const string DEFAULT_COURSE_MAP_PATH = "/course_map.nkm";
 
     private readonly JsonMkdsCourseMetadataService _jsonMetadataService = new();
+    private readonly DummyMkdsCourseMetadataService _dummyMkdsCourseMetadataService = new();
 
     public IMkdsCourse CreateFromFolder(string mainArcPath, string? texArcPath, string? courseMapPath = null)
         => new MkdsFolderCourse(mainArcPath, texArcPath,
@@ -15,10 +16,10 @@ public class MkdsCourseFactory : IMkdsCourseFactory
 
     public IMkdsCourse CreateFromCarc(string mainArcPath, string? texArcPath, string? courseMapPath = null)
         => new MkdsCarcCourse(mainArcPath, texArcPath,
-            courseMapPath ?? DEFAULT_COURSE_MAP_PATH, _jsonMetadataService);
+            courseMapPath ?? DEFAULT_COURSE_MAP_PATH, _dummyMkdsCourseMetadataService);
 
     public IMkdsCourse CreateFromRomCarc(NitroFsArchive romFs, string mainArcPath, string? texArcPath,
         string? courseMapPath = null)
         => new MkdsRomCarcCourse(romFs, mainArcPath, texArcPath,
-            courseMapPath ?? DEFAULT_COURSE_MAP_PATH, _jsonMetadataService);
+            courseMapPath ?? DEFAULT_COURSE_MAP_PATH, _dummyMkdsCourseMetadataService);
 }
