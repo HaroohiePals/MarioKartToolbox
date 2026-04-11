@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using HaroohiePals.NitroKart.Json;
 
 namespace HaroohiePals.MarioKartToolbox.Application.Clipboard.Json;
 

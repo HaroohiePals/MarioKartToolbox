@@ -1,12 +1,12 @@
 ﻿#nullable enable
+using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenTK.Mathematics;
-using System;
 
-namespace HaroohiePals.MarioKartToolbox.Application.Clipboard.Json;
+namespace HaroohiePals.NitroKart.Json;
 
-sealed class Vector2dJsonConverter : JsonConverter<Vector2d>
+public sealed class Vector2dJsonConverter : JsonConverter<Vector2d>
 {
     private const string PROPERTY_X_NAME = "x";
     private const string PROPERTY_Y_NAME = "y";
