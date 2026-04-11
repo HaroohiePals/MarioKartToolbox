@@ -8,7 +8,7 @@ public class MkdsLocalMapSettings
 {
     [Category("Local Map Coordinates")]
     [DisplayName("Top Left")]
-    public Vector2d TopLeft { get; set; } = new(-3000, -3000);
+    public Vector2d TopLeft { get; set; } = new(-6000, -3000);
     [Category("Local Map Coordinates")]
     [DisplayName("Bottom Right")]
     public Vector2d BottomRight { get; set; } = new(0, 3000);

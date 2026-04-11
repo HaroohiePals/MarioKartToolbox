@@ -14,7 +14,6 @@ sealed class MinimapViewportView : CourseViewportView
 {
     private const string PANE_TITLE = "Minimap View";
 
-    private readonly MinimapViewportViewModel _viewModel;
     private readonly MapDataRenderGroupFactory _renderGroupFactory;
     private readonly CourseModelRenderGroup _courseModelRenderGroup;
 
@@ -22,22 +21,21 @@ sealed class MinimapViewportView : CourseViewportView
         : base(PANE_TITLE, viewModel.Context)
     {
         _renderGroupFactory = new MapDataRenderGroupFactory(applicationSettings);
-        _viewModel = viewModel;
 
         var scene = new NitroKartRenderGroupSceneTopDown();
         _courseModelRenderGroup = new CourseModelRenderGroup();
         _courseModelRenderGroup.Load(Context.Course);
         scene.RenderGroups.Add(_courseModelRenderGroup);
-        scene.RenderGroups.Add(new LocalMapRenderGroup(_viewModel.Context.Course));
+        scene.RenderGroups.Add(new LocalMapRenderGroup(viewModel.Context.Course));
         //scene.RenderGroups.Add(new GlobalMapRenderGroup(context.Course));
 
         _scene = scene;
         _viewportPanel = new MinimapViewportPanel(scene, applicationSettings,
         [
-            new($"{FontAwesome6.SquareCaretLeft}", "Extend Left", _viewModel.ExtendLeft),
-            new($"{FontAwesome6.SquareCaretRight}", "Extend Right", _viewModel.ExtendRight),
-            new($"{FontAwesome6.SquareCaretDown}", "Extend Down", _viewModel.ExtendDown),
-            new($"{FontAwesome6.SquareCaretUp}", "Extend Up", _viewModel.ExtendUp)
+            new($"{FontAwesome6.SquareCaretLeft}", "Extend Left", viewModel.ExtendLeft),
+            new($"{FontAwesome6.SquareCaretRight}", "Extend Right", viewModel.ExtendRight),
+            new($"{FontAwesome6.SquareCaretDown}", "Extend Down", viewModel.ExtendDown),
+            new($"{FontAwesome6.SquareCaretUp}", "Extend Up", viewModel.ExtendUp)
         ]);
 
         _viewportPanel.Context.SceneObjectHolder = Context.SceneObjectHolder;

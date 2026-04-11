@@ -133,7 +133,8 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
             _views.Add(_subWindowFactory.CreateArchiveTreeView(binCourse.MainArchive));
         _views.Add(_subWindowFactory.CreateMapDataExplorerView(_viewModel.Context));
         _views.Add(_subWindowFactory.CreateCameraPreviewView(_viewModel.Context));
-        _views.Add(_subWindowFactory.CreateMinimapViewportView(_viewModel.Context));
+        if (_viewModel.Context.Course is MkdsFolderCourse)
+            _views.Add(_subWindowFactory.CreateMinimapViewportView(_viewModel.Context));
         _views.Add(_subWindowFactory.CreateTopDownViewportView(_viewModel.Context));
         _views.Add(_subWindowFactory.CreatePerspectiveViewportView(_viewModel.Context));
         _views.Add(_subWindowFactory.CreateTimelinePaneView(_viewModel.Context));
