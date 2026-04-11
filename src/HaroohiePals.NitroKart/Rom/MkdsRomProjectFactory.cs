@@ -15,6 +15,8 @@ namespace HaroohiePals.NitroKart.Rom;
 
 public class MkdsRomProjectFactory
 {
+    private const uint CURRENT_VERSION = 1;
+    
     public async Task<MkdsRomProject> CreateAsync(NdsRom rom, string projectName, string outputPath, bool unpackArc = true)
     {
         string[] arm9OverlaysPaths = rom.Arm9OverlayTable.Entries
@@ -36,13 +38,16 @@ public class MkdsRomProjectFactory
             Arm7OverlaysPaths = arm7OverlaysPaths
         };
 
-        uint version = 1;
-
         var project = new MkdsRomProject
         {
             Name = projectName,
             RomInfo = romInfo,
-            Version = version
+            Version = CURRENT_VERSION,
+            IgnoreFilePatterns = 
+            [
+                ".DS_Store",    // Ignore macOS metadata file
+                "*.json",       // Ignore JSON files such as metadata.json in the course files
+            ] 
         };
 
         Directory.CreateDirectory(outputPath);
