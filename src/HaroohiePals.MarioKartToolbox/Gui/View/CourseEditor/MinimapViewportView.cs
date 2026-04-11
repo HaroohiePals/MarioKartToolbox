@@ -43,7 +43,7 @@ sealed class MinimapViewportView : CourseViewportView
             new($"{FontAwesome6.MapLocationDot}", "Show Local Map",
                 _viewModel.ToggleGlobalMap, () => _viewModel.ShowGlobalMap),
             new($"{FontAwesome6.CircleHalfStroke}", "Toggle Translucency",
-                _viewModel.ToggleTranslucent, IsSelected: () => _viewModel.ShowTranslucent),
+                _viewModel.ToggleTranslucent, IsSelected: () => _viewModel.RenderTranslucent),
             new($"{FontAwesome6.SquareCaretLeft}", "Extend Left",
                 _viewModel.ExtendLeft, _viewModel.IsExtendButtonVisible),
             new($"{FontAwesome6.SquareCaretRight}", "Extend Right",
@@ -75,6 +75,8 @@ sealed class MinimapViewportView : CourseViewportView
 
         _globalMapRenderGroup.Enabled = _viewModel.ShowGlobalMap;
         _localMapRenderGroup.Enabled = !_viewModel.ShowGlobalMap;
+        _globalMapRenderGroup.RenderTranslucent = _viewModel.RenderTranslucent;
+        _localMapRenderGroup.RenderTranslucent = _viewModel.RenderTranslucent;
 
         return true;
     }

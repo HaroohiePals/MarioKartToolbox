@@ -9,7 +9,7 @@ sealed class MinimapViewportViewModel(ICourseEditorContext context)
 {
     public ICourseEditorContext Context { get; } = context;
     public bool ShowGlobalMap { get; private set; } = false;
-    public bool ShowTranslucent { get; private set; } = false;
+    public bool RenderTranslucent { get; private set; } = false;
 
     public void ExtendLeft() => ExtendLocalMap(MinimapLocalMapExtensionDirection.Left);
 
@@ -20,7 +20,7 @@ sealed class MinimapViewportViewModel(ICourseEditorContext context)
     public void ExtendUp() => ExtendLocalMap(MinimapLocalMapExtensionDirection.Up);
     public bool IsExtendButtonVisible() => !ShowGlobalMap;
     public void ToggleGlobalMap() => ShowGlobalMap = !ShowGlobalMap;
-    public void ToggleTranslucent() => ShowTranslucent = !ShowTranslucent;
+    public void ToggleTranslucent() => RenderTranslucent = !RenderTranslucent;
 
     private void ExtendLocalMap(MinimapLocalMapExtensionDirection direction)
     {

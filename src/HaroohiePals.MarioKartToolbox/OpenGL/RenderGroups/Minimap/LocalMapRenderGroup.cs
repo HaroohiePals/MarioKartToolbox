@@ -27,6 +27,8 @@ class LocalMapRenderGroup : RenderGroup
 
     private readonly QuadRenderer? _firstLocalMapRenderer;
     private readonly QuadRenderer? _secondLocalMapRenderer;
+    private readonly QuadRenderer? _firstLocalMapRendererTranslucent;
+    private readonly QuadRenderer? _secondLocalMapRendererTranslucent;
     private readonly IMkdsCourse _course;
 
     private MkdsLocalMapSettings _mapSettings => _course.Metadata.LocalMapSettings!;
@@ -37,17 +39,26 @@ class LocalMapRenderGroup : RenderGroup
     {
         _course = course;
 
-        var texture1 = CreateTexture(RenderTranslucent, false);
-        var texture2 = CreateTexture(RenderTranslucent, true);
+        var texture1 = CreateTexture(false, false);
+        var texture2 = CreateTexture(false, true);
+        var texture1Translucent = CreateTexture(true, false);
+        var texture2Translucent = CreateTexture(true, true);
 
-        _firstLocalMapRenderer = texture1 is null ? null : new QuadRenderer(texture1, true, RenderTranslucent);
-        _secondLocalMapRenderer = texture2 is null ? null : new QuadRenderer(texture2, true, RenderTranslucent);
+        _firstLocalMapRenderer = texture1 is null ? null : new QuadRenderer(texture1, true, false);
+        _secondLocalMapRenderer = texture2 is null ? null : new QuadRenderer(texture2, true, false);
+        _firstLocalMapRendererTranslucent =
+            texture1Translucent is null ? null : new QuadRenderer(texture1Translucent, true, false);
+        _secondLocalMapRendererTranslucent =
+            texture2Translucent is null ? null : new QuadRenderer(texture2Translucent, true, false);
     }
 
     public override void Render(ViewportContext context)
     {
+        var first = RenderTranslucent ? _firstLocalMapRendererTranslucent : _firstLocalMapRenderer;
+        var second = RenderTranslucent ? _secondLocalMapRendererTranslucent : _secondLocalMapRenderer;
+
         // Render second screen first because its less prioritary
-        if (_secondLocalMapRenderer is not null)
+        if (second is not null)
         {
             if (_mapSettings.Mode == MkdsLocalMapMode.Extended)
             {
@@ -59,12 +70,12 @@ class LocalMapRenderGroup : RenderGroup
                 uint pickingId = context.GetPickingId(PickingGroupId, 0, LOCAL_MAP_SECOND_SCREEN_SUB_INDEX);
                 bool isHovered = context.IsHovered(_mapSettings, LOCAL_MAP_SECOND_SCREEN_SUB_INDEX);
 
-                _secondLocalMapRenderer.Points =
+                second.Points =
                 [
                     new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapSettings,
                         pickingId, isHovered, false)
                 ];
-                _secondLocalMapRenderer.Render(context);
+                second.Render(context);
             }
             else
             {
@@ -73,16 +84,16 @@ class LocalMapRenderGroup : RenderGroup
                 var position = (Vector3)transform.Translation;
                 var scale = (Vector3)transform.Scale / 10;
 
-                _secondLocalMapRenderer.Points =
+                second.Points =
                 [
                     new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapSettings,
                         ViewportContext.InvalidPickingId, false, false)
                 ];
-                _secondLocalMapRenderer.Render(context);
+                second.Render(context);
             }
         }
 
-        if (_firstLocalMapRenderer is not null)
+        if (first is not null)
         {
             var transform = GetCurrentTransform(LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
 
@@ -92,12 +103,12 @@ class LocalMapRenderGroup : RenderGroup
             uint pickingId = context.GetPickingId(PickingGroupId, 0, LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
             bool isHovered = context.IsHovered(_mapSettings, LOCAL_MAP_FIRST_SCREEN_SUB_INDEX);
 
-            _firstLocalMapRenderer.Points =
+            first.Points =
             [
                 new InstancedPoint(position, Vector3.Zero, scale, Color4.White, true, _mapSettings,
                     pickingId, isHovered, false)
             ];
-            _firstLocalMapRenderer.Render(context);
+            first.Render(context);
         }
     }
 
@@ -216,7 +227,8 @@ class LocalMapRenderGroup : RenderGroup
         {
             for (int i = 0; i < decoded.Width * decoded.Height; i++)
             {
-                decoded.Pixels[i] = (decoded.Pixels[i] & 0x00FFFFFF) | 0x77000000;
+                if ((decoded.Pixels[i] & 0xFF000000) != 0)
+                    decoded.Pixels[i] = (decoded.Pixels[i] & 0x00FFFFFF) | 0x77000000;
             }
         }
 
