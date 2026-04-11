@@ -50,9 +50,6 @@ class MainWindowViewModel(
             case ".nkm":
                 LoadBinaryCourseEditor(fileName);
                 break;
-            case ".inkm":
-                LoadIntermediateCourseEditor(fileName);
-                break;
             case ".carc":
                 LoadCarcCourseEditor(fileName);
                 break;
@@ -153,27 +150,6 @@ class MainWindowViewModel(
 
         _courseEditorView =
             windowFactory.CreateCourseEditorView(new MkdsFolderCourse(basePath, baseTexPath, courseMapPath));
-        _courseEditorView.CloseCallback += CloseCourseEditor;
-
-        SetMainWindowContent.Invoke(_courseEditorView);
-
-        discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
-    }
-
-    private void LoadIntermediateCourseEditor(string path)
-    {
-        string basePath = Path.GetDirectoryName(path)!;
-        string courseMapPath = $"/{Path.GetFileName(path)}";
-
-        if (basePath.EndsWith("\\MissionRun", StringComparison.InvariantCultureIgnoreCase) ||
-            basePath.EndsWith("/MissionRun", StringComparison.InvariantCultureIgnoreCase))
-        {
-            basePath = basePath.Replace("\\MissionRun", "", StringComparison.InvariantCultureIgnoreCase);
-            basePath = basePath.Replace("/MissionRun", "", StringComparison.InvariantCultureIgnoreCase);
-            courseMapPath = $"/MissionRun{courseMapPath}";
-        }
-
-        _courseEditorView = windowFactory.CreateCourseEditorView(new MkdsIntermediateCourse(basePath, courseMapPath));
         _courseEditorView.CloseCallback += CloseCourseEditor;
 
         SetMainWindowContent.Invoke(_courseEditorView);
