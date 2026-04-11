@@ -14,6 +14,7 @@ public class DummyMkdsCourseMetadataService : IMkdsCourseMetadataService
     
     private static MkdsCourseMetadata CreateDefault() => new()
     {
-        LocalMapSettings = new MkdsLocalMapSettings()
+        LocalMapSettings = new MkdsLocalMapSettings(),
+        GlobalMapSettings = new MkdsGlobalMapSettings(),
     };
 }

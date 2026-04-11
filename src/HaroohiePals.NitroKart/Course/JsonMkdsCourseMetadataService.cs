@@ -21,8 +21,10 @@ public class JsonMkdsCourseMetadataService : IMkdsCourseMetadataService
 
     public MkdsCourseMetadata Load(Archive mainArchive)
     {
+        var defaultValue = CreateDefault();
+        
         if (!mainArchive.ExistsFile(COURSE_METADATA_PATH))
-            return CreateDefault();
+            return defaultValue;
 
         try
         {
@@ -30,11 +32,17 @@ public class JsonMkdsCourseMetadataService : IMkdsCourseMetadataService
             string json = Encoding.UTF8.GetString(data);
             var metadata = JsonConvert.DeserializeObject<MkdsCourseMetadata>(json, _jsonSettings);
 
-            return metadata ?? CreateDefault();
+            if (metadata is null)
+                return defaultValue;
+            
+            metadata.GlobalMapSettings ??= defaultValue.GlobalMapSettings;
+            metadata.LocalMapSettings ??= defaultValue.LocalMapSettings;
+            
+            return metadata;
         }
         catch (Exception)
         {
-            return CreateDefault();
+            return defaultValue;
         }
     }
 
@@ -47,6 +55,7 @@ public class JsonMkdsCourseMetadataService : IMkdsCourseMetadataService
 
     private static MkdsCourseMetadata CreateDefault() => new()
     {
-        LocalMapSettings = new MkdsLocalMapSettings()
+        LocalMapSettings = new MkdsLocalMapSettings(),
+        GlobalMapSettings = new MkdsGlobalMapSettings(),
     };
 }
