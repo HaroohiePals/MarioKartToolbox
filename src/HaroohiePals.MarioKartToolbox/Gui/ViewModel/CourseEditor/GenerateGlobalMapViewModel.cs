@@ -193,17 +193,16 @@ class GenerateGlobalMapViewModel
     private static (Vector2d TopLeft, Vector2d BottomRight) ComputeBoundsFromTriangles(
         IReadOnlyList<Triangle> triangles, MkdsGlobalMapMode mode)
     {
-        double wxMin = double.MinValue;
-        double wxMax = double.MaxValue;
-        double wzMin = double.MinValue;
-        double wzMax = double.MaxValue;
+        double wxMin = double.MaxValue;
+        double wxMax = double.MinValue;
+        double wzMin = double.MaxValue;
+        double wzMax = double.MinValue;
 
         foreach (var triangle in triangles)
         {
             for (int i = 0; i < 3; i++)
             {
                 var p = triangle[i];
-
                 if (p.X < wxMin) wxMin = p.X;
                 if (p.X > wxMax) wxMax = p.X;
                 if (p.Z < wzMin) wzMin = p.Z;
