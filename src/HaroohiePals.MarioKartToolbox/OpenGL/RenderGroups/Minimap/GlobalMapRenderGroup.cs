@@ -48,7 +48,7 @@ class GlobalMapRenderGroup : RenderGroup
         var transform = GetCurrentTransform();
         var position = (Vector3)transform.Translation;
         var scale = (Vector3)transform.Scale / 10;
-        var rotation = _mapSettings.Rotate90Degrees ? new Vector3(0, 90, 0) : Vector3.Zero;
+        var rotation = (Vector3)transform.Rotation;
 
         uint pickingId = context.GetPickingId(PickingGroupId, 0);
         bool isHovered = context.IsHovered(_mapSettings);
@@ -92,8 +92,14 @@ class GlobalMapRenderGroup : RenderGroup
         double leftEdge = centerX - totalWidth * 0.5;
         double topEdge = centerY - height * 0.5;
 
-        _mapSettings.TopLeft = new Vector2d(Math.Round(leftEdge), Math.Round(topEdge));
-        _mapSettings.BottomRight = new Vector2d(Math.Round(leftEdge + totalWidth), Math.Round(topEdge + height));
+        double rawTopY    = Math.Round(topEdge);
+        double rawBottomY = Math.Round(topEdge + height);
+
+        double storedTopY    = _mapSettings.Rotate90Degrees ? rawBottomY : rawTopY;
+        double storedBottomY = _mapSettings.Rotate90Degrees ? rawTopY    : rawBottomY;
+
+        _mapSettings.TopLeft = new Vector2d(Math.Round(leftEdge), storedTopY);
+        _mapSettings.BottomRight = new Vector2d(Math.Round(leftEdge + totalWidth), storedBottomY);
 
         return true;
     }
@@ -118,15 +124,20 @@ class GlobalMapRenderGroup : RenderGroup
         var topLeft = _mapSettings.TopLeft;
         var bottomRight = _mapSettings.BottomRight;
 
+        double topY    = _mapSettings.Rotate90Degrees ? bottomRight.Y : topLeft.Y;
+        double bottomY = _mapSettings.Rotate90Degrees ? topLeft.Y     : bottomRight.Y;
+
         double width = bottomRight.X - topLeft.X;
-        double height = bottomRight.Y - topLeft.Y;
+        double height = bottomY - topY;
 
         double centerX = topLeft.X + width * 0.5;
-        double centerY = (topLeft.Y + bottomRight.Y) * 0.5;
+        double centerZ = (topY + bottomY) * 0.5;
+
+        var rotation = _mapSettings.Rotate90Degrees ? new Vector3d(0, -90, 0) : Vector3d.Zero;
 
         return new Transform(
-            new Vector3d(centerX, QUAD_HEIGHT_Y, centerY),
-            Vector3d.Zero,
+            new Vector3d(centerX, QUAD_HEIGHT_Y, centerZ),
+            rotation,
             new Vector3d(width * 0.5f, 1, height * 0.5f));
     }
 
