@@ -37,7 +37,7 @@ static class GlobalMapRasterizer
 
         double spanX = bottomRight.X - topLeft.X;
         double spanY = bottomRight.Y - topLeft.Y;
-        if (triangles.Count == 0 || spanX <= 0 || spanY <= 0)
+        if (triangles.Count == 0 || spanX == 0 || spanY == 0)
             return bitmap;
 
         foreach (var tri in triangles)
@@ -72,7 +72,7 @@ static class GlobalMapRasterizer
     {
         var dir = v - centroid;
         double len = dir.Length;
-        if (len < 1e-6)
+        if (len < 0.000001)
             return v;
         return v + dir * (pixels / len);
     }
@@ -89,30 +89,15 @@ static class GlobalMapRasterizer
     {
         double spanX = bottomRight.X - topLeft.X;
         double spanY = bottomRight.Y - topLeft.Y;
-        double px, py;
-        switch (mode)
-        {
-            case MkdsGlobalMapMode.RotateClockwise:
-                px = (world.Z - topLeft.X) / spanX * DISPLAY_WIDTH;
-                py = (bottomRight.Y - world.X) / spanY * DISPLAY_HEIGHT;
-                break;
-            case MkdsGlobalMapMode.RotateCounterClockwise:
-                px = (bottomRight.X - world.Z) / spanX * DISPLAY_WIDTH;
-                py = (world.X - topLeft.Y) / spanY * DISPLAY_HEIGHT;
-                break;
-            default:
-                px = (world.X - topLeft.X) / spanX * DISPLAY_WIDTH;
-                py = (world.Z - topLeft.Y) / spanY * DISPLAY_HEIGHT;
-                break;
-        }
+
+        double projU = mode == MkdsGlobalMapMode.Normal ? world.X : world.Z;
+        double projV = mode == MkdsGlobalMapMode.Normal ? world.Z : world.X;
+
+        double px = (projU - topLeft.X) / spanX * DISPLAY_WIDTH;
+        double py = (projV - topLeft.Y) / spanY * DISPLAY_HEIGHT;
         return new Vector2d(px, py);
     }
 
-    // Paints every filled safe-region pixel that has at least one 4-neighbor
-    // outside the silhouette with the outline color, producing a one-pixel
-    // inline along the silhouette's inner edge. Neighbors painted with the
-    // outline color in an earlier iteration still count as silhouette, so the
-    // inline stays a single pixel wide as the scan mutates the bitmap in place.
     private static void ApplyOutline(Rgba8Bitmap bmp, Color4 fillColor, Color4 outlineColor)
     {
         uint fillPacked = PackColor(fillColor);

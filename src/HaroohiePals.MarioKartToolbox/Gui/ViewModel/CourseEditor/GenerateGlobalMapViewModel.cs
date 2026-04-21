@@ -104,10 +104,7 @@ class GenerateGlobalMapViewModel
         if (!HasGeometry)
             return false;
 
-        var (tl, br) = ComputeBoundsFromTriangles(LoadedTriangles, Mode);
-
-        TopLeft = new Vector2d(Math.Min(tl.X, br.X), Math.Min(tl.Y, br.Y));
-        BottomRight = new Vector2d(Math.Max(tl.X, br.X), Math.Max(tl.Y, br.Y));
+        (TopLeft, BottomRight) = ComputeBoundsFromTriangles(LoadedTriangles, Mode);
         return true;
     }
 
