@@ -83,6 +83,11 @@ class CourseEditorViewModel(
         modalService.ShowModal(new MapDataGeneratorModalView(new MapDataGeneratorViewModel(Context)));
     }
 
+    public void ShowGlobalMapGenerator()
+    {
+        modalService.ShowModal(new GenerateGlobalMapModalView(new GenerateGlobalMapViewModel(Context)));
+    }
+
     public void ShowImportCollision()
     {
         modalService.ShowModal(new CollisionImportModalView(Context));

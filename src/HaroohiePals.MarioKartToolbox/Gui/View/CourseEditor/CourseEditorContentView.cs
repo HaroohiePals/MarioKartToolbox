@@ -82,7 +82,8 @@ sealed class CourseEditorContentView : WindowContentView, IDisposable
         {
             Items =
             [
-                new ("Map Data Generator (Experimental)", _viewModel.ShowMapDataGenerator)
+                new ("Map Data Generator (Experimental)", _viewModel.ShowMapDataGenerator),
+                new ("Global Map Generator (Experimental)", _viewModel.ShowGlobalMapGenerator)
             ]
         }
     ];
