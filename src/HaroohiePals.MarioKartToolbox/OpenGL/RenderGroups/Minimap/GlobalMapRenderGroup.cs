@@ -145,8 +145,8 @@ class GlobalMapRenderGroup : RenderGroup
 
         double rotationY = _mapSettings.Mode switch
         {
-            MkdsGlobalMapMode.RotateClockwise => -90.0,
-            MkdsGlobalMapMode.RotateCounterClockwise => 90.0,
+            MkdsGlobalMapMode.RotateCounterClockwise => -90.0,
+            MkdsGlobalMapMode.RotateClockwise => 90.0,
             _ => 0.0,
         };
         var rotation = new Vector3d(0, rotationY, 0);

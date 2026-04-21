@@ -13,12 +13,10 @@ using System.Collections.Generic;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
-internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
+class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
     : ModalView("Global Map Generator",
         new System.Numerics.Vector2(ImGuiEx.CalcUiScaledValue(600), ImGuiEx.CalcUiScaledValue(820)))
 {
-    private readonly GenerateGlobalMapViewModel _viewModel = viewModel;
-
     private int _offsetX;
     private int _offsetY;
 
@@ -67,27 +65,30 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
     {
         ImGui.TextUnformatted("Source");
 
-        int sourceInt = (int)_viewModel.Settings.SourceType;
-        if (ImGui.RadioButton("Current course KCL (road triangles only)", ref sourceInt, (int)GenerateGlobalMapSourceType.CourseKcl))
+        int sourceInt = (int)viewModel.Settings.SourceType;
+        if (ImGui.RadioButton("Current course KCL (road triangles only)", ref sourceInt,
+                (int)GenerateGlobalMapSourceType.CourseKcl))
         {
-            _viewModel.Settings.SourceType = GenerateGlobalMapSourceType.CourseKcl;
-            _viewModel.ReloadTriangles();
+            viewModel.Settings.SourceType = GenerateGlobalMapSourceType.CourseKcl;
+            viewModel.ReloadTriangles();
         }
 
-        if (ImGui.RadioButton("External OBJ file (all triangles)", ref sourceInt, (int)GenerateGlobalMapSourceType.ExternalObj))
+        if (ImGui.RadioButton("External OBJ file (all triangles)", ref sourceInt,
+                (int)GenerateGlobalMapSourceType.ExternalObj))
         {
-            _viewModel.Settings.SourceType = GenerateGlobalMapSourceType.ExternalObj;
-            _viewModel.ReloadTriangles();
+            viewModel.Settings.SourceType = GenerateGlobalMapSourceType.ExternalObj;
+            viewModel.ReloadTriangles();
         }
 
-        if (_viewModel.Settings.SourceType == GenerateGlobalMapSourceType.ExternalObj)
+        if (viewModel.Settings.SourceType == GenerateGlobalMapSourceType.ExternalObj)
         {
             ImGui.PushItemWidth(-ImGuiEx.CalcUiScaledValue(90));
-            string path = _viewModel.Settings.ObjFilePath ?? "";
+            string path = viewModel.Settings.ObjFilePath ?? "";
             if (ImGui.InputText("##ObjFilePath", ref path, 10000))
             {
-                _viewModel.Settings.ObjFilePath = path;
+                viewModel.Settings.ObjFilePath = path;
             }
+
             ImGui.PopItemWidth();
             ImGui.SameLine();
             if (ImGui.Button("Browse...##ObjFilePath"))
@@ -99,41 +100,41 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
     private void DrawStatus()
     {
-        if (_viewModel.HasError)
+        if (viewModel.HasError)
         {
-            ImGui.TextUnformatted($"Error: {_viewModel.ErrorMessage}");
+            ImGui.TextUnformatted($"Error: {viewModel.ErrorMessage}");
             return;
         }
 
-        ImGui.TextUnformatted($"{_viewModel.TriangleCount} triangle(s) loaded.");
+        ImGui.TextUnformatted($"{viewModel.TriangleCount} triangle(s) loaded.");
     }
 
     private void DrawMode()
     {
         ImGui.TextUnformatted("Mode");
-        ImGuiEx.ComboEnum("##Mode", ref _viewModel.Mode);
+        ImGuiEx.ComboEnum("##Mode", ref viewModel.Mode);
     }
 
     private void DrawCoordinates()
     {
         ImGui.TextUnformatted("Coordinates");
 
-        bool canAuto = _viewModel.HasGeometry;
+        bool canAuto = viewModel.HasGeometry;
         if (!canAuto) ImGui.BeginDisabled();
         if (ImGui.Button("Auto-compute from geometry"))
-            _viewModel.AutoComputeBounds();
+            viewModel.AutoComputeBounds();
         if (!canAuto) ImGui.EndDisabled();
 
-        int[] tl = [(int)_viewModel.TopLeft.X, (int)_viewModel.TopLeft.Y];
+        int[] tl = [(int)viewModel.TopLeft.X, (int)viewModel.TopLeft.Y];
         if (ImGui.DragInt2("Top Left", ref tl[0], 10f))
-            _viewModel.TopLeft = new Vector2d(tl[0], tl[1]);
+            viewModel.TopLeft = new Vector2d(tl[0], tl[1]);
 
-        int[] br = [(int)_viewModel.BottomRight.X, (int)_viewModel.BottomRight.Y];
+        int[] br = [(int)viewModel.BottomRight.X, (int)viewModel.BottomRight.Y];
         if (ImGui.DragInt2("Bottom Right", ref br[0], 10f))
-            _viewModel.BottomRight = new Vector2d(br[0], br[1]);
+            viewModel.BottomRight = new Vector2d(br[0], br[1]);
 
-        double sizeX = Math.Abs(_viewModel.BottomRight.X - _viewModel.TopLeft.X);
-        double sizeY = Math.Abs(_viewModel.BottomRight.Y - _viewModel.TopLeft.Y);
+        double sizeX = Math.Abs(viewModel.BottomRight.X - viewModel.TopLeft.X);
+        double sizeY = Math.Abs(viewModel.BottomRight.Y - viewModel.TopLeft.Y);
         ImGui.TextDisabled($"Size: {sizeX:F0} x {sizeY:F0}");
     }
 
@@ -149,7 +150,7 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         ImGui.SameLine();
         if (ImGui.Button("Apply Offset"))
         {
-            _viewModel.ApplyOffset(_offsetX, _offsetY);
+            viewModel.ApplyOffset(_offsetX, _offsetY);
             _offsetX = 0;
             _offsetY = 0;
         }
@@ -160,16 +161,17 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         ImGui.TextUnformatted("PNG Export");
 
         ImGui.PushItemWidth(ImGuiEx.CalcUiScaledValue(140));
-        ImGui.DragFloat("Triangle Expansion (px)", ref _viewModel.TriangleExpansion, 0.1f, 0f, 5f, "%.2f");
+        ImGui.DragFloat("Triangle Expansion (px)", ref viewModel.TriangleExpansion, 0.1f, 0f, 5f, "%.2f");
         ImGui.PopItemWidth();
 
-        bool canRender = _viewModel.HasGeometry;
+        bool canRender = viewModel.HasGeometry;
         if (!canRender) ImGui.BeginDisabled();
         if (ImGui.Button("Render Preview"))
         {
-            _viewModel.RenderPreview();
+            viewModel.RenderPreview();
             RefreshPreviewTextureIfNeeded();
         }
+
         ImGui.SameLine();
         if (ImGui.Button("Save PNG..."))
             BrowseAndSavePng();
@@ -190,11 +192,11 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
     private void DrawActionButtons()
     {
-        bool canApply = !_viewModel.HasError;
+        bool canApply = !viewModel.HasError;
 
         if (!canApply)
             ImGui.BeginDisabled();
-        if (ImGui.Button("Apply") && _viewModel.Commit())
+        if (ImGui.Button("Apply") && viewModel.Commit())
             Close();
         if (!canApply)
             ImGui.EndDisabled();
@@ -205,13 +207,13 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
     private void RefreshPreviewTextureIfNeeded()
     {
-        if (_viewModel.PreviewBitmap is null || _previewTextureVersion == _viewModel.PreviewVersion)
+        if (viewModel.PreviewBitmap is null || _previewTextureVersion == viewModel.PreviewVersion)
             return;
 
         _previewTexture?.Dispose();
-        _previewTexture = new GLTexture(_viewModel.PreviewBitmap, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
+        _previewTexture = new GLTexture(viewModel.PreviewBitmap, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
         _previewTexture.SetFilterMode(TextureFilterMode.Nearest, TextureFilterMode.Nearest);
-        _previewTextureVersion = _viewModel.PreviewVersion;
+        _previewTextureVersion = viewModel.PreviewVersion;
     }
 
     private void BrowseForObjFile()
@@ -224,8 +226,8 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         if (result != NfdStatus.Ok || string.IsNullOrEmpty(outPath))
             return;
 
-        _viewModel.Settings.ObjFilePath = outPath;
-        _viewModel.ReloadTriangles();
+        viewModel.Settings.ObjFilePath = outPath;
+        viewModel.ReloadTriangles();
     }
 
     private void BrowseAndSavePng()
@@ -241,8 +243,8 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         if (!outPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
             outPath += ".png";
 
-        _viewModel.RenderPreview();
+        viewModel.RenderPreview();
         RefreshPreviewTextureIfNeeded();
-        _viewModel.SavePng(outPath);
+        viewModel.SavePng(outPath);
     }
 }

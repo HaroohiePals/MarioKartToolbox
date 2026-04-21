@@ -38,23 +38,21 @@ class GenerateGlobalMapViewModel
     ];
 
     private readonly ICourseEditorContext _courseEditorContext;
+    
+    private IReadOnlyList<Triangle> _loadedTriangles = [];
 
     public GenerateGlobalMapSettings Settings;
-
     public MkdsGlobalMapMode Mode;
     public Vector2d TopLeft;
     public Vector2d BottomRight;
     public float TriangleExpansion = 1f;
-
-    public IReadOnlyList<Triangle> LoadedTriangles { get; private set; } = [];
+    
     public string? ErrorMessage { get; private set; }
-
     public Rgba8Bitmap? PreviewBitmap { get; private set; }
     public int PreviewVersion { get; private set; }
-
-    public int TriangleCount => LoadedTriangles.Count;
+    public int TriangleCount => _loadedTriangles.Count;
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
-    public bool HasGeometry => LoadedTriangles.Count > 0;
+    public bool HasGeometry => _loadedTriangles.Count > 0;
 
     public GenerateGlobalMapViewModel(ICourseEditorContext courseEditorContext)
     {
@@ -85,7 +83,7 @@ class GenerateGlobalMapViewModel
 
         try
         {
-            LoadedTriangles = Settings.SourceType switch
+            _loadedTriangles = Settings.SourceType switch
             {
                 GenerateGlobalMapSourceType.CourseKcl => LoadFromCourseKcl(),
                 GenerateGlobalMapSourceType.ExternalObj => LoadFromObj(Settings.ObjFilePath),
@@ -94,7 +92,7 @@ class GenerateGlobalMapViewModel
         }
         catch (Exception ex)
         {
-            LoadedTriangles = [];
+            _loadedTriangles = [];
             ErrorMessage = ex.Message;
         }
     }
@@ -104,7 +102,7 @@ class GenerateGlobalMapViewModel
         if (!HasGeometry)
             return false;
 
-        (TopLeft, BottomRight) = ComputeBoundsFromTriangles(LoadedTriangles, Mode);
+        (TopLeft, BottomRight) = ComputeBoundsFromTriangles(_loadedTriangles, Mode);
         return true;
     }
 
@@ -120,7 +118,7 @@ class GenerateGlobalMapViewModel
             return false;
 
         PreviewBitmap = GlobalMapRasterizer.Rasterize(
-            LoadedTriangles, TopLeft, BottomRight, Mode, TriangleExpansion);
+            _loadedTriangles, TopLeft, BottomRight, Mode, TriangleExpansion);
         PreviewVersion++;
         return true;
     }
@@ -131,7 +129,7 @@ class GenerateGlobalMapViewModel
             return false;
 
         var bitmap = PreviewBitmap ?? GlobalMapRasterizer.Rasterize(
-            LoadedTriangles, TopLeft, BottomRight, Mode, TriangleExpansion);
+            _loadedTriangles, TopLeft, BottomRight, Mode, TriangleExpansion);
 
         try
         {
@@ -203,7 +201,7 @@ class GenerateGlobalMapViewModel
         var result = new List<Triangle>();
         foreach (var face in obj.Faces)
         {
-            var idx = face.VertexIndices;
+            int[]? idx = face.VertexIndices;
             if (idx is null || idx.Length < 3)
                 continue;
 
@@ -248,17 +246,24 @@ class GenerateGlobalMapViewModel
         double uMin, uMax, vMin, vMax;
         switch (mode)
         {
-            case MkdsGlobalMapMode.RotateClockwise:
-                uMin = wzMin; uMax = wzMax;
-                vMin = -wxMax; vMax = -wxMin;
-                break;
             case MkdsGlobalMapMode.RotateCounterClockwise:
-                uMin = -wzMax; uMax = -wzMin;
-                vMin = wxMin; vMax = wxMax;
+                uMin = wzMin;
+                uMax = wzMax;
+                vMin = -wxMax;
+                vMax = -wxMin;
                 break;
+            case MkdsGlobalMapMode.RotateClockwise:
+                uMin = -wzMax;
+                uMax = -wzMin;
+                vMin = wxMin;
+                vMax = wxMax;
+                break;
+            case MkdsGlobalMapMode.Normal:
             default:
-                uMin = wxMin; uMax = wxMax;
-                vMin = wzMin; vMax = wzMax;
+                uMin = wxMin;
+                uMax = wxMax;
+                vMin = wzMin;
+                vMax = wzMax;
                 break;
         }
 
@@ -282,14 +287,15 @@ class GenerateGlobalMapViewModel
         Vector2d tl, br;
         switch (mode)
         {
-            case MkdsGlobalMapMode.RotateClockwise:
+            case MkdsGlobalMapMode.RotateCounterClockwise:
                 tl = new Vector2d(uAt0, -vAt0);
                 br = new Vector2d(uAtMax, -vAtMax);
                 break;
-            case MkdsGlobalMapMode.RotateCounterClockwise:
+            case MkdsGlobalMapMode.RotateClockwise:
                 tl = new Vector2d(-uAt0, vAt0);
                 br = new Vector2d(-uAtMax, vAtMax);
                 break;
+            case MkdsGlobalMapMode.Normal:
             default:
                 tl = new Vector2d(uAt0, vAt0);
                 br = new Vector2d(uAtMax, vAtMax);
