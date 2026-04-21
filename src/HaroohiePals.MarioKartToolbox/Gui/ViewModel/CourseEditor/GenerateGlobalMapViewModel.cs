@@ -1,7 +1,9 @@
 #nullable enable
 using HaroohiePals.Actions;
+using HaroohiePals.Graphics;
 using HaroohiePals.Graphics3d;
 using HaroohiePals.MarioKartToolbox.KCollision;
+using HaroohiePals.MarioKartToolbox.Tools;
 using HaroohiePals.Mathematics;
 using HaroohiePals.NitroKart.Course;
 using OpenTK.Mathematics;
@@ -42,9 +44,13 @@ class GenerateGlobalMapViewModel
     public MkdsGlobalMapMode Mode;
     public Vector2d TopLeft;
     public Vector2d BottomRight;
+    public float TriangleExpansion = 1f;
 
     public IReadOnlyList<Triangle> LoadedTriangles { get; private set; } = [];
     public string? ErrorMessage { get; private set; }
+
+    public Rgba8Bitmap? PreviewBitmap { get; private set; }
+    public int PreviewVersion { get; private set; }
 
     public int TriangleCount => LoadedTriangles.Count;
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
@@ -109,6 +115,38 @@ class GenerateGlobalMapViewModel
     {
         TopLeft = new Vector2d(TopLeft.X + dx, TopLeft.Y + dy);
         BottomRight = new Vector2d(BottomRight.X + dx, BottomRight.Y + dy);
+    }
+
+    public bool RenderPreview()
+    {
+        if (!HasGeometry)
+            return false;
+
+        PreviewBitmap = GlobalMapRasterizer.Rasterize(
+            LoadedTriangles, TopLeft, BottomRight, Mode, TriangleExpansion);
+        PreviewVersion++;
+        return true;
+    }
+
+    public bool SavePng(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+
+        var bitmap = PreviewBitmap ?? GlobalMapRasterizer.Rasterize(
+            LoadedTriangles, TopLeft, BottomRight, Mode, TriangleExpansion);
+
+        try
+        {
+            GlobalMapRasterizer.SavePng(bitmap, path);
+            ErrorMessage = null;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to save PNG: {ex.Message}";
+            return false;
+        }
     }
 
     public bool Commit()

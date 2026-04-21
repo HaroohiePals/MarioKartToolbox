@@ -1,7 +1,10 @@
 #nullable enable
+using HaroohiePals.Graphics3d;
+using HaroohiePals.Graphics3d.OpenGL;
 using HaroohiePals.Gui;
 using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
+using HaroohiePals.MarioKartToolbox.Tools;
 using ImGuiNET;
 using NativeFileDialogs.Net;
 using OpenTK.Mathematics;
@@ -12,12 +15,15 @@ namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
 internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
     : ModalView("Global Map Generator",
-        new System.Numerics.Vector2(ImGuiEx.CalcUiScaledValue(600), ImGuiEx.CalcUiScaledValue(560)))
+        new System.Numerics.Vector2(ImGuiEx.CalcUiScaledValue(600), ImGuiEx.CalcUiScaledValue(820)))
 {
     private readonly GenerateGlobalMapViewModel _viewModel = viewModel;
 
     private int _offsetX;
     private int _offsetY;
+
+    private GLTexture? _previewTexture;
+    private int _previewTextureVersion;
 
     protected override void DrawContent()
     {
@@ -44,7 +50,17 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
         ImGui.Separator();
 
+        DrawPngExport();
+
+        ImGui.Separator();
+
         DrawActionButtons();
+    }
+
+    protected override void OnClose()
+    {
+        _previewTexture?.Dispose();
+        _previewTexture = null;
     }
 
     private void DrawSourceSelection()
@@ -139,6 +155,39 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         }
     }
 
+    private void DrawPngExport()
+    {
+        ImGui.TextUnformatted("PNG Export");
+
+        ImGui.PushItemWidth(ImGuiEx.CalcUiScaledValue(140));
+        ImGui.DragFloat("Triangle Expansion (px)", ref _viewModel.TriangleExpansion, 0.1f, 0f, 5f, "%.2f");
+        ImGui.PopItemWidth();
+
+        bool canRender = _viewModel.HasGeometry;
+        if (!canRender) ImGui.BeginDisabled();
+        if (ImGui.Button("Render Preview"))
+        {
+            _viewModel.RenderPreview();
+            RefreshPreviewTextureIfNeeded();
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("Save PNG..."))
+            BrowseAndSavePng();
+        if (!canRender) ImGui.EndDisabled();
+
+        RefreshPreviewTextureIfNeeded();
+
+        if (_previewTexture is not null)
+        {
+            float side = ImGuiEx.CalcUiScaledValue(GlobalMapRasterizer.CANVAS_WIDTH);
+            ImGui.Image(_previewTexture.Handle, new System.Numerics.Vector2(side, side));
+        }
+        else
+        {
+            ImGui.TextDisabled("Click Render Preview or Save PNG to generate a thumbnail.");
+        }
+    }
+
     private void DrawActionButtons()
     {
         bool canApply = !_viewModel.HasError;
@@ -154,6 +203,17 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             Close();
     }
 
+    private void RefreshPreviewTextureIfNeeded()
+    {
+        if (_viewModel.PreviewBitmap is null || _previewTextureVersion == _viewModel.PreviewVersion)
+            return;
+
+        _previewTexture?.Dispose();
+        _previewTexture = new GLTexture(_viewModel.PreviewBitmap, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
+        _previewTexture.SetFilterMode(TextureFilterMode.Nearest, TextureFilterMode.Nearest);
+        _previewTextureVersion = _viewModel.PreviewVersion;
+    }
+
     private void BrowseForObjFile()
     {
         var result = Nfd.OpenDialog(out string? outPath, new Dictionary<string, string>
@@ -166,5 +226,23 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
         _viewModel.Settings.ObjFilePath = outPath;
         _viewModel.ReloadTriangles();
+    }
+
+    private void BrowseAndSavePng()
+    {
+        var result = Nfd.SaveDialog(out string? outPath, new Dictionary<string, string>
+        {
+            { "PNG Image", "png" }
+        });
+
+        if (result != NfdStatus.Ok || string.IsNullOrEmpty(outPath))
+            return;
+
+        if (!outPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+            outPath += ".png";
+
+        _viewModel.RenderPreview();
+        RefreshPreviewTextureIfNeeded();
+        _viewModel.SavePng(outPath);
     }
 }
