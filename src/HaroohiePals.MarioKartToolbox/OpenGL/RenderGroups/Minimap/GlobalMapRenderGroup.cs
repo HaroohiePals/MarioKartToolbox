@@ -82,24 +82,31 @@ class GlobalMapRenderGroup : RenderGroup
         if (obj != _mapSettings)
             return false;
 
-        double halfTotalWidth = transform.Scale.X;
-        double halfHeight = transform.Scale.Z;
-        double centerX = transform.Translation.X;
-        double centerY = transform.Translation.Z;
+        // Scale is in the quad's local frame (pre-rotation), so Scale.X is
+        // always halfWidth and Scale.Z is always halfHeight regardless of mode.
+        double halfWidth = Math.Abs(transform.Scale.X);
+        double halfHeight = Math.Abs(transform.Scale.Z);
 
-        double totalWidth = halfTotalWidth * 2f;
-        double height = halfHeight * 2f;
-        double leftEdge = centerX - totalWidth * 0.5;
-        double topEdge = centerY - height * 0.5;
+        // In rotated modes, world X/Z map back to storage Y/X (transpose).
+        bool rotated = _mapSettings.Mode != MkdsGlobalMapMode.Normal;
+        double storageCenterX = rotated ? transform.Translation.Z : transform.Translation.X;
+        double storageCenterY = rotated ? transform.Translation.X : transform.Translation.Z;
 
-        double rawTopY    = Math.Round(topEdge);
-        double rawBottomY = Math.Round(topEdge + height);
+        // Preserve the stored diagonal's sign convention (which corner was
+        // labelled TopLeft vs BottomRight) so gizmo drags don't silently
+        // normalize bounds that arrived X-flipped or Y-flipped.
+        var oldTopLeft = _mapSettings.TopLeft;
+        var oldBottomRight = _mapSettings.BottomRight;
+        bool xDescending = oldTopLeft.X > oldBottomRight.X;
+        bool yDescending = oldTopLeft.Y > oldBottomRight.Y;
 
-        double storedTopY    = _mapSettings.Rotate90Degrees ? rawBottomY : rawTopY;
-        double storedBottomY = _mapSettings.Rotate90Degrees ? rawTopY    : rawBottomY;
+        double newTopLeftX = xDescending ? storageCenterX + halfWidth : storageCenterX - halfWidth;
+        double newBottomRightX = xDescending ? storageCenterX - halfWidth : storageCenterX + halfWidth;
+        double newTopLeftY = yDescending ? storageCenterY + halfHeight : storageCenterY - halfHeight;
+        double newBottomRightY = yDescending ? storageCenterY - halfHeight : storageCenterY + halfHeight;
 
-        _mapSettings.TopLeft = new Vector2d(Math.Round(leftEdge), storedTopY);
-        _mapSettings.BottomRight = new Vector2d(Math.Round(leftEdge + totalWidth), storedBottomY);
+        _mapSettings.TopLeft = new Vector2d(Math.Round(newTopLeftX), Math.Round(newTopLeftY));
+        _mapSettings.BottomRight = new Vector2d(Math.Round(newBottomRightX), Math.Round(newBottomRightY));
 
         return true;
     }
@@ -124,21 +131,30 @@ class GlobalMapRenderGroup : RenderGroup
         var topLeft = _mapSettings.TopLeft;
         var bottomRight = _mapSettings.BottomRight;
 
-        double topY    = _mapSettings.Rotate90Degrees ? bottomRight.Y : topLeft.Y;
-        double bottomY = _mapSettings.Rotate90Degrees ? topLeft.Y     : bottomRight.Y;
+        double storageCenterX = (topLeft.X + bottomRight.X) * 0.5;
+        double storageCenterY = (topLeft.Y + bottomRight.Y) * 0.5;
+        double halfWidth = Math.Abs(bottomRight.X - topLeft.X) * 0.5;
+        double halfHeight = Math.Abs(bottomRight.Y - topLeft.Y) * 0.5;
 
-        double width = bottomRight.X - topLeft.X;
-        double height = bottomY - topY;
+        // In rotated modes, the stored bounds live in a frame whose X and Y
+        // axes are transposed relative to world XZ. Which rotation direction
+        // aligns the authored texture with the course depends on the mode.
+        bool rotated = _mapSettings.Mode != MkdsGlobalMapMode.Normal;
+        double worldCenterX = rotated ? storageCenterY : storageCenterX;
+        double worldCenterZ = rotated ? storageCenterX : storageCenterY;
 
-        double centerX = topLeft.X + width * 0.5;
-        double centerZ = (topY + bottomY) * 0.5;
-
-        var rotation = _mapSettings.Rotate90Degrees ? new Vector3d(0, -90, 0) : Vector3d.Zero;
+        double rotationY = _mapSettings.Mode switch
+        {
+            MkdsGlobalMapMode.RotateClockwise => -90.0,
+            MkdsGlobalMapMode.RotateCounterClockwise => 90.0,
+            _ => 0.0,
+        };
+        var rotation = new Vector3d(0, rotationY, 0);
 
         return new Transform(
-            new Vector3d(centerX, QUAD_HEIGHT_Y, centerZ),
+            new Vector3d(worldCenterX, QUAD_HEIGHT_Y, worldCenterZ),
             rotation,
-            new Vector3d(width * 0.5f, 1, height * 0.5f));
+            new Vector3d(halfWidth, 1, halfHeight));
     }
 
     private GLTexture? CreateTexture(bool translucent)

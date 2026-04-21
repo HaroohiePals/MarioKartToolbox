@@ -11,7 +11,5 @@ public class MkdsGlobalMapSettings
     [Category("Global Map Coordinates")]
     [DisplayName("Bottom Right")]
     public Vector2d BottomRight { get; set; } = new(0, 3000);
-    [Category("Global Map")]
-    [DisplayName("Rotate 90 Degrees")]
-    public bool Rotate90Degrees { get; set; } = false;
+    public MkdsGlobalMapMode Mode { get; set; } = MkdsGlobalMapMode.Normal;
 }
