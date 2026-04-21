@@ -4,16 +4,20 @@ using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 using ImGuiNET;
 using NativeFileDialogs.Net;
+using OpenTK.Mathematics;
+using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
 internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
     : ModalView("Global Map Generator",
-        new Vector2(ImGuiEx.CalcUiScaledValue(600), ImGuiEx.CalcUiScaledValue(500)))
+        new System.Numerics.Vector2(ImGuiEx.CalcUiScaledValue(600), ImGuiEx.CalcUiScaledValue(560)))
 {
     private readonly GenerateGlobalMapViewModel _viewModel = viewModel;
+
+    private int _offsetX;
+    private int _offsetY;
 
     protected override void DrawContent()
     {
@@ -28,8 +32,19 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
         ImGui.Separator();
 
-        if (ImGui.Button("Close"))
-            Close();
+        DrawMode();
+
+        ImGui.Separator();
+
+        DrawCoordinates();
+
+        ImGui.Separator();
+
+        DrawOffset();
+
+        ImGui.Separator();
+
+        DrawActionButtons();
     }
 
     private void DrawSourceSelection()
@@ -75,6 +90,68 @@ internal class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         }
 
         ImGui.TextUnformatted($"{_viewModel.TriangleCount} triangle(s) loaded.");
+    }
+
+    private void DrawMode()
+    {
+        ImGui.TextUnformatted("Mode");
+        ImGuiEx.ComboEnum("##Mode", ref _viewModel.Mode);
+    }
+
+    private void DrawCoordinates()
+    {
+        ImGui.TextUnformatted("Coordinates");
+
+        bool canAuto = _viewModel.HasGeometry;
+        if (!canAuto) ImGui.BeginDisabled();
+        if (ImGui.Button("Auto-compute from geometry"))
+            _viewModel.AutoComputeBounds();
+        if (!canAuto) ImGui.EndDisabled();
+
+        int[] tl = [(int)_viewModel.TopLeft.X, (int)_viewModel.TopLeft.Y];
+        if (ImGui.DragInt2("Top Left", ref tl[0], 10f))
+            _viewModel.TopLeft = new Vector2d(tl[0], tl[1]);
+
+        int[] br = [(int)_viewModel.BottomRight.X, (int)_viewModel.BottomRight.Y];
+        if (ImGui.DragInt2("Bottom Right", ref br[0], 10f))
+            _viewModel.BottomRight = new Vector2d(br[0], br[1]);
+
+        double sizeX = Math.Abs(_viewModel.BottomRight.X - _viewModel.TopLeft.X);
+        double sizeY = Math.Abs(_viewModel.BottomRight.Y - _viewModel.TopLeft.Y);
+        ImGui.TextDisabled($"Size: {sizeX:F0} x {sizeY:F0}");
+    }
+
+    private void DrawOffset()
+    {
+        ImGui.TextUnformatted("Position Offset");
+
+        ImGui.PushItemWidth(ImGuiEx.CalcUiScaledValue(100));
+        ImGui.DragInt("Delta X", ref _offsetX, 10f);
+        ImGui.SameLine();
+        ImGui.DragInt("Delta Y", ref _offsetY, 10f);
+        ImGui.PopItemWidth();
+        ImGui.SameLine();
+        if (ImGui.Button("Apply Offset"))
+        {
+            _viewModel.ApplyOffset(_offsetX, _offsetY);
+            _offsetX = 0;
+            _offsetY = 0;
+        }
+    }
+
+    private void DrawActionButtons()
+    {
+        bool canApply = !_viewModel.HasError;
+
+        if (!canApply)
+            ImGui.BeginDisabled();
+        if (ImGui.Button("Apply") && _viewModel.Commit())
+            Close();
+        if (!canApply)
+            ImGui.EndDisabled();
+        ImGui.SameLine();
+        if (ImGui.Button("Close"))
+            Close();
     }
 
     private void BrowseForObjFile()
