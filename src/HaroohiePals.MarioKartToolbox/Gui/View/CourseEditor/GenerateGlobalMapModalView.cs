@@ -4,7 +4,6 @@ using HaroohiePals.Graphics3d.OpenGL;
 using HaroohiePals.Gui;
 using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
-using HaroohiePals.MarioKartToolbox.Tools;
 using ImGuiNET;
 using NativeFileDialogs.Net;
 using OpenTK.Mathematics;
@@ -17,21 +16,24 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
     : ModalView("Global Map Generator",
         new System.Numerics.Vector2(ImGuiEx.CalcUiScaledValue(600), ImGuiEx.CalcUiScaledValue(820)))
 {
-    private int _offsetX;
-    private int _offsetY;
+    private const uint SAFE_RECT_COLOR = 0xFF0000FF;
 
     private GLTexture? _previewTexture;
-    private int _previewTextureVersion = -1;
+    private int _previewTextureVersion;
 
     private GLTexture? _courseBgTexture;
     private GLTexture? _hudOverlayTexture;
     private bool _backgroundTexturesInitialized;
 
+    private bool _panning;
+    private System.Numerics.Vector2 _panAccumPx;
+
     protected override void DrawContent()
     {
-        if (_previewTextureVersion == -1 && viewModel.HasGeometry)
+        // First time you open the modal calculate bounds automatically
+        if (_previewTextureVersion == 0 && viewModel.HasGeometry)
         {
-            viewModel.ReloadTriangles();
+            viewModel.AutoComputeBounds();
             viewModel.RenderPreview();
             RefreshPreviewTextureIfNeeded();
         }
@@ -55,7 +57,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
         ImGui.Separator();
 
-        DrawOffset();
+        DrawSafeArea();
 
         ImGui.Separator();
 
@@ -133,7 +135,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
     private void DrawMode()
     {
         ImGui.TextUnformatted("Mode");
-        if (!ImGuiEx.ComboEnum("##Mode", ref viewModel.Mode)) 
+        if (!ImGuiEx.ComboEnum("##Mode", ref viewModel.Settings.Mode))
             return;
         
         viewModel.AutoComputeBounds();
@@ -155,47 +157,54 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         }
         if (!canAuto) ImGui.EndDisabled();
 
-        int[] tl = [(int)viewModel.TopLeft.X, (int)viewModel.TopLeft.Y];
+        int[] tl = [(int)viewModel.Settings.TopLeft.X, (int)viewModel.Settings.TopLeft.Y];
         if (ImGui.DragInt2("Top Left", ref tl[0], 10f))
-            viewModel.TopLeft = new Vector2d(tl[0], tl[1]);
-        if (ImGui.IsItemDeactivatedAfterEdit())
-        {
-            viewModel.RenderPreview();
-            RefreshPreviewTextureIfNeeded();
-        }
-        
-        int[] br = [(int)viewModel.BottomRight.X, (int)viewModel.BottomRight.Y];
-        if (ImGui.DragInt2("Bottom Right", ref br[0], 10f))
-            viewModel.BottomRight = new Vector2d(br[0], br[1]);
+            viewModel.Settings.TopLeft = new Vector2d(tl[0], tl[1]);
         if (ImGui.IsItemDeactivatedAfterEdit())
         {
             viewModel.RenderPreview();
             RefreshPreviewTextureIfNeeded();
         }
 
-        double sizeX = Math.Abs(viewModel.BottomRight.X - viewModel.TopLeft.X);
-        double sizeY = Math.Abs(viewModel.BottomRight.Y - viewModel.TopLeft.Y);
+        int[] br = [(int)viewModel.Settings.BottomRight.X, (int)viewModel.Settings.BottomRight.Y];
+        if (ImGui.DragInt2("Bottom Right", ref br[0], 10f))
+            viewModel.Settings.BottomRight = new Vector2d(br[0], br[1]);
+        if (ImGui.IsItemDeactivatedAfterEdit())
+        {
+            viewModel.RenderPreview();
+            RefreshPreviewTextureIfNeeded();
+        }
+
+        double sizeX = Math.Abs(viewModel.Settings.BottomRight.X - viewModel.Settings.TopLeft.X);
+        double sizeY = Math.Abs(viewModel.Settings.BottomRight.Y - viewModel.Settings.TopLeft.Y);
         ImGui.TextDisabled($"Size: {sizeX:F0} x {sizeY:F0}");
     }
 
-    private void DrawOffset()
+    private void DrawSafeArea()
     {
-        ImGui.TextUnformatted("Position Offset");
+        ImGui.TextUnformatted("Safe Area (canvas pixels, 0..256)");
 
-        ImGui.PushItemWidth(ImGuiEx.CalcUiScaledValue(100));
-        ImGui.DragInt("Delta X", ref _offsetX, 10f);
-        ImGui.SameLine();
-        ImGui.DragInt("Delta Y", ref _offsetY, 10f);
-        ImGui.PopItemWidth();
-        ImGui.SameLine();
-        if (ImGui.Button("Apply Offset"))
+        var safe = viewModel.Settings.SafeArea;
+        int[] sa0 = [safe.Min.X, safe.Min.Y];
+        if (ImGui.DragInt2("Safe Top Left", ref sa0[0], 1f, 0, 256))
+            viewModel.Settings.SafeArea = new Box2i(new Vector2i(sa0[0], sa0[1]), safe.Max);
+        if (ImGui.IsItemDeactivatedAfterEdit())
         {
-            viewModel.ApplyOffset(_offsetX, _offsetY);
             viewModel.RenderPreview();
             RefreshPreviewTextureIfNeeded();
-            _offsetX = 0;
-            _offsetY = 0;
         }
+
+        safe = viewModel.Settings.SafeArea;
+        int[] sa1 = [safe.Max.X, safe.Max.Y];
+        if (ImGui.DragInt2("Safe Bottom Right", ref sa1[0], 1f, 0, 256))
+            viewModel.Settings.SafeArea = new Box2i(safe.Min, new Vector2i(sa1[0], sa1[1]));
+        if (ImGui.IsItemDeactivatedAfterEdit())
+        {
+            viewModel.RenderPreview();
+            RefreshPreviewTextureIfNeeded();
+        }
+
+        ImGui.Checkbox("Show safe area overlay", ref viewModel.Settings.ShowSafeArea);
     }
 
     private void DrawPngExport()
@@ -203,7 +212,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         ImGui.TextUnformatted("PNG Export");
 
         ImGui.PushItemWidth(ImGuiEx.CalcUiScaledValue(140));
-        ImGui.DragFloat("Triangle Expansion (px)", ref viewModel.TriangleExpansion, 0.1f, 0f, 5f, "%.2f");
+        ImGui.DragFloat("Triangle Expansion (px)", ref viewModel.Settings.TriangleExpansion, 0.1f, 0f, 5f, "%.2f");
         if (ImGui.IsItemDeactivatedAfterEdit())
         {
             viewModel.RenderPreview();
@@ -223,13 +232,59 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
         if (_previewTexture is not null)
         {
-            float side = ImGuiEx.CalcUiScaledValue(GlobalMapRasterizer.CANVAS_WIDTH);
-            float displayH = ImGuiEx.CalcUiScaledValue(192);
+            float side = ImGuiEx.CalcUiScaledValue(MkdsGlobalMapConsts.DISPLAY_WIDTH);
+            float displayH = ImGuiEx.CalcUiScaledValue(MkdsGlobalMapConsts.DISPLAY_HEIGHT);
             var origin = ImGui.GetCursorPos();
+            float pxScale = side / MkdsGlobalMapConsts.DISPLAY_WIDTH;
+
+            ImGui.SetCursorPos(origin);
+            ImGui.InvisibleButton("##MapPreviewInput", new System.Numerics.Vector2(side, side));
+            bool hovered = ImGui.IsItemHovered();
+            var screenMin = ImGui.GetItemRectMin();
+
+            if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+            {
+                _panAccumPx = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left);
+                _panning = true;
+            }
+            else if (_panning && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            {
+                viewModel.ApplyPanDeltaPixels(_panAccumPx.X / pxScale, _panAccumPx.Y / pxScale);
+                viewModel.RenderPreview();
+                RefreshPreviewTextureIfNeeded();
+                _panAccumPx = default;
+                _panning = false;
+                ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
+            }
+
+            if (hovered && !_panning)
+            {
+                float wheel = ImGui.GetIO().MouseWheel;
+                if (wheel != 0)
+                {
+                    var mouseLocalUi = ImGui.GetMousePos() - screenMin;
+                    var canvasPixel = new System.Numerics.Vector2(
+                        mouseLocalUi.X / pxScale, mouseLocalUi.Y / pxScale);
+                    if (viewModel.ApplyZoomAtPixel(wheel, canvasPixel))
+                    {
+                        viewModel.RenderPreview();
+                        RefreshPreviewTextureIfNeeded();
+                    }
+                }
+            }
 
             DrawLayer(_courseBgTexture,   origin, side, displayH);
             DrawLayer(_hudOverlayTexture, origin, side, displayH);
-            DrawLayer(_previewTexture,    origin, side, side);
+            DrawLayerOffset(_previewTexture, origin, _panning ? _panAccumPx : default, side, side);
+
+            if (viewModel.Settings.ShowSafeArea)
+            {
+                var safe = viewModel.Settings.SafeArea;
+                var dl = ImGui.GetWindowDrawList();
+                var rmin = screenMin + new System.Numerics.Vector2(safe.Min.X * pxScale, safe.Min.Y * pxScale);
+                var rmax = screenMin + new System.Numerics.Vector2(safe.Max.X * pxScale, safe.Max.Y * pxScale);
+                dl.AddRect(rmin, rmax, SAFE_RECT_COLOR, 0f, ImDrawFlags.None, 1.5f);
+            }
 
             ImGui.SetCursorPos(origin);
             ImGui.Dummy(new System.Numerics.Vector2(side, side));
@@ -245,6 +300,15 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         if (tex is null)
             return;
         ImGui.SetCursorPos(origin);
+        ImGui.Image(tex.Handle, new System.Numerics.Vector2(w, h));
+    }
+
+    private static void DrawLayerOffset(GLTexture? tex, System.Numerics.Vector2 origin,
+        System.Numerics.Vector2 offset, float w, float h)
+    {
+        if (tex is null)
+            return;
+        ImGui.SetCursorPos(origin + offset);
         ImGui.Image(tex.Handle, new System.Numerics.Vector2(w, h));
     }
 

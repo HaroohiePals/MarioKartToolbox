@@ -4,7 +4,6 @@ using HaroohiePals.Graphics;
 using HaroohiePals.Graphics3d;
 using HaroohiePals.MarioKartToolbox.KCollision;
 using HaroohiePals.MarioKartToolbox.Resources;
-using HaroohiePals.MarioKartToolbox.Tools;
 using HaroohiePals.Mathematics;
 using HaroohiePals.Nitro.Gx;
 using HaroohiePals.Nitro.NitroSystem.G2d;
@@ -22,13 +21,6 @@ namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 
 class GenerateGlobalMapViewModel
 {
-    private const int DISPLAY_WIDTH = 256;
-    private const int DISPLAY_HEIGHT = 192;
-    private const int SAFE_OFFSET_X = 120;
-    private const int SAFE_OFFSET_Y = 24;
-    private const int SAFE_WIDTH = DISPLAY_WIDTH - SAFE_OFFSET_X;
-    private const int SAFE_HEIGHT = DISPLAY_HEIGHT - SAFE_OFFSET_Y;
-
     private static readonly HashSet<MkdsCollisionType> RoadTypes =
     [
         MkdsCollisionType.Road,
@@ -44,15 +36,11 @@ class GenerateGlobalMapViewModel
     ];
 
     private readonly ICourseEditorContext _courseEditorContext;
-    
+
     private IReadOnlyList<Triangle> _loadedTriangles = [];
 
-    public GenerateGlobalMapSettings Settings;
-    public MkdsGlobalMapMode Mode;
-    public Vector2d TopLeft;
-    public Vector2d BottomRight;
-    public float TriangleExpansion = 1f;
-    
+    public GenerateGlobalMapSettings Settings = new GenerateGlobalMapSettings();
+
     public string? ErrorMessage { get; private set; }
     public Rgba8Bitmap? PreviewBitmap { get; private set; }
     public int PreviewVersion { get; private set; }
@@ -72,15 +60,15 @@ class GenerateGlobalMapViewModel
         var existing = _courseEditorContext.Course.Metadata.GlobalMapSettings;
         if (existing is not null)
         {
-            Mode = existing.Mode;
-            TopLeft = existing.TopLeft;
-            BottomRight = existing.BottomRight;
+            Settings.Mode = existing.Mode;
+            Settings.TopLeft = existing.TopLeft;
+            Settings.BottomRight = existing.BottomRight;
         }
         else
         {
-            Mode = MkdsGlobalMapMode.Normal;
-            TopLeft = new Vector2d(-6000, -3000);
-            BottomRight = new Vector2d(0, 3000);
+            Settings.Mode = MkdsGlobalMapMode.Normal;
+            Settings.TopLeft = new Vector2d(-6000, -3000);
+            Settings.BottomRight = new Vector2d(0, 3000);
         }
 
         BackgroundBitmap = LoadBackground(_courseEditorContext.Course);
@@ -89,7 +77,7 @@ class GenerateGlobalMapViewModel
         ReloadTriangles();
     }
 
-    
+
     public void ReloadTriangles()
     {
         ErrorMessage = null;
@@ -115,14 +103,57 @@ class GenerateGlobalMapViewModel
         if (!HasGeometry)
             return false;
 
-        (TopLeft, BottomRight) = ComputeBoundsFromTriangles(_loadedTriangles, Mode);
+        (Settings.TopLeft, Settings.BottomRight) = ComputeBoundsFromTriangles(_loadedTriangles, Settings.Mode);
         return true;
     }
 
     public void ApplyOffset(double dx, double dy)
     {
-        TopLeft = new Vector2d(TopLeft.X + dx, TopLeft.Y + dy);
-        BottomRight = new Vector2d(BottomRight.X + dx, BottomRight.Y + dy);
+        Settings.TopLeft = new Vector2d(Settings.TopLeft.X + dx, Settings.TopLeft.Y + dy);
+        Settings.BottomRight = new Vector2d(Settings.BottomRight.X + dx, Settings.BottomRight.Y + dy);
+    }
+
+    public void ApplyPanDeltaPixels(double canvasDx, double canvasDy)
+    {
+        double sx = Settings.BottomRight.X - Settings.TopLeft.X;
+        double sy = Settings.BottomRight.Y - Settings.TopLeft.Y;
+        double dWx = -canvasDx * sx / MkdsGlobalMapConsts.DISPLAY_WIDTH;
+        double dWy = -canvasDy * sy / MkdsGlobalMapConsts.DISPLAY_HEIGHT;
+
+        Settings.TopLeft = new Vector2d(
+            Math.Round(Settings.TopLeft.X + dWx),
+            Math.Round(Settings.TopLeft.Y + dWy));
+        Settings.BottomRight = new Vector2d(
+            Math.Round(Settings.BottomRight.X + dWx),
+            Math.Round(Settings.BottomRight.Y + dWy));
+    }
+
+    public bool ApplyZoomAtPixel(float wheel, System.Numerics.Vector2 canvasPixel)
+    {
+        if (wheel == 0)
+            return false;
+
+        double factor = Math.Pow(1.15, -wheel);
+        double fx = Math.Clamp(canvasPixel.X / MkdsGlobalMapConsts.DISPLAY_WIDTH, 0, 1);
+        double fy = Math.Clamp(canvasPixel.Y / MkdsGlobalMapConsts.DISPLAY_HEIGHT, 0, 1);
+        double ax = Settings.TopLeft.X + fx * (Settings.BottomRight.X - Settings.TopLeft.X);
+        double ay = Settings.TopLeft.Y + fy * (Settings.BottomRight.Y - Settings.TopLeft.Y);
+
+        var newTl = new Vector2d(
+            ax + (Settings.TopLeft.X - ax) * factor,
+            ay + (Settings.TopLeft.Y - ay) * factor);
+
+        var newBr = new Vector2d(
+            ax + (Settings.BottomRight.X - ax) * factor,
+            ay + (Settings.BottomRight.Y - ay) * factor);
+
+        if (Math.Abs(newBr.X - newTl.X) < 1 || Math.Abs(newBr.Y - newTl.Y) < 1)
+            return false;
+
+        Settings.TopLeft = new Vector2d(Math.Round(newTl.X), Math.Round(newTl.Y));
+        Settings.BottomRight = new Vector2d(Math.Round(newBr.X), Math.Round(newBr.Y));
+
+        return true;
     }
 
     public bool RenderPreview()
@@ -130,9 +161,11 @@ class GenerateGlobalMapViewModel
         if (!HasGeometry)
             return false;
 
-        PreviewBitmap = GlobalMapRasterizer.Rasterize(
-            _loadedTriangles, TopLeft, BottomRight, Mode, TriangleExpansion);
+        PreviewBitmap = MkdsGlobalMapRasterizer.Rasterize(
+            _loadedTriangles, Settings.TopLeft, Settings.BottomRight,
+            Settings.Mode, Settings.SafeArea, Settings.TriangleExpansion);
         PreviewVersion++;
+
         return true;
     }
 
@@ -141,12 +174,13 @@ class GenerateGlobalMapViewModel
         if (string.IsNullOrWhiteSpace(path))
             return false;
 
-        var bitmap = PreviewBitmap ?? GlobalMapRasterizer.Rasterize(
-            _loadedTriangles, TopLeft, BottomRight, Mode, TriangleExpansion);
+        var bitmap = PreviewBitmap ?? MkdsGlobalMapRasterizer.Rasterize(
+            _loadedTriangles, Settings.TopLeft, Settings.BottomRight,
+            Settings.Mode, Settings.SafeArea, Settings.TriangleExpansion);
 
         try
         {
-            GlobalMapRasterizer.SavePng(bitmap, path);
+            MkdsGlobalMapRasterizer.SavePng(bitmap, path);
             ErrorMessage = null;
             return true;
         }
@@ -166,9 +200,9 @@ class GenerateGlobalMapViewModel
         {
             var created = new MkdsGlobalMapSettings
             {
-                TopLeft = TopLeft,
-                BottomRight = BottomRight,
-                Mode = Mode,
+                TopLeft = Settings.TopLeft,
+                BottomRight = Settings.BottomRight,
+                Mode = Settings.Mode,
             };
             _courseEditorContext.ActionStack.Add(
                 metadata.SetPropertyAction(m => m.GlobalMapSettings, (MkdsGlobalMapSettings?)created));
@@ -177,9 +211,9 @@ class GenerateGlobalMapViewModel
         {
             var actions = new List<IAction>
             {
-                existing.SetPropertyAction(s => s.TopLeft, TopLeft),
-                existing.SetPropertyAction(s => s.BottomRight, BottomRight),
-                existing.SetPropertyAction(s => s.Mode, Mode),
+                existing.SetPropertyAction(s => s.TopLeft, Settings.TopLeft),
+                existing.SetPropertyAction(s => s.BottomRight, Settings.BottomRight),
+                existing.SetPropertyAction(s => s.Mode, Settings.Mode),
             };
             _courseEditorContext.ActionStack.Add(new BatchAction(actions));
         }
@@ -236,7 +270,7 @@ class GenerateGlobalMapViewModel
         return RoadTypes.Contains(attr.Type);
     }
 
-    private static (Vector2d TopLeft, Vector2d BottomRight) ComputeBoundsFromTriangles(
+    private (Vector2d TopLeft, Vector2d BottomRight) ComputeBoundsFromTriangles(
         IReadOnlyList<Triangle> triangles, MkdsGlobalMapMode mode)
     {
         double wxMin = double.MaxValue;
@@ -283,19 +317,27 @@ class GenerateGlobalMapViewModel
         if (!(uMax > uMin) || !(vMax > vMin))
             return (Vector2d.Zero, Vector2d.Zero);
 
-        double kx = SAFE_WIDTH / (uMax - uMin);
-        double ky = SAFE_HEIGHT / (vMax - vMin);
+        int safeOffsetX = Settings.SafeArea.Min.X;
+        int safeOffsetY = Settings.SafeArea.Min.Y;
+        int safeWidth = Settings.SafeArea.Size.X;
+        int safeHeight = Settings.SafeArea.Size.Y;
+
+        if (safeWidth <= 0 || safeHeight <= 0)
+            return (Vector2d.Zero, Vector2d.Zero);
+
+        double kx = safeWidth / (uMax - uMin);
+        double ky = safeHeight / (vMax - vMin);
         double k = Math.Min(kx, ky);
 
         double geomPxW = k * (uMax - uMin);
         double geomPxH = k * (vMax - vMin);
-        double pxOx = SAFE_OFFSET_X + (SAFE_WIDTH - geomPxW) * 0.5;
-        double pxOy = SAFE_OFFSET_Y + (SAFE_HEIGHT - geomPxH) * 0.5;
+        double pxOx = safeOffsetX + (safeWidth - geomPxW) * 0.5;
+        double pxOy = safeOffsetY + (safeHeight - geomPxH) * 0.5;
 
         double uAt0 = uMin - pxOx / k;
-        double uAtMax = uAt0 + DISPLAY_WIDTH / k;
+        double uAtMax = uAt0 + MkdsGlobalMapConsts.DISPLAY_WIDTH / k;
         double vAt0 = vMin - pxOy / k;
-        double vAtMax = vAt0 + DISPLAY_HEIGHT / k;
+        double vAtMax = vAt0 + MkdsGlobalMapConsts.DISPLAY_HEIGHT / k;
 
         Vector2d tl, br;
         switch (mode)
@@ -337,7 +379,8 @@ class GenerateGlobalMapViewModel
                 palette.Palette.Palette,
                 screen.Screen.ScreenData,
                 ImageFormat.Pltt16, MapFormat.Text,
-                256, 192, firstTransparent: true);
+                MkdsGlobalMapConsts.DISPLAY_WIDTH, MkdsGlobalMapConsts.DISPLAY_HEIGHT,
+                firstTransparent: true);
         }
         catch
         {

@@ -5,6 +5,7 @@ using HaroohiePals.Graphics3d;
 using HaroohiePals.Graphics3d.OpenGL;
 using HaroohiePals.Graphics3d.OpenGL.Renderers;
 using HaroohiePals.Gui.Viewport;
+using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 using HaroohiePals.MarioKartToolbox.OpenGL.Renderers;
 using HaroohiePals.Mathematics;
 using HaroohiePals.Nitro.Gx;
@@ -163,11 +164,9 @@ class GlobalMapRenderGroup : RenderGroup
         var palette = _course.GetTexFileOrDefault<Nclr>("Map2D/global.NCLR");
         var map = _course.GetTexFileOrDefault<Nscr>("Map2D/global1.NSCR");
 
-        const int dsWidth = 256;
-        const int dsHeight = 192;
-
         var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
-            map.Screen.ScreenData, ImageFormat.Pltt16, MapFormat.Text, dsWidth, dsHeight, true);
+            map.Screen.ScreenData, ImageFormat.Pltt16, MapFormat.Text, 
+            MkdsGlobalMapConsts.DISPLAY_WIDTH, MkdsGlobalMapConsts.DISPLAY_HEIGHT, true);
 
         if (decoded is null)
             return null;

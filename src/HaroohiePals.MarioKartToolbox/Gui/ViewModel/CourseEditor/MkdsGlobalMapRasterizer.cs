@@ -9,20 +9,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace HaroohiePals.MarioKartToolbox.Tools;
+namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 
-static class GlobalMapRasterizer
+static class MkdsGlobalMapRasterizer
 {
-    public const int CANVAS_WIDTH = 256;
-    public const int CANVAS_HEIGHT = 256;
-
-    private const int DISPLAY_WIDTH = 256;
-    private const int DISPLAY_HEIGHT = 192;
-    private const int SAFE_X0 = 120;
-    private const int SAFE_Y0 = 24;
-    private const int SAFE_X1 = 256;
-    private const int SAFE_Y1 = 192;
-
     private static readonly Color4 FillColor = new Color4(120, 120, 120, 255);
     private static readonly Color4 OutlineColor = new Color4(248, 248, 248, 255);
 
@@ -31,13 +21,20 @@ static class GlobalMapRasterizer
         Vector2d topLeft,
         Vector2d bottomRight,
         MkdsGlobalMapMode mode,
+        Box2i safeArea,
         double expandPixels = 0)
     {
-        var bitmap = new Rgba8Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
+        var bitmap = new Rgba8Bitmap(MkdsGlobalMapConsts.CANVAS_WIDTH, MkdsGlobalMapConsts.CANVAS_HEIGHT);
+
+        int safeX0 = Math.Clamp(safeArea.Min.X, 0, MkdsGlobalMapConsts.CANVAS_WIDTH);
+        int safeY0 = Math.Clamp(safeArea.Min.Y, 0, MkdsGlobalMapConsts.CANVAS_HEIGHT);
+        int safeX1 = Math.Clamp(safeArea.Max.X, 0, MkdsGlobalMapConsts.CANVAS_WIDTH);
+        int safeY1 = Math.Clamp(safeArea.Max.Y, 0, MkdsGlobalMapConsts.CANVAS_HEIGHT);
 
         double spanX = bottomRight.X - topLeft.X;
         double spanY = bottomRight.Y - topLeft.Y;
-        if (triangles.Count == 0 || spanX == 0 || spanY == 0)
+        if (triangles.Count == 0 || spanX == 0 || spanY == 0
+            || safeX0 >= safeX1 || safeY0 >= safeY1)
             return bitmap;
 
         foreach (var tri in triangles)
@@ -49,10 +46,10 @@ static class GlobalMapRasterizer
             if (expandPixels > 0)
                 ExpandFromCentroid(ref a, ref b, ref c, expandPixels);
 
-            FillTriangle(bitmap, a, b, c, FillColor);
+            FillTriangle(bitmap, a, b, c, FillColor, safeX0, safeY0, safeX1, safeY1);
         }
 
-        ApplyOutline(bitmap, FillColor, OutlineColor);
+        ApplyOutline(bitmap, FillColor, OutlineColor, safeX0, safeY0, safeX1, safeY1);
 
         return bitmap;
     }
@@ -93,19 +90,20 @@ static class GlobalMapRasterizer
         double projU = mode == MkdsGlobalMapMode.Normal ? world.X : world.Z;
         double projV = mode == MkdsGlobalMapMode.Normal ? world.Z : world.X;
 
-        double px = (projU - topLeft.X) / spanX * DISPLAY_WIDTH;
-        double py = (projV - topLeft.Y) / spanY * DISPLAY_HEIGHT;
+        double px = (projU - topLeft.X) / spanX * MkdsGlobalMapConsts.DISPLAY_WIDTH;
+        double py = (projV - topLeft.Y) / spanY * MkdsGlobalMapConsts.DISPLAY_HEIGHT;
         return new Vector2d(px, py);
     }
 
-    private static void ApplyOutline(Rgba8Bitmap bmp, Color4 fillColor, Color4 outlineColor)
+    private static void ApplyOutline(Rgba8Bitmap bmp, Color4 fillColor, Color4 outlineColor,
+        int safeX0, int safeY0, int safeX1, int safeY1)
     {
         uint fillPacked = PackColor(fillColor);
         uint outlinePacked = PackColor(outlineColor);
 
-        for (int y = SAFE_Y0; y < SAFE_Y1; y++)
+        for (int y = safeY0; y < safeY1; y++)
         {
-            for (int x = SAFE_X0; x < SAFE_X1; x++)
+            for (int x = safeX0; x < safeX1; x++)
             {
                 if (bmp[x, y] != fillPacked)
                     continue;
@@ -128,7 +126,8 @@ static class GlobalMapRasterizer
     private static bool IsOutside(uint pixel, uint fillPacked, uint outlinePacked)
         => pixel != fillPacked && pixel != outlinePacked;
 
-    private static void FillTriangle(Rgba8Bitmap bmp, Vector2d a, Vector2d b, Vector2d c, Color4 color)
+    private static void FillTriangle(Rgba8Bitmap bmp, Vector2d a, Vector2d b, Vector2d c, Color4 color,
+        int safeX0, int safeY0, int safeX1, int safeY1)
     {
         uint packed = PackColor(color);
 
@@ -137,10 +136,10 @@ static class GlobalMapRasterizer
         double minX = Math.Min(a.X, Math.Min(b.X, c.X));
         double maxX = Math.Max(a.X, Math.Max(b.X, c.X));
 
-        int y0 = Math.Max(SAFE_Y0, (int)Math.Ceiling(minY));
-        int y1 = Math.Min(SAFE_Y1 - 1, (int)Math.Floor(maxY));
-        int x0 = Math.Max(SAFE_X0, (int)Math.Ceiling(minX));
-        int x1 = Math.Min(SAFE_X1 - 1, (int)Math.Floor(maxX));
+        int y0 = Math.Max(safeY0, (int)Math.Ceiling(minY));
+        int y1 = Math.Min(safeY1 - 1, (int)Math.Floor(maxY));
+        int x0 = Math.Max(safeX0, (int)Math.Ceiling(minX));
+        int x1 = Math.Min(safeX1 - 1, (int)Math.Floor(maxX));
         if (y0 > y1 || x0 > x1) return;
 
         double denom = (b.Y - c.Y) * (a.X - c.X) + (c.X - b.X) * (a.Y - c.Y);
