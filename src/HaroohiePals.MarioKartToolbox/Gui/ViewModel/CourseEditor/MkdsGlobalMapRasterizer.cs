@@ -1,10 +1,13 @@
 #nullable enable
 using HaroohiePals.Graphics;
+using HaroohiePals.MarioKartToolbox.Resources;
 using HaroohiePals.Mathematics;
 using HaroohiePals.NitroKart.Course;
+using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using OpenTK.Mathematics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -16,13 +19,17 @@ static class MkdsGlobalMapRasterizer
     private static readonly Color4 FillColor = new Color4(120, 120, 120, 255);
     private static readonly Color4 OutlineColor = new Color4(248, 248, 248, 255);
 
+    private static Image<Bgra32>? _markerPatternCache;
+
     public static Rgba8Bitmap Rasterize(
         IReadOnlyList<Triangle> triangles,
         Vector2d topLeft,
         Vector2d bottomRight,
         MkdsGlobalMapMode mode,
         Box2i safeArea,
-        double expandPixels = 0)
+        double expandPixels,
+        MkdsStartPoint? startPoint,
+        int startMarkerWidth)
     {
         var bitmap = new Rgba8Bitmap(MkdsGlobalMapConsts.CANVAS_WIDTH, MkdsGlobalMapConsts.CANVAS_HEIGHT);
 
@@ -51,7 +58,90 @@ static class MkdsGlobalMapRasterizer
 
         ApplyOutline(bitmap, FillColor, OutlineColor, safeX0, safeY0, safeX1, safeY1);
 
+        if (startPoint is not null && startMarkerWidth >= 1)
+        {
+            DrawStartMarker(bitmap, startPoint, startMarkerWidth, mode, topLeft, bottomRight,
+                safeX0, safeY0, safeX1, safeY1);
+        }
+
         return bitmap;
+    }
+
+    private static void DrawStartMarker(Rgba8Bitmap bmp, MkdsStartPoint sp, int width,
+        MkdsGlobalMapMode mode, Vector2d topLeft, Vector2d bottomRight,
+        int safeX0, int safeY0, int safeX1, int safeY1)
+    {
+        var rot =
+            Matrix3d.CreateRotationX(MathHelper.DegreesToRadians(sp.Rotation.X)) *
+            Matrix3d.CreateRotationY(MathHelper.DegreesToRadians(sp.Rotation.Y)) *
+            Matrix3d.CreateRotationZ(MathHelper.DegreesToRadians(sp.Rotation.Z));
+
+        Vector2d c = Project(sp.Position, mode, topLeft, bottomRight);
+        Vector2d euRaw = Project(sp.Position + rot.Row0, mode, topLeft, bottomRight) - c;
+        if (euRaw.LengthSquared < 0.00001)
+            return;
+
+        double angleDeg = MathHelper.RadiansToDegrees(Math.Atan2(euRaw.Y, euRaw.X));
+
+        var pattern = GetMarkerPattern();
+        int patternW = pattern.Width;
+        int patternH = pattern.Height;
+
+        var patternPixels = new Bgra32[patternW * patternH];
+        pattern.CopyPixelDataTo(MemoryMarshal.AsBytes(patternPixels.AsSpan()));
+
+        using var tiled = new Image<Bgra32>(width, patternH, new Bgra32(0, 0, 0, 0));
+        tiled.ProcessPixelRows(accessor =>
+        {
+            for (int y = 0; y < patternH; y++)
+            {
+                var dstRow = accessor.GetRowSpan(y);
+                int rowOffset = y * patternW;
+                for (int x = 0; x < width; x++)
+                    dstRow[x] = patternPixels[rowOffset + (x % patternW)];
+            }
+        });
+
+        int S = (int)Math.Ceiling(Math.Sqrt((double)width * width + (double)patternH * patternH)) + 2;
+        using var padded = new Image<Bgra32>(S, S, new Bgra32(0, 0, 0, 0));
+        int offX = (S - width) / 2;
+        int offY = (S - patternH) / 2;
+
+        padded.Mutate(ctx => ctx.DrawImage(tiled, new Point(offX, offY), 1f));
+        padded.Mutate(ctx => ctx.Rotate((float)angleDeg, KnownResamplers.NearestNeighbor));
+
+        int rotW = padded.Width;
+        int rotH = padded.Height;
+        int ox = (int)Math.Round(c.X - rotW * 0.5);
+        int oy = (int)Math.Round(c.Y - rotH * 0.5);
+
+        int dx0 = Math.Max(safeX0, ox);
+        int dy0 = Math.Max(safeY0, oy);
+        int dx1 = Math.Min(safeX1 - 1, ox + rotW - 1);
+        int dy1 = Math.Min(safeY1 - 1, oy + rotH - 1);
+
+        if (dx0 > dx1 || dy0 > dy1)
+            return;
+
+        padded.ProcessPixelRows(accessor =>
+        {
+            for (int y = dy0; y <= dy1; y++)
+            {
+                var row = accessor.GetRowSpan(y - oy);
+                for (int x = dx0; x <= dx1; x++)
+                {
+                    var src = row[x - ox];
+
+                    if (src.A == 0) 
+                        continue;
+
+                    bmp[x, y] = ((uint)src.A << 24)
+                              | ((uint)src.R << 16)
+                              | ((uint)src.G << 8)
+                              | (uint)src.B;
+                }
+            }
+        });
     }
 
     // Grows a triangle outward by pushing each vertex away from the centroid by
@@ -167,5 +257,13 @@ static class MkdsGlobalMapRasterizer
         byte b = (byte)Math.Clamp((int)(color.B * 255f + 0.5f), 0, 255);
         byte a = (byte)Math.Clamp((int)(color.A * 255f + 0.5f), 0, 255);
         return ((uint)a << 24) | ((uint)r << 16) | ((uint)g << 8) | b;
+    }
+
+    private static Image<Bgra32> GetMarkerPattern()
+    {
+        if (_markerPatternCache is not null)
+            return _markerPatternCache;
+        _markerPatternCache = Image.Load<Bgra32>(Images.GlobalMapStartMarkerPattern);
+        return _markerPatternCache;
     }
 }

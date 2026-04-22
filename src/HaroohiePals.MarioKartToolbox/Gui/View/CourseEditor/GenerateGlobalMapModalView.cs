@@ -18,7 +18,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
     private const string MODAL_TITLE = "Global Map Generator";
     private const uint SAFE_RECT_COLOR = 0xFF0000FF; // Red
     private static System.Numerics.Vector2 ModalSize = new System.Numerics.Vector2(
-            ImGuiEx.CalcUiScaledValue(720), ImGuiEx.CalcUiScaledValue(420));
+            ImGuiEx.CalcUiScaledValue(720), ImGuiEx.CalcUiScaledValue(450));
 
     private GenerateGlobalMapModalViewStep _curStep = GenerateGlobalMapModalViewStep.Source;
 
@@ -141,8 +141,43 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             DrawCoordinatesSection();
             DrawSafeAreaSection();
             DrawExpansionSection();
+            DrawStartMarkerSection();
         }
         ImGui.EndChild();
+    }
+
+    private void DrawStartMarkerSection()
+    {
+        if (!ImGui.CollapsingHeader("Start Grid Marker##GenerateGlobalMap_StartMarker",
+                ImGuiTreeNodeFlags.DefaultOpen))
+            return;
+
+        ImGui.Columns(2, "##Columns_StartMarker");
+
+        ImGui.Text("Show");
+        ImGui.NextColumn();
+        if (ImGui.Checkbox("##ShowStartMarker", ref viewModel.Settings.ShowStartMarker))
+        {
+            viewModel.RenderPreview();
+            RefreshPreviewTextureIfNeeded();
+        }
+        ImGui.NextColumn();
+
+        if (!viewModel.Settings.ShowStartMarker) ImGui.BeginDisabled();
+        ImGui.Text("Width (px)");
+        ImGui.NextColumn();
+        ImGui.PushItemWidth(-1);
+        ImGui.DragInt("##StartMarkerWidth", ref viewModel.Settings.StartMarkerWidth, 1f, 1, 64);
+        if (ImGui.IsItemDeactivatedAfterEdit())
+        {
+            viewModel.RenderPreview();
+            RefreshPreviewTextureIfNeeded();
+        }
+        ImGui.PopItemWidth();
+        ImGui.NextColumn();
+        if (!viewModel.Settings.ShowStartMarker) ImGui.EndDisabled();
+
+        ImGui.Columns(1);
     }
 
     private void DrawCoordinatesSection()

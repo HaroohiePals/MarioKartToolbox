@@ -174,9 +174,14 @@ class GenerateGlobalMapViewModel
         if (!HasGeometry)
             return false;
 
+        var marker = Settings.ShowStartMarker
+            ? _courseEditorContext.Course.MapData.StartPoints.FirstOrDefault()
+            : null;
+
         PreviewBitmap = MkdsGlobalMapRasterizer.Rasterize(
             _loadedTriangles, Settings.TopLeft, Settings.BottomRight,
-            Settings.Mode, Settings.SafeArea, Settings.TriangleExpansion);
+            Settings.Mode, Settings.SafeArea, Settings.TriangleExpansion,
+            marker, Math.Max(1, Settings.StartMarkerWidth));
         PreviewVersion++;
 
         return true;
@@ -187,9 +192,14 @@ class GenerateGlobalMapViewModel
         if (string.IsNullOrWhiteSpace(path))
             return false;
 
+        var marker = Settings.ShowStartMarker
+            ? _courseEditorContext.Course.MapData.StartPoints.FirstOrDefault()
+            : null;
+
         var bitmap = PreviewBitmap ?? MkdsGlobalMapRasterizer.Rasterize(
             _loadedTriangles, Settings.TopLeft, Settings.BottomRight,
-            Settings.Mode, Settings.SafeArea, Settings.TriangleExpansion);
+            Settings.Mode, Settings.SafeArea, Settings.TriangleExpansion,
+            marker, Math.Max(1, Settings.StartMarkerWidth));
 
         try
         {

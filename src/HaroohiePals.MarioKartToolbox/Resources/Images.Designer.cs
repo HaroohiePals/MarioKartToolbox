@@ -69,5 +69,25 @@ namespace HaroohiePals.MarioKartToolbox.Resources {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] GlobalMapStartMarkerLabel {
+            get {
+                object obj = ResourceManager.GetObject("GlobalMapStartMarkerLabel", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] GlobalMapStartMarkerPattern {
+            get {
+                object obj = ResourceManager.GetObject("GlobalMapStartMarkerPattern", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

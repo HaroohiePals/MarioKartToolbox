@@ -28,5 +28,8 @@ struct GenerateGlobalMapSettings
     public Box2i SafeArea = DefaultSafeArea;
     public bool ShowSafeArea = true;
 
+    public bool ShowStartMarker = true;
+    public int StartMarkerWidth = 15;
+
     public GenerateGlobalMapSettings() { }
 }
