@@ -278,6 +278,16 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         float side = ImGuiEx.CalcUiScaledValue(MkdsGlobalMapConsts.DISPLAY_WIDTH);
         float displayH = ImGuiEx.CalcUiScaledValue(MkdsGlobalMapConsts.DISPLAY_HEIGHT);
 
+        ImGui.TextDisabled("Drag the minimap to adjust its position\nScroll to zoom in/out.");
+
+        bool canSave = viewModel.HasGeometry;
+        if (!canSave) 
+            ImGui.BeginDisabled();
+        if (ImGui.Button("Save as PNG..."))
+            BrowseAndSavePng();
+        if (!canSave) 
+            ImGui.EndDisabled();
+
         if (_previewTexture is not null)
         {
             var origin = ImGui.GetCursorPos();
@@ -287,6 +297,11 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             ImGui.InvisibleButton("##MapPreviewInput", new System.Numerics.Vector2(side, side));
             bool hovered = ImGui.IsItemHovered();
             var screenMin = ImGui.GetItemRectMin();
+
+            if (hovered)
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+            }
 
             if (ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
             {
@@ -341,11 +356,6 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             ImGui.Dummy(new System.Numerics.Vector2(side, side));
         }
 
-        bool canSave = viewModel.HasGeometry;
-        if (!canSave) ImGui.BeginDisabled();
-        if (ImGui.Button("Save PNG..."))
-            BrowseAndSavePng();
-        if (!canSave) ImGui.EndDisabled();
     }
 
     private void DrawNavigationButtons(bool canContinue)
