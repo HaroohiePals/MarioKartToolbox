@@ -47,6 +47,7 @@ class GenerateGlobalMapViewModel
     public int TriangleCount => _loadedTriangles.Count;
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
     public bool HasGeometry => _loadedTriangles.Count > 0;
+    public bool HasExistingSettings => _courseEditorContext.Course.Metadata.GlobalMapSettings is not null;
 
     public Rgba8Bitmap? BackgroundBitmap { get; }
     public Rgba8Bitmap? HudOverlayBitmap { get; }
@@ -96,6 +97,18 @@ class GenerateGlobalMapViewModel
             _loadedTriangles = [];
             ErrorMessage = ex.Message;
         }
+    }
+
+    public bool LoadExistingSettings()
+    {
+        var existing = _courseEditorContext.Course.Metadata.GlobalMapSettings;
+        if (existing is null)
+            return false;
+
+        Settings.Mode = existing.Mode;
+        Settings.TopLeft = existing.TopLeft;
+        Settings.BottomRight = existing.BottomRight;
+        return true;
     }
 
     public bool AutoComputeBounds()
