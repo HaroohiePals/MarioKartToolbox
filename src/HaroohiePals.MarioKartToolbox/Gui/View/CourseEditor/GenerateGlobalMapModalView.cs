@@ -23,6 +23,10 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
     private GLTexture? _previewTexture;
     private int _previewTextureVersion = -1;
 
+    private GLTexture? _courseBgTexture;
+    private GLTexture? _hudOverlayTexture;
+    private bool _backgroundTexturesInitialized;
+
     protected override void DrawContent()
     {
         if (_previewTextureVersion == -1 && viewModel.HasGeometry)
@@ -66,6 +70,14 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
     {
         _previewTexture?.Dispose();
         _previewTexture = null;
+
+        _courseBgTexture?.Dispose();
+        _courseBgTexture = null;
+
+        _hudOverlayTexture?.Dispose();
+        _hudOverlayTexture = null;
+
+        _backgroundTexturesInitialized = false;
     }
 
     private void DrawSourceSelection()
@@ -212,12 +224,28 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         if (_previewTexture is not null)
         {
             float side = ImGuiEx.CalcUiScaledValue(GlobalMapRasterizer.CANVAS_WIDTH);
-            ImGui.Image(_previewTexture.Handle, new System.Numerics.Vector2(side, side));
+            float displayH = ImGuiEx.CalcUiScaledValue(192);
+            var origin = ImGui.GetCursorPos();
+
+            DrawLayer(_courseBgTexture,   origin, side, displayH);
+            DrawLayer(_hudOverlayTexture, origin, side, displayH);
+            DrawLayer(_previewTexture,    origin, side, side);
+
+            ImGui.SetCursorPos(origin);
+            ImGui.Dummy(new System.Numerics.Vector2(side, side));
         }
         else
         {
             ImGui.TextDisabled("Click Render Preview or Save PNG to generate a thumbnail.");
         }
+    }
+
+    private static void DrawLayer(GLTexture? tex, System.Numerics.Vector2 origin, float w, float h)
+    {
+        if (tex is null)
+            return;
+        ImGui.SetCursorPos(origin);
+        ImGui.Image(tex.Handle, new System.Numerics.Vector2(w, h));
     }
 
     private void DrawActionButtons()
@@ -237,6 +265,8 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
     private void RefreshPreviewTextureIfNeeded()
     {
+        EnsureBackgroundTextures();
+
         if (viewModel.PreviewBitmap is null || _previewTextureVersion == viewModel.PreviewVersion)
             return;
 
@@ -244,6 +274,27 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         _previewTexture = new GLTexture(viewModel.PreviewBitmap, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
         _previewTexture.SetFilterMode(TextureFilterMode.Nearest, TextureFilterMode.Nearest);
         _previewTextureVersion = viewModel.PreviewVersion;
+    }
+
+    private void EnsureBackgroundTextures()
+    {
+        if (_backgroundTexturesInitialized)
+            return;
+        _backgroundTexturesInitialized = true;
+
+        if (viewModel.BackgroundBitmap is not null)
+        {
+            _courseBgTexture = new GLTexture(
+                viewModel.BackgroundBitmap, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
+            _courseBgTexture.SetFilterMode(TextureFilterMode.Nearest, TextureFilterMode.Nearest);
+        }
+
+        if (viewModel.HudOverlayBitmap is not null)
+        {
+            _hudOverlayTexture = new GLTexture(
+                viewModel.HudOverlayBitmap, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
+            _hudOverlayTexture.SetFilterMode(TextureFilterMode.Nearest, TextureFilterMode.Nearest);
+        }
     }
 
     private void BrowseForObjFile()

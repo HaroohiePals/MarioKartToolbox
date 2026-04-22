@@ -3,14 +3,20 @@ using HaroohiePals.Actions;
 using HaroohiePals.Graphics;
 using HaroohiePals.Graphics3d;
 using HaroohiePals.MarioKartToolbox.KCollision;
+using HaroohiePals.MarioKartToolbox.Resources;
 using HaroohiePals.MarioKartToolbox.Tools;
 using HaroohiePals.Mathematics;
+using HaroohiePals.Nitro.Gx;
+using HaroohiePals.Nitro.NitroSystem.G2d;
 using HaroohiePals.NitroKart.Course;
 using OpenTK.Mathematics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 
@@ -54,6 +60,9 @@ class GenerateGlobalMapViewModel
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
     public bool HasGeometry => _loadedTriangles.Count > 0;
 
+    public Rgba8Bitmap? BackgroundBitmap { get; }
+    public Rgba8Bitmap? HudOverlayBitmap { get; }
+
     public GenerateGlobalMapViewModel(ICourseEditorContext courseEditorContext)
     {
         _courseEditorContext = courseEditorContext;
@@ -74,9 +83,13 @@ class GenerateGlobalMapViewModel
             BottomRight = new Vector2d(0, 3000);
         }
 
+        BackgroundBitmap = LoadBackground(_courseEditorContext.Course);
+        HudOverlayBitmap = LoadHudOverlay();
+
         ReloadTriangles();
     }
 
+    
     public void ReloadTriangles()
     {
         ErrorMessage = null;
@@ -306,4 +319,49 @@ class GenerateGlobalMapViewModel
             new Vector2d(Math.Round(tl.X), Math.Round(tl.Y)),
             new Vector2d(Math.Round(br.X), Math.Round(br.Y)));
     }
+
+    private static Rgba8Bitmap? LoadBackground(IMkdsCourse course)
+    {
+        try
+        {
+            var tiles = course.GetTexFileOrDefault<Ncgr>("Map2D/global2.NCGR");
+            var palette = course.GetTexFileOrDefault<Nclr>("Map2D/global2.NCLR");
+            var screen = course.GetTexFileOrDefault<Nscr>("Map2D/global2.NSCR");
+            if (tiles?.Character?.CharacterData is null
+                || palette?.Palette?.Palette is null
+                || screen?.Screen?.ScreenData is null)
+                return null;
+
+            return GxUtil.DecodeChar(
+                tiles.Character.CharacterData,
+                palette.Palette.Palette,
+                screen.Screen.ScreenData,
+                ImageFormat.Pltt16, MapFormat.Text,
+                256, 192, firstTransparent: true);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static Rgba8Bitmap? LoadHudOverlay()
+    {
+        try
+        {
+            byte[]? png = Images.BottomScreenRaceHudGlobalMap;
+            if (png is null || png.Length == 0)
+                return null;
+
+            using var img = Image.Load<Bgra32>(png);
+            var bmp = new Rgba8Bitmap(img.Width, img.Height);
+            img.CopyPixelDataTo(MemoryMarshal.AsBytes<uint>(bmp.Pixels));
+            return bmp;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
 }
