@@ -209,32 +209,39 @@ class LocalMapRenderGroup : RenderGroup
 
     private GLTexture? CreateTexture(bool translucent, bool loadSecondMap)
     {
-        var tiles = _course.GetTexFileOrDefault<Ncgr>(TILES_FILENAME);
-        var palette = _course.GetTexFileOrDefault<Nclr>(PALETTE_FILENAME);
-        var map = _course.GetTexFileOrDefault<Nscr>(loadSecondMap ? SECOND_SCREEN_FILENAME : FIRST_SCREEN_FILENAME);
-
-        if (tiles is null || palette is null || map is null)
-            return null;
-
-        var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
-            map.Screen.ScreenData, ImageFormat.Pltt256, MapFormat.Text, map.Screen.Width,
-            map.Screen.Height, true);
-
-        if (decoded is null)
-            return null;
-
-        if (translucent)
+        try
         {
-            for (int i = 0; i < decoded.Width * decoded.Height; i++)
+            var tiles = _course.GetTexFileOrDefault<Ncgr>(TILES_FILENAME);
+            var palette = _course.GetTexFileOrDefault<Nclr>(PALETTE_FILENAME);
+            var map = _course.GetTexFileOrDefault<Nscr>(loadSecondMap ? SECOND_SCREEN_FILENAME : FIRST_SCREEN_FILENAME);
+
+            if (tiles is null || palette is null || map is null)
+                return null;
+
+            var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
+                map.Screen.ScreenData, ImageFormat.Pltt256, MapFormat.Text, map.Screen.Width,
+                map.Screen.Height, true);
+
+            if (decoded is null)
+                return null;
+
+            if (translucent)
             {
-                if ((decoded.Pixels[i] & 0xFF000000) != 0)
-                    decoded.Pixels[i] = (decoded.Pixels[i] & 0x00FFFFFF) | 0x77000000;
+                for (int i = 0; i < decoded.Width * decoded.Height; i++)
+                {
+                    if ((decoded.Pixels[i] & 0xFF000000) != 0)
+                        decoded.Pixels[i] = (decoded.Pixels[i] & 0x00FFFFFF) | 0x77000000;
+                }
             }
+
+            var texture = new GLTexture(decoded, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
+            texture.SetFilterMode(TextureFilterMode.Nearest, TextureFilterMode.Nearest);
+
+            return texture;
         }
-
-        var texture = new GLTexture(decoded, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
-        texture.SetFilterMode(TextureFilterMode.Nearest, TextureFilterMode.Nearest);
-
-        return texture;
+        catch
+        {
+            return null;
+        }
     }
 }

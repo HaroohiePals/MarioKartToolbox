@@ -17,6 +17,11 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
 
 class GlobalMapRenderGroup : RenderGroup
 {
+    private const string MAP_2D_FOLDER_NAME = "Map2D";
+    private const string TILES_FILENAME = $"{MAP_2D_FOLDER_NAME}/global.NCGR";
+    private const string PALETTE_FILENAME = $"{MAP_2D_FOLDER_NAME}/global.NCLR";
+    private const string SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/global1.NSCR";
+    
     private const float QUAD_HEIGHT_Y = 3000f;
 
     private readonly QuadRenderer? _quadRenderer;
@@ -160,29 +165,36 @@ class GlobalMapRenderGroup : RenderGroup
 
     private GLTexture? CreateTexture(bool translucent)
     {
-        var tiles = _course.GetTexFileOrDefault<Ncgr>("Map2D/global.NCGR");
-        var palette = _course.GetTexFileOrDefault<Nclr>("Map2D/global.NCLR");
-        var map = _course.GetTexFileOrDefault<Nscr>("Map2D/global1.NSCR");
-
-        var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
-            map.Screen.ScreenData, ImageFormat.Pltt16, MapFormat.Text, 
-            MkdsGlobalMapConsts.DISPLAY_WIDTH, MkdsGlobalMapConsts.DISPLAY_HEIGHT, true);
-
-        if (decoded is null)
-            return null;
-
-        if (translucent)
+        try
         {
-            for (int i = 0; i < decoded.Width * decoded.Height; i++)
+            var tiles = _course.GetTexFileOrDefault<Ncgr>(TILES_FILENAME);
+            var palette = _course.GetTexFileOrDefault<Nclr>(PALETTE_FILENAME);
+            var map = _course.GetTexFileOrDefault<Nscr>(SCREEN_FILENAME);
+
+            var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
+                map.Screen.ScreenData, ImageFormat.Pltt16, MapFormat.Text, 
+                MkdsGlobalMapConsts.DISPLAY_WIDTH, MkdsGlobalMapConsts.DISPLAY_HEIGHT, true);
+
+            if (decoded is null)
+                return null;
+
+            if (translucent)
             {
-                if ((decoded.Pixels[i] & 0xFF000000) != 0)
-                    decoded.Pixels[i] = (decoded.Pixels[i] & 0x00FFFFFF) | 0x77000000;
+                for (int i = 0; i < decoded.Width * decoded.Height; i++)
+                {
+                    if ((decoded.Pixels[i] & 0xFF000000) != 0)
+                        decoded.Pixels[i] = (decoded.Pixels[i] & 0x00FFFFFF) | 0x77000000;
+                }
             }
+
+            var texture = new GLTexture(decoded, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
+            texture.SetFilterMode(TextureFilterMode.Nearest, TextureFilterMode.Nearest);
+
+            return texture;
         }
-
-        var texture = new GLTexture(decoded, TextureWrapMode.Clamp, TextureWrapMode.Clamp);
-        texture.SetFilterMode(TextureFilterMode.Nearest, TextureFilterMode.Nearest);
-
-        return texture;
+        catch
+        {
+            return null;
+        }
     }
 }
