@@ -197,7 +197,7 @@ class GenerateGlobalMapViewModel
             TriangleExpansion = Settings.TriangleExpansion,
             ShowStartMarker = Settings.ShowStartMarker,
             StartPointPosition = startPoint?.Position ?? Vector3d.Zero,
-            StartPointRotation = startPoint?.Position ?? Vector3d.Zero,
+            StartPointRotation = startPoint?.Rotation ?? Vector3d.Zero,
             StartMarkerWidth = Math.Max(1, Settings.StartMarkerWidth),
             ShowStartMarkerLabel = Settings.ShowStartMarkerLabel,
             StartMarkerLabelOffset = Settings.StartMarkerLabelOffset
