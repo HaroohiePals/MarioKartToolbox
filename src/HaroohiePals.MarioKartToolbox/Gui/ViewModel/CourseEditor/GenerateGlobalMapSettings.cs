@@ -31,5 +31,8 @@ struct GenerateGlobalMapSettings
     public bool ShowStartMarker = true;
     public int StartMarkerWidth = 15;
 
+    public bool ShowStartMarkerLabel = true;
+    public Vector2i StartMarkerLabelOffset = Vector2i.Zero;
+
     public GenerateGlobalMapSettings() { }
 }

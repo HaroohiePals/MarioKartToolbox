@@ -17,8 +17,9 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 {
     private const string MODAL_TITLE = "Global Map Generator";
     private const uint SAFE_RECT_COLOR = 0xFF0000FF; // Red
-    private static System.Numerics.Vector2 ModalSize = new System.Numerics.Vector2(
-            ImGuiEx.CalcUiScaledValue(720), ImGuiEx.CalcUiScaledValue(450));
+
+    private static readonly System.Numerics.Vector2 ModalSize = new(ImGuiEx.CalcUiScaledValue(720),
+        ImGuiEx.CalcUiScaledValue(500));
 
     private GenerateGlobalMapModalViewStep _curStep = GenerateGlobalMapModalViewStep.Source;
 
@@ -44,11 +45,12 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             ImGui.Separator();
             canContinue = _curStep switch
             {
-                GenerateGlobalMapModalViewStep.Source    => DrawSourceStep(),
+                GenerateGlobalMapModalViewStep.Source => DrawSourceStep(),
                 GenerateGlobalMapModalViewStep.Configure => DrawConfigureStep(),
                 _ => false
             };
         }
+
         ImGui.EndChild();
         DrawNavigationButtons(canContinue);
     }
@@ -143,6 +145,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             DrawExpansionSection();
             DrawStartMarkerSection();
         }
+
         ImGui.EndChild();
     }
 
@@ -161,6 +164,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             viewModel.RenderPreview();
             RefreshPreviewTextureIfNeeded();
         }
+
         ImGui.NextColumn();
 
         if (!viewModel.Settings.ShowStartMarker) ImGui.BeginDisabled();
@@ -173,8 +177,32 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             viewModel.RenderPreview();
             RefreshPreviewTextureIfNeeded();
         }
+
         ImGui.PopItemWidth();
         ImGui.NextColumn();
+
+        ImGui.Text("Show Label");
+        ImGui.NextColumn();
+        if (ImGui.Checkbox("##ShowStartMarkerLabel", ref viewModel.Settings.ShowStartMarkerLabel))
+        {
+            viewModel.RenderPreview();
+            RefreshPreviewTextureIfNeeded();
+        }
+
+        ImGui.NextColumn();
+
+        if (!viewModel.Settings.ShowStartMarkerLabel) ImGui.BeginDisabled();
+        int[] labelOff = [viewModel.Settings.StartMarkerLabelOffset.X, viewModel.Settings.StartMarkerLabelOffset.Y];
+        if (DragInt2Row("StartMarkerLabelOffset", "Label Offset (px)", labelOff, 1f, 0, 0, out bool labelOffDeact))
+            viewModel.Settings.StartMarkerLabelOffset = new Vector2i(labelOff[0], labelOff[1]);
+        if (labelOffDeact)
+        {
+            viewModel.RenderPreview();
+            RefreshPreviewTextureIfNeeded();
+        }
+
+        if (!viewModel.Settings.ShowStartMarkerLabel) ImGui.EndDisabled();
+
         if (!viewModel.Settings.ShowStartMarker) ImGui.EndDisabled();
 
         ImGui.Columns(1);
@@ -214,6 +242,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             viewModel.RenderPreview();
             RefreshPreviewTextureIfNeeded();
         }
+
         ImGui.PopItemWidth();
         ImGui.NextColumn();
 
@@ -232,6 +261,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             viewModel.RenderPreview();
             RefreshPreviewTextureIfNeeded();
         }
+
         if (!canAuto) ImGui.EndDisabled();
 
         ImGui.SameLine();
@@ -246,6 +276,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
                 RefreshPreviewTextureIfNeeded();
             }
         }
+
         if (!canLoadExisting) ImGui.EndDisabled();
     }
 
@@ -288,7 +319,8 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
     private void DrawExpansionSection()
     {
-        if (!ImGui.CollapsingHeader("Rasterization Settings##GenerateGlobalMap_RasterizationSettings", ImGuiTreeNodeFlags.DefaultOpen))
+        if (!ImGui.CollapsingHeader("Rasterization Settings##GenerateGlobalMap_RasterizationSettings",
+                ImGuiTreeNodeFlags.DefaultOpen))
             return;
 
         ImGui.Columns(2, "##Columns_Expansion");
@@ -301,6 +333,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             viewModel.RenderPreview();
             RefreshPreviewTextureIfNeeded();
         }
+
         ImGui.PopItemWidth();
         ImGui.NextColumn();
         ImGui.Columns(1);
@@ -316,11 +349,11 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         ImGui.TextDisabled("Drag the minimap to adjust its position\nScroll to zoom in/out.");
 
         bool canSave = viewModel.HasGeometry;
-        if (!canSave) 
+        if (!canSave)
             ImGui.BeginDisabled();
         if (ImGui.Button("Save as PNG..."))
             BrowseAndSavePng();
-        if (!canSave) 
+        if (!canSave)
             ImGui.EndDisabled();
 
         if (_previewTexture is not null)
@@ -371,7 +404,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
             DrawLayer(_courseBgTexture, origin, side, displayH);
             DrawLayer(_hudOverlayTexture, origin, side, displayH);
-            DrawLayerOffset(_previewTexture, origin, 
+            DrawLayerOffset(_previewTexture, origin,
                 _isPanning ? _panAccumPx : System.Numerics.Vector2.Zero, side, side);
 
             if (viewModel.Settings.ShowSafeArea)
@@ -390,7 +423,6 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         {
             ImGui.Dummy(new System.Numerics.Vector2(side, side));
         }
-
     }
 
     private void DrawNavigationButtons(bool canContinue)
@@ -407,6 +439,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             if (!isFirst)
                 _curStep--;
         }
+
         if (isFirst) ImGui.EndDisabled();
 
         ImGui.SameLine();
@@ -427,9 +460,11 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
                     viewModel.RenderPreview();
                     RefreshPreviewTextureIfNeeded();
                 }
+
                 _curStep++;
             }
         }
+
         if (!canContinue) ImGui.EndDisabled();
     }
 

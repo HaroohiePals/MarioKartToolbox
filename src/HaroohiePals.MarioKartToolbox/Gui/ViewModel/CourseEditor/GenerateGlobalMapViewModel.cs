@@ -36,6 +36,7 @@ class GenerateGlobalMapViewModel
     ];
 
     private readonly ICourseEditorContext _courseEditorContext;
+    private readonly MkdsGlobalMapRasterizer _rasterizer = new MkdsGlobalMapRasterizer();
 
     private IReadOnlyList<Triangle> _loadedTriangles = [];
 
@@ -174,17 +175,34 @@ class GenerateGlobalMapViewModel
         if (!HasGeometry)
             return false;
 
-        var marker = Settings.ShowStartMarker
-            ? _courseEditorContext.Course.MapData.StartPoints.FirstOrDefault()
-            : null;
-
-        PreviewBitmap = MkdsGlobalMapRasterizer.Rasterize(
-            _loadedTriangles, Settings.TopLeft, Settings.BottomRight,
-            Settings.Mode, Settings.SafeArea, Settings.TriangleExpansion,
-            marker, Math.Max(1, Settings.StartMarkerWidth));
+        PreviewBitmap = _rasterizer.Rasterize(BuildRasterizeOptions());
         PreviewVersion++;
 
         return true;
+    }
+
+    private MkdsGlobalMapRasterizeOptions BuildRasterizeOptions()
+    {
+        var startPoint = Settings.ShowStartMarker
+            ? _courseEditorContext.Course.MapData.StartPoints.FirstOrDefault()
+            : null;
+
+        var options = new MkdsGlobalMapRasterizeOptions
+        {
+            Triangles = _loadedTriangles,
+            TopLeft = Settings.TopLeft,
+            BottomRight = Settings.BottomRight,
+            Mode = Settings.Mode,
+            SafeArea = Settings.SafeArea,
+            TriangleExpansion = Settings.TriangleExpansion,
+            ShowStartMarker = Settings.ShowStartMarker,
+            StartPointPosition = startPoint?.Position ?? Vector3d.Zero,
+            StartPointRotation = startPoint?.Position ?? Vector3d.Zero,
+            StartMarkerWidth = Math.Max(1, Settings.StartMarkerWidth),
+            ShowStartMarkerLabel = Settings.ShowStartMarkerLabel,
+            StartMarkerLabelOffset = Settings.StartMarkerLabelOffset
+        };
+        return options;
     }
 
     public bool SavePng(string path)
@@ -192,18 +210,13 @@ class GenerateGlobalMapViewModel
         if (string.IsNullOrWhiteSpace(path))
             return false;
 
-        var marker = Settings.ShowStartMarker
-            ? _courseEditorContext.Course.MapData.StartPoints.FirstOrDefault()
-            : null;
-
-        var bitmap = PreviewBitmap ?? MkdsGlobalMapRasterizer.Rasterize(
-            _loadedTriangles, Settings.TopLeft, Settings.BottomRight,
-            Settings.Mode, Settings.SafeArea, Settings.TriangleExpansion,
-            marker, Math.Max(1, Settings.StartMarkerWidth));
+        var bitmap = PreviewBitmap ?? _rasterizer.Rasterize(BuildRasterizeOptions());
 
         try
         {
-            MkdsGlobalMapRasterizer.SavePng(bitmap, path);
+            var byteSpan = MemoryMarshal.AsBytes<uint>(bitmap.Pixels);
+            using var image = Image.LoadPixelData<Bgra32>(byteSpan, bitmap.Width, bitmap.Height);
+            image.SaveAsPng(path);
             ErrorMessage = null;
             return true;
         }
