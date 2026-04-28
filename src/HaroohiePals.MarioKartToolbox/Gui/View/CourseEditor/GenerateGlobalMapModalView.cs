@@ -82,7 +82,7 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             _generateTask.Dispose();
             _generateTask = null;
             _generatingModal.Close();
-            if (viewModel.TryApplyGeneratedGraphics())
+            if (viewModel.Apply(true))
                 Close();
         }
 
@@ -543,10 +543,9 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         {
             if (isLast)
             {
-                viewModel.Commit();
-
                 if (_outputMode == GenerateGlobalMapOutputMode.CoordinatesOnly)
                 {
+                    viewModel.Apply(false);
                     Close();
                 }
                 else

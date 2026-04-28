@@ -7,6 +7,7 @@ using HaroohiePals.MarioKartToolbox.Resources;
 using HaroohiePals.Mathematics;
 using HaroohiePals.Nitro.Gx;
 using HaroohiePals.Nitro.NitroSystem.G2d;
+using HaroohiePals.NitroKart.Actions;
 using HaroohiePals.NitroKart.Course;
 using OpenTK.Mathematics;
 using SixLabors.ImageSharp;
@@ -297,17 +298,29 @@ class GenerateGlobalMapViewModel
         }
     }
 
-    public bool TryApplyGeneratedGraphics()
+    public bool Apply(bool includeGeneratedGraphics)
     {
-        if (_pendingGeneratedGraphics is null)
-            return false;
+        var actions = BuildMetadataActions();
 
-        _courseEditorContext.Course.GlobalMapGraphics = _pendingGeneratedGraphics;
-        _pendingGeneratedGraphics = null;
+        if (includeGeneratedGraphics)
+        {
+            if (_pendingGeneratedGraphics is null)
+                return false;
+
+            actions.Add(new SetMkdsCourseGlobalMapGraphicsAction(
+                _courseEditorContext.Course, _pendingGeneratedGraphics));
+            _pendingGeneratedGraphics = null;
+        }
+
+        if (actions.Count == 0)
+            return true;
+
+        IAction action = actions.Count == 1 ? actions[0] : new BatchAction(actions);
+        _courseEditorContext.ActionStack.Add(action);
         return true;
     }
 
-    public bool Commit()
+    private List<IAction> BuildMetadataActions()
     {
         var metadata = _courseEditorContext.Course.Metadata;
         var existing = metadata.GlobalMapSettings;
@@ -320,21 +333,18 @@ class GenerateGlobalMapViewModel
                 BottomRight = Settings.BottomRight,
                 Mode = Settings.Mode,
             };
-            _courseEditorContext.ActionStack.Add(
-                metadata.SetPropertyAction(m => m.GlobalMapSettings, (MkdsGlobalMapSettings?)created));
-        }
-        else
-        {
-            var actions = new List<IAction>
+            return new List<IAction>
             {
-                existing.SetPropertyAction(s => s.TopLeft, Settings.TopLeft),
-                existing.SetPropertyAction(s => s.BottomRight, Settings.BottomRight),
-                existing.SetPropertyAction(s => s.Mode, Settings.Mode),
+                metadata.SetPropertyAction(m => m.GlobalMapSettings, (MkdsGlobalMapSettings?)created)
             };
-            _courseEditorContext.ActionStack.Add(new BatchAction(actions));
         }
 
-        return true;
+        return new List<IAction>
+        {
+            existing.SetPropertyAction(s => s.TopLeft, Settings.TopLeft),
+            existing.SetPropertyAction(s => s.BottomRight, Settings.BottomRight),
+            existing.SetPropertyAction(s => s.Mode, Settings.Mode),
+        };
     }
 
     private IReadOnlyList<Triangle> LoadFromCourseKcl()
