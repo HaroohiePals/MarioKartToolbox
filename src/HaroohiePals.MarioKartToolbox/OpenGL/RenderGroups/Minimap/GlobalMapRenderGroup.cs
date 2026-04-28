@@ -17,11 +17,6 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
 
 class GlobalMapRenderGroup : RenderGroup
 {
-    private const string MAP_2D_FOLDER_NAME = "Map2D";
-    private const string TILES_FILENAME = $"{MAP_2D_FOLDER_NAME}/global.NCGR";
-    private const string PALETTE_FILENAME = $"{MAP_2D_FOLDER_NAME}/global.NCLR";
-    private const string SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/global1.NSCR";
-    
     private const float QUAD_HEIGHT_Y = 3000f;
 
     private readonly QuadRenderer? _quadRenderer;
@@ -167,12 +162,12 @@ class GlobalMapRenderGroup : RenderGroup
     {
         try
         {
-            var tiles = _course.GetTexFileOrDefault<Ncgr>(TILES_FILENAME);
-            var palette = _course.GetTexFileOrDefault<Nclr>(PALETTE_FILENAME);
-            var map = _course.GetTexFileOrDefault<Nscr>(SCREEN_FILENAME);
+            var graphics = _course.GlobalMapGraphics;
+            if (graphics is null)
+                return null;
 
-            var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
-                map.Screen.ScreenData, ImageFormat.Pltt16, MapFormat.Text, 
+            var decoded = GxUtil.DecodeChar(graphics.Ncgr.Character.CharacterData, graphics.Nclr.Palette.Palette,
+                graphics.Nscr.Screen.ScreenData, ImageFormat.Pltt16, MapFormat.Text,
                 MkdsGlobalMapConsts.DISPLAY_WIDTH, MkdsGlobalMapConsts.DISPLAY_HEIGHT, true);
 
             if (decoded is null)

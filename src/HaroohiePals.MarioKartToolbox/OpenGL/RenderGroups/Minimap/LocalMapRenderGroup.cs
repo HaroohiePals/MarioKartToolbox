@@ -15,12 +15,6 @@ namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
 
 class LocalMapRenderGroup : RenderGroup
 {
-    private const string MAP_2D_FOLDER_NAME = "Map2D";
-    private const string TILES_FILENAME = $"{MAP_2D_FOLDER_NAME}/local.NCGR";
-    private const string PALETTE_FILENAME = $"{MAP_2D_FOLDER_NAME}/local.NCLR";
-    private const string FIRST_SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/local2.NSCR";
-    private const string SECOND_SCREEN_FILENAME = $"{MAP_2D_FOLDER_NAME}/local3.NSCR";
-
     private const int LOCAL_MAP_FIRST_SCREEN_SUB_INDEX = 0;
     private const int LOCAL_MAP_SECOND_SCREEN_SUB_INDEX = 1;
     private const float QUAD_HEIGHT_Y = 2500f;
@@ -211,14 +205,12 @@ class LocalMapRenderGroup : RenderGroup
     {
         try
         {
-            var tiles = _course.GetTexFileOrDefault<Ncgr>(TILES_FILENAME);
-            var palette = _course.GetTexFileOrDefault<Nclr>(PALETTE_FILENAME);
-            var map = _course.GetTexFileOrDefault<Nscr>(loadSecondMap ? SECOND_SCREEN_FILENAME : FIRST_SCREEN_FILENAME);
-
-            if (tiles is null || palette is null || map is null)
+            var graphics = loadSecondMap ? _course.LocalMapSecondGraphics : _course.LocalMapFirstGraphics;
+            if (graphics is null)
                 return null;
 
-            var decoded = GxUtil.DecodeChar(tiles.Character.CharacterData, palette.Palette.Palette,
+            var map = graphics.Nscr;
+            var decoded = GxUtil.DecodeChar(graphics.Ncgr.Character.CharacterData, graphics.Nclr.Palette.Palette,
                 map.Screen.ScreenData, ImageFormat.Pltt256, MapFormat.Text, map.Screen.Width,
                 map.Screen.Height, true);
 

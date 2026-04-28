@@ -402,18 +402,16 @@ class GenerateGlobalMapViewModel
     {
         try
         {
-            var tiles = course.GetTexFileOrDefault<Ncgr>("Map2D/global2.NCGR");
-            var palette = course.GetTexFileOrDefault<Nclr>("Map2D/global2.NCLR");
-            var screen = course.GetTexFileOrDefault<Nscr>("Map2D/global2.NSCR");
-            if (tiles?.Character?.CharacterData is null
-                || palette?.Palette?.Palette is null
-                || screen?.Screen?.ScreenData is null)
+            var graphics = course.GlobalMapBackgroundGraphics;
+            if (graphics?.Ncgr?.Character?.CharacterData is null
+                || graphics.Nclr?.Palette?.Palette is null
+                || graphics.Nscr?.Screen?.ScreenData is null)
                 return null;
 
             return GxUtil.DecodeChar(
-                tiles.Character.CharacterData,
-                palette.Palette.Palette,
-                screen.Screen.ScreenData,
+                graphics.Ncgr.Character.CharacterData,
+                graphics.Nclr.Palette.Palette,
+                graphics.Nscr.Screen.ScreenData,
                 ImageFormat.Pltt16, MapFormat.Text,
                 MkdsGlobalMapConsts.DISPLAY_WIDTH, MkdsGlobalMapConsts.DISPLAY_HEIGHT,
                 firstTransparent: true);
