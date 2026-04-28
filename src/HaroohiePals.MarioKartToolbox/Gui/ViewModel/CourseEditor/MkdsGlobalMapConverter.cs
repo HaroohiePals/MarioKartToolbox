@@ -17,7 +17,8 @@ static class MkdsGlobalMapConverter
     private static readonly TimeSpan AvailabilityTimeout = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan RunTimeout = TimeSpan.FromSeconds(60);
 
-    public static async Task<bool> IsAvailableAsync()
+    // Wrapped in Task.Run so Process.Start doesn't freeze the UI thread.
+    public static Task<bool> IsAvailableAsync() => Task.Run(async () =>
     {
         Process? process = null;
         try
@@ -56,9 +57,9 @@ static class MkdsGlobalMapConverter
         {
             process?.Dispose();
         }
-    }
+    });
 
-    public static async Task<MkdsMapGraphics> RunAsync(string pngPath, string tempDir)
+    public static Task<MkdsMapGraphics> RunAsync(string pngPath, string tempDir) => Task.Run(async () =>
     {
         var psi = new ProcessStartInfo
         {
@@ -113,7 +114,7 @@ static class MkdsGlobalMapConverter
         var nscr = new Nscr(await File.ReadAllBytesAsync(nscrPath));
 
         return new MkdsMapGraphics(ncgr, nclr, nscr);
-    }
+    });
 
     private static void TryKill(Process process)
     {
