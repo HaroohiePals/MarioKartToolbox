@@ -1,11 +1,13 @@
 using System.Numerics;
 using HaroohiePals.Gui;
+using HaroohiePals.IO.Archive;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
 using HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 using HaroohiePals.MarioKartToolbox.Gui.Viewport;
 using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData;
 using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
 using HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.NitroSystem;
+using HaroohiePals.NitroKart.Course;
 using ImGuiNET;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
@@ -18,7 +20,7 @@ sealed class MinimapViewportView : CourseViewportView
     private readonly MapDataRenderGroupFactory _renderGroupFactory;
     private readonly CourseModelRenderGroup _courseModelRenderGroup;
     private readonly LocalMapRenderGroup _localMapRenderGroup;
-    private readonly GlobalMapRenderGroup _globalMapRenderGroup;
+    private GlobalMapRenderGroup _globalMapRenderGroup;
 
     public MinimapViewportView(MinimapViewportViewModel viewModel, IApplicationSettingsService applicationSettings)
         : base(PANE_TITLE, viewModel.Context)
@@ -56,6 +58,39 @@ sealed class MinimapViewportView : CourseViewportView
 
         _viewportPanel.Context.SceneObjectHolder = Context.SceneObjectHolder;
         _viewportPanel.Context.ActionStack = Context.ActionStack;
+
+        Context.Course.CourseFileUpdated += OnCourseFileUpdated;
+    }
+
+    public override void Dispose()
+    {
+        Context.Course.CourseFileUpdated -= OnCourseFileUpdated;
+        base.Dispose();
+    }
+
+    private void OnCourseFileUpdated(bool isTex, string path)
+    {
+        if (!isTex)
+            return;
+        
+        if (MkdsCourseTexPaths.IsGlobalMapPath(path))
+            RebuildGlobalMapRenderGroup();
+    }
+
+    private void RebuildGlobalMapRenderGroup()
+    {
+        bool enabled = _globalMapRenderGroup.Enabled;
+        bool translucent = _globalMapRenderGroup.RenderTranslucent;
+
+        _globalMapRenderGroup.Dispose();
+        _scene.RenderGroups.Remove(_globalMapRenderGroup);
+
+        _globalMapRenderGroup = new GlobalMapRenderGroup(Context.Course)
+        {
+            Enabled = enabled,
+            RenderTranslucent = translucent,
+        };
+        _scene.RenderGroups.Add(_globalMapRenderGroup);
     }
 
     public override bool Draw()

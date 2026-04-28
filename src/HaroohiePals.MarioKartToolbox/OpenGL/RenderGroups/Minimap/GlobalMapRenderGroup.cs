@@ -15,7 +15,7 @@ using OpenTK.Mathematics;
 
 namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.Minimap;
 
-class GlobalMapRenderGroup : RenderGroup
+class GlobalMapRenderGroup : RenderGroup, IDisposable
 {
     private const float QUAD_HEIGHT_Y = 3000f;
 
@@ -156,6 +156,12 @@ class GlobalMapRenderGroup : RenderGroup
             new Vector3d(worldCenterX, QUAD_HEIGHT_Y, worldCenterZ),
             rotation,
             new Vector3d(halfWidth, 1, halfHeight));
+    }
+
+    public void Dispose()
+    {
+        _quadRenderer?.Dispose();
+        _quadRendererTranslucent?.Dispose();
     }
 
     private GLTexture? CreateTexture(bool translucent)

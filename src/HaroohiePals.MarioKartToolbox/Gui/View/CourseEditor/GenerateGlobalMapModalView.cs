@@ -9,6 +9,7 @@ using NativeFileDialogs.Net;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 
@@ -35,8 +36,22 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
     private bool _configureColumnsInitialized;
 
+    private GenerateGlobalMapModalViewStep? _previousDrawnStep;
+    private GenerateGlobalMapOutputMode _outputMode = GenerateGlobalMapOutputMode.CoordinatesAndGraphics;
+
+    private readonly LoadingModalView _checkConverterModal = new("Checking ptexconv...");
+    private readonly LoadingModalView _generatingModal = new("Generating minimap... Please wait.");
+    private Task? _availabilityTask;
+    private Task? _generateTask;
+
     protected override void DrawContent()
     {
+        if (_previousDrawnStep != _curStep)
+        {
+            OnEnterStep(_curStep);
+            _previousDrawnStep = _curStep;
+        }
+
         bool canContinue = false;
         if (ImGui.BeginChild("##GenerateGlobalMap_Content",
                 new System.Numerics.Vector2(0, -ImGui.GetFrameHeightWithSpacing())))
@@ -47,12 +62,42 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
             {
                 GenerateGlobalMapModalViewStep.Source => DrawSourceStep(),
                 GenerateGlobalMapModalViewStep.Configure => DrawConfigureStep(),
+                GenerateGlobalMapModalViewStep.Output => DrawOutputStep(),
                 _ => false
             };
         }
 
         ImGui.EndChild();
         DrawNavigationButtons(canContinue);
+
+        if (_availabilityTask is { IsCompleted: true })
+        {
+            _availabilityTask.Dispose();
+            _availabilityTask = null;
+            _checkConverterModal.Close();
+        }
+
+        if (_generateTask is { IsCompleted: true })
+        {
+            _generateTask.Dispose();
+            _generateTask = null;
+            _generatingModal.Close();
+            if (viewModel.TryApplyGeneratedGraphics())
+                Close();
+        }
+
+        _checkConverterModal.Draw();
+        _generatingModal.Draw();
+    }
+
+    private void OnEnterStep(GenerateGlobalMapModalViewStep step)
+    {
+        if (step == GenerateGlobalMapModalViewStep.Output)
+        {
+            _outputMode = GenerateGlobalMapOutputMode.CoordinatesAndGraphics;
+            _checkConverterModal.Open();
+            _availabilityTask = viewModel.RefreshGenerateGraphicsAvailabilityAsync();
+        }
     }
 
     protected override void OnClose()
@@ -68,6 +113,11 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
         _backgroundTexturesInitialized = false;
         _configureColumnsInitialized = false;
+        _previousDrawnStep = null;
+        _curStep = GenerateGlobalMapModalViewStep.Source;
+
+        _availabilityTask = null;
+        _generateTask = null;
     }
 
     private bool DrawSourceStep()
@@ -134,6 +184,58 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         ImGui.Columns(1);
 
         return !viewModel.HasError;
+    }
+
+    private bool DrawOutputStep()
+    {
+        ImGui.TextUnformatted("Choose what to apply when saving:");
+        ImGui.Separator();
+
+        int mode = (int)_outputMode;
+        if (ImGui.RadioButton("Apply coordinates only", ref mode,
+                (int)GenerateGlobalMapOutputMode.CoordinatesOnly))
+        {
+            _outputMode = GenerateGlobalMapOutputMode.CoordinatesOnly;
+        }
+
+        if (ImGui.RadioButton("Apply coordinates + generate graphics (ptexconv)", ref mode,
+                (int)GenerateGlobalMapOutputMode.CoordinatesAndGraphics))
+        {
+            _outputMode = GenerateGlobalMapOutputMode.CoordinatesAndGraphics;
+        }
+
+        if (!viewModel.IsCheckingAvailability
+            && _outputMode == GenerateGlobalMapOutputMode.CoordinatesAndGraphics
+            && !viewModel.CanGenerateGraphics)
+        {
+            ImGui.TextDisabled("'ptexconv' was not found on PATH. Install it or pick another option.");
+        }
+
+        ImGui.Separator();
+
+        bool canSavePng = viewModel.HasGeometry;
+        if (!canSavePng)
+            ImGui.BeginDisabled();
+        if (ImGui.Button("Save preview as PNG..."))
+            BrowseAndSavePng();
+        if (!canSavePng)
+            ImGui.EndDisabled();
+
+        if (viewModel.HasError)
+        {
+            ImGui.Separator();
+            ImGui.TextUnformatted($"Error: {viewModel.ErrorMessage}");
+        }
+
+        if (!viewModel.HasGeometry)
+            return false;
+        if (viewModel.IsCheckingAvailability)
+            return false;
+        if (_outputMode == GenerateGlobalMapOutputMode.CoordinatesAndGraphics
+            && !viewModel.CanGenerateGraphics)
+            return false;
+
+        return true;
     }
 
     private void DrawSettingsPanel()
@@ -348,14 +450,6 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
 
         ImGui.TextDisabled("Drag the minimap to adjust its position\nScroll to zoom in/out.");
 
-        bool canSave = viewModel.HasGeometry;
-        if (!canSave)
-            ImGui.BeginDisabled();
-        if (ImGui.Button("Save as PNG..."))
-            BrowseAndSavePng();
-        if (!canSave)
-            ImGui.EndDisabled();
-
         if (_previewTexture is not null)
         {
             var origin = ImGui.GetCursorPos();
@@ -449,8 +543,17 @@ class GenerateGlobalMapModalView(GenerateGlobalMapViewModel viewModel)
         {
             if (isLast)
             {
-                if (viewModel.Commit())
+                viewModel.Commit();
+
+                if (_outputMode == GenerateGlobalMapOutputMode.CoordinatesOnly)
+                {
                     Close();
+                }
+                else
+                {
+                    _generatingModal.Open();
+                    _generateTask = viewModel.GenerateGraphicsAsync();
+                }
             }
             else
             {

@@ -1,6 +1,9 @@
+#nullable enable
+using HaroohiePals.IO.Archive;
+
 namespace HaroohiePals.NitroKart.Course;
 
-internal static class MkdsCourseTexPaths
+public static class MkdsCourseTexPaths
 {
     private const string MAP_2D = "/Map2D";
 
@@ -15,4 +18,9 @@ internal static class MkdsCourseTexPaths
     public const string LOCAL_NCLR = $"{MAP_2D}/local.NCLR";
     public const string LOCAL_2_NSCR = $"{MAP_2D}/local2.NSCR";
     public const string LOCAL_3_NSCR = $"{MAP_2D}/local3.NSCR";
+
+    public static bool IsGlobalMapPath(string path)
+        => Archive.PathEqual(path, GLOBAL_NCGR)
+        || Archive.PathEqual(path, GLOBAL_NCLR)
+        || Archive.PathEqual(path, GLOBAL_1_NSCR);
 }

@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.CourseEditor;
 
@@ -214,9 +215,7 @@ class GenerateGlobalMapViewModel
 
         try
         {
-            var byteSpan = MemoryMarshal.AsBytes<uint>(bitmap.Pixels);
-            using var image = Image.LoadPixelData<Bgra32>(byteSpan, bitmap.Width, bitmap.Height);
-            image.SaveAsPng(path);
+            SaveBitmapAsPng(bitmap, path);
             ErrorMessage = null;
             return true;
         }
@@ -225,6 +224,87 @@ class GenerateGlobalMapViewModel
             ErrorMessage = $"Failed to save PNG: {ex.Message}";
             return false;
         }
+    }
+
+    private static void SaveBitmapAsPng(Rgba8Bitmap bitmap, string path)
+    {
+        var byteSpan = MemoryMarshal.AsBytes<uint>(bitmap.Pixels);
+        using var image = Image.LoadPixelData<Bgra32>(byteSpan, bitmap.Width, bitmap.Height);
+        image.SaveAsPng(path);
+    }
+
+    private bool? _canGenerateGraphics;
+    private bool _isCheckingAvailability;
+    private MkdsMapGraphics? _pendingGeneratedGraphics;
+
+    public bool CanGenerateGraphics => _canGenerateGraphics ?? false;
+    public bool IsCheckingAvailability => _isCheckingAvailability;
+
+    public async Task RefreshGenerateGraphicsAvailabilityAsync()
+    {
+        _isCheckingAvailability = true;
+        try
+        {
+            _canGenerateGraphics = await MkdsGlobalMapConverter.IsAvailableAsync();
+        }
+        finally
+        {
+            _isCheckingAvailability = false;
+        }
+    }
+
+    public async Task GenerateGraphicsAsync()
+    {
+        _pendingGeneratedGraphics = null;
+
+        if (!HasGeometry)
+        {
+            ErrorMessage = "No geometry to generate graphics from.";
+            return;
+        }
+
+        RenderPreview();
+        var bitmap = PreviewBitmap;
+        if (bitmap is null)
+        {
+            ErrorMessage = "Preview is not available.";
+            return;
+        }
+
+        string tempDir = Path.Combine(Path.GetTempPath(), "mktb-globalmap-" + Guid.NewGuid().ToString("N"));
+        string pngPath = Path.Combine(tempDir, "globalmap.png");
+
+        try
+        {
+            await Task.Run(() =>
+            {
+                Directory.CreateDirectory(tempDir);
+                SaveBitmapAsPng(bitmap, pngPath);
+            });
+
+            _pendingGeneratedGraphics = await MkdsGlobalMapConverter.RunAsync(pngPath, tempDir);
+            ErrorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            _pendingGeneratedGraphics = null;
+            ErrorMessage = $"Failed to generate graphics: {ex.Message}";
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, true); }
+            catch { /* ignored */ }
+        }
+    }
+
+    public bool TryApplyGeneratedGraphics()
+    {
+        if (_pendingGeneratedGraphics is null)
+            return false;
+
+        _courseEditorContext.Course.GlobalMapGraphics = _pendingGeneratedGraphics;
+        _pendingGeneratedGraphics = null;
+        return true;
     }
 
     public bool Commit()

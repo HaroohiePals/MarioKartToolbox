@@ -4,6 +4,7 @@ enum GenerateGlobalMapModalViewStep
 {
     Source,
     Configure,
+    Output,
 
-    Last = Configure
+    Last = Output
 }
