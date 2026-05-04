@@ -46,7 +46,7 @@ public class MkdsRomProjectFactory
             IgnoreFilePatterns = 
             [
                 ".DS_Store",    // Ignore macOS metadata file
-                "*.json",       // Ignore JSON files such as metadata.json in the course files
+                "*.json",       // Ignore JSON files such as course_info.json in the course files
             ] 
         };
 

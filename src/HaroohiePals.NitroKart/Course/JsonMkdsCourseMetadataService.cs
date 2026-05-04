@@ -10,7 +10,7 @@ namespace HaroohiePals.NitroKart.Course;
 
 public class JsonMkdsCourseMetadataService : IMkdsCourseMetadataService
 {
-    private const string COURSE_METADATA_FILENAME = "metadata.json";
+    private const string COURSE_METADATA_FILENAME = "course_info.json";
     private const string COURSE_METADATA_PATH = $"/{COURSE_METADATA_FILENAME}";
 
     private readonly JsonSerializerSettings _jsonSettings = new()
