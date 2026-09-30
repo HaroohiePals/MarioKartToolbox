@@ -522,7 +522,7 @@ class GenerateGlobalMapViewModel
 
             using var img = Image.Load<Bgra32>(png);
             var bmp = new Rgba8Bitmap(img.Width, img.Height);
-            img.CopyPixelDataTo(MemoryMarshal.AsBytes<uint>(bmp.Pixels));
+            img.CopyPixelDataTo(MemoryMarshal.AsBytes(bmp.Pixels.AsSpan()));
             return bmp;
         }
         catch

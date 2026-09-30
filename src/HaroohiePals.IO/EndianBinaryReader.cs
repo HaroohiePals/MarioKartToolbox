@@ -106,14 +106,14 @@ namespace HaroohiePals.IO
         {
             int size       = sizeof(T);
             var result     = new T[count];
-            var byteResult = MemoryMarshal.Cast<T, byte>(result);
+            var byteResult = MemoryMarshal.Cast<T, byte>(result.AsSpan());
             BaseStream.Read(byteResult);
 
-            if (Reverse && size > 1)
-            {
-                for (int i = 0; i < size * count; i += size)
-                    byteResult.Slice(i, size).Reverse();
-            }
+            if (!Reverse || size <= 1) 
+                return result;
+            
+            for (int i = 0; i < size * count; i += size)
+                byteResult.Slice(i, size).Reverse();
 
             return result;
         }

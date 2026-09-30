@@ -26,10 +26,10 @@ Planned features will be added in the issues of this repository.
 ![Camera Preview](./assets/img/nkm_camera_preview.png)
 
 ## Linux Build Instructions
-1. Install the .NET 8.0 SDK ([https://learn.microsoft.com/en-us/dotnet/core/install/linux](https://learn.microsoft.com/en-us/dotnet/core/install/linux))
+1. Install the .NET 10.0 SDK ([https://learn.microsoft.com/en-us/dotnet/core/install/linux](https://learn.microsoft.com/en-us/dotnet/core/install/linux))
 1. `git clone https://github.com/HaroohiePals/MarioKartToolbox.git`
 2. `cd MarioKartToolbox`
-3. `dotnet publish src/HaroohiePals.MarioKartToolbox/HaroohiePals.MarioKartToolbox.csproj -c Release -f net8.0 /p:DebugType=None /p:DebugSymbols=false --self-contained false --output ./Release/`
+3. `dotnet publish src/HaroohiePals.MarioKartToolbox/HaroohiePals.MarioKartToolbox.csproj -c Release -f net10.0 /p:DebugType=None /p:DebugSymbols=false --self-contained false --output ./Release/`
 4. `./Release/MarioKartToolbox`
 
 ## Credits
