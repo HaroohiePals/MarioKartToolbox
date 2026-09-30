@@ -39,7 +39,7 @@ class CollisionImportModalView : ModalView
     private bool _selectionChanged;
     private ListBoxView _materialListBox;
     private KclOctree.CompressionMethod _compressionMethod = KclOctree.CompressionMethod.Merge;
-    private Task _importTask;
+    private Task<MkdsKcl> _importTask;
 
     public CollisionImportModalView(ICourseEditorContext context) : base("Import Collision",
         new Vector2(ImGuiEx.CalcUiScaledValue(600), ImGuiEx.CalcUiScaledValue(500)))
@@ -121,21 +121,23 @@ class CollisionImportModalView : ModalView
                     .ToDictionary<CollisionImportMaterialAttribute, string, ushort>(
                         m => m.MaterialName, m => m.Attribute);
 
-                var newCollision = MkdsKclConverter.FromObj(_objFile, materialAttributes, _octreeParams,
+                return MkdsKclConverter.FromObj(_objFile, materialAttributes, _octreeParams,
                     _compressionMethod);
-
-                _context.ActionStack.Add(new SetMkdsCourseCollisionAction(_context.Course, newCollision));
             }
             catch
             {
-                // ignored
+                return null;
             }
         });
     }
 
     private void EndImportTask()
     {
-        _importTask?.Dispose();
+        var newCollision = _importTask.Result;
+        if (newCollision != null)
+            _context.ActionStack.Add(new SetMkdsCourseCollisionAction(_context.Course, newCollision));
+
+        _importTask.Dispose();
         _importTask = null;
         _loadingModal.Close();
         Close();
