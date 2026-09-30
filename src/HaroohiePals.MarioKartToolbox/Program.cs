@@ -15,6 +15,7 @@ using HaroohiePals.NitroKart.Validation.MapData;
 using System;
 using System.IO;
 using HaroohiePals.NitroKart.Course;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using TextCopy;
 
 namespace HaroohiePals.MarioKartToolbox;
@@ -102,6 +103,10 @@ static class Program
 
         //Set working dir
         Directory.SetCurrentDirectory(workingDir);
+
+        // Inside a macOS .app bundle GLFW would chdir to Contents/Resources on init,
+        // undoing the working dir set above.
+        GLFW.InitHint(InitHintBool.CocoaChdirResources, false);
 
         //Copy default imgui.ini inside this folder
         if (!File.Exists(IMGUI_INI_FILE_PATH))
