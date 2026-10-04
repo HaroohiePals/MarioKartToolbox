@@ -1,4 +1,5 @@
-﻿using HaroohiePals.MarioKartToolbox.Application.Settings;
+﻿#nullable enable
+using HaroohiePals.MarioKartToolbox.Application.Settings;
 using HaroohiePals.MarioKartToolbox.Infrastructure.Discord;
 using System;
 
@@ -10,6 +11,7 @@ sealed class ApplicationDiscordRichPresenceService : IApplicationDiscordRichPres
     private readonly IApplicationSettingsService _applicationSettings;
 
     private string _gameName = string.Empty;
+    private string? _courseName;
 
     private RichPresenceApplicationState _applicationState = RichPresenceApplicationState.Idle;
 
@@ -29,13 +31,19 @@ sealed class ApplicationDiscordRichPresenceService : IApplicationDiscordRichPres
         UpdateRichPresence();
     }
 
+    public void SetCourseName(string? courseName)
+    {
+        _courseName = courseName;
+        UpdateRichPresence();
+    }
+
     public void SetApplicationState(RichPresenceApplicationState state)
     {
         _applicationState = state;
         UpdateRichPresence();
     }
 
-    private void OnApplicationSettingsChanged(object sender, EventArgs e)
+    private void OnApplicationSettingsChanged(object? sender, EventArgs e)
     {
         UpdateRichPresence();
     }
@@ -55,7 +63,10 @@ sealed class ApplicationDiscordRichPresenceService : IApplicationDiscordRichPres
                 description = "Browsing through the contents";
                 break;
             case RichPresenceApplicationState.CourseEditor:
-                description = "Editing a course";
+                description = _applicationSettings.Settings.Discord.ShowCourseName &&
+                              !string.IsNullOrEmpty(_courseName)
+                    ? $"Editing \"{_courseName}\""
+                    : "Editing a course";
                 break;
         }
 
@@ -66,10 +77,10 @@ sealed class ApplicationDiscordRichPresenceService : IApplicationDiscordRichPres
     {
         UpdateDescription();
         _richPresenceService.SetDetails(_gameName);
-        
-        if (_applicationSettings.Settings.Discord.EnableRichPresence == _richPresenceService.IsEnabled) 
+
+        if (_applicationSettings.Settings.Discord.EnableRichPresence == _richPresenceService.IsEnabled)
             return;
-        
+
         if (_applicationSettings.Settings.Discord.EnableRichPresence)
             _richPresenceService.EnableRichPresence();
         else

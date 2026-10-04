@@ -146,6 +146,11 @@ class MainWindowViewModel(
 
         string baseTexPath = basePath.Replace("_arc", "Tex_arc");
 
+        string courseDirName = Path.GetFileName(basePath);
+        string courseName = courseDirName.EndsWith("_arc", StringComparison.InvariantCultureIgnoreCase)
+            ? courseDirName.Replace("_arc", "")
+            : null;
+
         if (!Directory.Exists(baseTexPath))
             baseTexPath = null;
 
@@ -155,6 +160,7 @@ class MainWindowViewModel(
 
         SetMainWindowContent.Invoke(_courseEditorView);
 
+        discordRichPresenceService.SetCourseName(courseName);
         discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
     }
 
@@ -174,6 +180,7 @@ class MainWindowViewModel(
 
         SetMainWindowContent.Invoke(_courseEditorView);
 
+        discordRichPresenceService.SetCourseName(Path.GetFileNameWithoutExtension(path));
         discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
     }
 
@@ -193,6 +200,7 @@ class MainWindowViewModel(
 
         SetMainWindowContent.Invoke(_courseEditorView);
 
+        discordRichPresenceService.SetCourseName(Path.GetFileNameWithoutExtension(path));
         discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.CourseEditor);
     }
 
@@ -206,6 +214,8 @@ class MainWindowViewModel(
 
         _courseEditorView.Dispose();
         _courseEditorView = null;
+
+        discordRichPresenceService.SetCourseName(null);
     }
 
     private void CloseRomExplorer(bool keepLoaded = true)
