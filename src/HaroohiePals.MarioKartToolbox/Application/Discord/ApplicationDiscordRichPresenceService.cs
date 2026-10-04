@@ -76,7 +76,9 @@ sealed class ApplicationDiscordRichPresenceService : IApplicationDiscordRichPres
     private void UpdateRichPresence()
     {
         UpdateDescription();
-        _richPresenceService.SetDetails(_gameName);
+        _richPresenceService.SetDetails(_applicationSettings.Settings.Discord.ShowRomTitle
+            ? _gameName
+            : string.Empty);
 
         if (_applicationSettings.Settings.Discord.EnableRichPresence == _richPresenceService.IsEnabled)
             return;
