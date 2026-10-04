@@ -1,6 +1,7 @@
 ﻿using System;
 using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.MarioKartToolbox.Application.Clipboard;
+using HaroohiePals.MarioKartToolbox.Application.Discord;
 using HaroohiePals.MarioKartToolbox.Application.Settings;
 using HaroohiePals.MarioKartToolbox.Gui.View.CourseEditor;
 using HaroohiePals.MarioKartToolbox.Gui.View.RomExplorer;
@@ -18,7 +19,8 @@ class MainWindowFactory(
     ICourseEditorViewFactory courseEditorSubWindowFactory,
     IMapDataClipboard mapDataClipboard,
     IMkdsMapObjDatabase mkdsMapObjDatabase,
-    IMkdsCourseValidatorFactory mkdsCourseValidatorFactory)
+    IMkdsCourseValidatorFactory mkdsCourseValidatorFactory,
+    IApplicationDiscordRichPresenceService discordRichPresenceService)
     : IMainWindowFactory
 {
     public CourseEditorContentView CreateCourseEditorView(IMkdsCourse course)
@@ -27,7 +29,7 @@ class MainWindowFactory(
             applicationSettings, modalService, courseEditorSubWindowFactory);
 
     public RomExplorerContentView CreateRomExplorerContentView(string fileName)
-        => new RomExplorerContentView(new RomExplorerViewModel(fileName, modalService));
+        => new RomExplorerContentView(new RomExplorerViewModel(fileName, modalService, discordRichPresenceService));
 
     public ModalView CreatePreferencesModal()
         => new PreferencesModalView(applicationSettings);

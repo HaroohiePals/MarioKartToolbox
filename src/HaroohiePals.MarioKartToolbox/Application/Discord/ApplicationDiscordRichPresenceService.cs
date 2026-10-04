@@ -66,12 +66,13 @@ sealed class ApplicationDiscordRichPresenceService : IApplicationDiscordRichPres
     {
         UpdateDescription();
         _richPresenceService.SetDetails(_gameName);
-        if (_applicationSettings.Settings.Discord.EnableRichPresence != _richPresenceService.IsEnabled)
-        {
-            if (_applicationSettings.Settings.Discord.EnableRichPresence)
-                _richPresenceService.EnableRichPresence();
-            else
-                _richPresenceService.DisableRichPresence();
-        }
+        
+        if (_applicationSettings.Settings.Discord.EnableRichPresence == _richPresenceService.IsEnabled) 
+            return;
+        
+        if (_applicationSettings.Settings.Discord.EnableRichPresence)
+            _richPresenceService.EnableRichPresence();
+        else
+            _richPresenceService.DisableRichPresence();
     }
 }

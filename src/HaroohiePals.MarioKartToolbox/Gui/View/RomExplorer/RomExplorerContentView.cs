@@ -93,6 +93,9 @@ class RomExplorerContentView(RomExplorerViewModel viewModel): WindowContentView
         return true;
     }
 
+    public void Unload()
+        => viewModel.Unload();
+
     public void SetFileActivationCallbacks(Action<string, Archive>? onCarcOpen = null, Action<string>? onNkmOpen = null)
     {
         viewModel.OnCarcOpen = onCarcOpen;

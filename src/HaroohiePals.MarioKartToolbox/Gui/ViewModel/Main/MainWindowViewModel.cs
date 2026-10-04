@@ -215,7 +215,10 @@ class MainWindowViewModel(
 
         SetMainWindowContent.Invoke(null);
         if (!keepLoaded)
+        {
+            _romExplorer.Unload();
             _romExplorer = null;
+        }
     }
 
     private void CloseAllWindows()

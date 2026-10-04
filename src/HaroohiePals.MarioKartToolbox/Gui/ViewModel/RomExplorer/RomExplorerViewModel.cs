@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using HaroohiePals.Gui.View.Modal;
 using HaroohiePals.IO.Archive;
+using HaroohiePals.MarioKartToolbox.Application.Discord;
 using HaroohiePals.Nitro.Card;
 using HaroohiePals.NitroKart.Rom;
 using NativeFileDialogs.Net;
@@ -14,7 +15,10 @@ namespace HaroohiePals.MarioKartToolbox.Gui.ViewModel.RomExplorer;
 
 class RomExplorerViewModel
 {
+    private const string DEFAULT_GAME_NAME = "Mario Kart DS";
+
     private readonly IModalService _modalService;
+    private readonly IApplicationDiscordRichPresenceService _discordRichPresenceService;
     private readonly string _fileName;
     private readonly string? _romFsBasePath;
     private readonly RomExplorerRomType _romType;
@@ -28,10 +32,12 @@ class RomExplorerViewModel
     public Action<string, Archive>? OnCarcOpen { get; set; }
     public Archive? RomArchive { get; private set; }
 
-    public RomExplorerViewModel(string fileName, IModalService modalService)
+    public RomExplorerViewModel(string fileName, IModalService modalService,
+        IApplicationDiscordRichPresenceService discordRichPresenceService)
     {
         _fileName = fileName;
         _modalService = modalService;
+        _discordRichPresenceService = discordRichPresenceService;
 
         var fileInfo = new FileInfo(fileName);
         string ext = fileInfo.Extension.ToLower();
@@ -56,7 +62,12 @@ class RomExplorerViewModel
                 _romType = RomExplorerRomType.DiskRom;
                 break;
         }
+
+        _discordRichPresenceService.SetGameName(_project?.Name ?? DEFAULT_GAME_NAME);
     }
+
+    public void Unload()
+        => _discordRichPresenceService.SetGameName(DEFAULT_GAME_NAME);
 
     public string GetTitle()
         => _project?.Name ?? _fileName;
