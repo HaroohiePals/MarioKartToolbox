@@ -216,6 +216,9 @@ class MainWindowViewModel(
         _courseEditorView = null;
 
         discordRichPresenceService.SetCourseName(null);
+        discordRichPresenceService.SetApplicationState(_romExplorer is null
+            ? RichPresenceApplicationState.Idle
+            : RichPresenceApplicationState.RomExplorer);
     }
 
     private void CloseRomExplorer(bool keepLoaded = true)
@@ -228,6 +231,8 @@ class MainWindowViewModel(
         {
             _romExplorer.Unload();
             _romExplorer = null;
+
+            discordRichPresenceService.SetApplicationState(RichPresenceApplicationState.Idle);
         }
     }
 
