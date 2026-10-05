@@ -9,6 +9,7 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
     {
         private System.Numerics.Vector2 _pointA;
         private System.Numerics.Vector2 _pointB;
+        private bool _clickedInside;
 
         public bool Dragging { get; private set; } = false;
         public Vector2i TopLeft { get; private set; }
@@ -17,16 +18,21 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
 
         public bool Draw()
         {
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                _clickedInside = ImGui.IsWindowHovered();
+
             if (!ImGui.IsWindowFocused())
                 return false;
 
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Left))
             {
+                if (!_clickedInside)
+                    return false;
+
+                var windowPos = ImGui.GetWindowPos();
                 if (!Dragging)
-                {
-                    _pointA = ImGui.GetMousePos() - ImGui.GetWindowPos();
-                }
-                _pointB = ImGui.GetMousePos() - ImGui.GetWindowPos();
+                    _pointA = ImGui.GetIO().MouseClickedPos[0] - windowPos;
+                _pointB = ImGui.GetMousePos() - windowPos;
 
                 Dragging = true;
             }
@@ -38,27 +44,20 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
                 TopLeft = new Vector2i((int)Math.Max(Math.Min(_pointA.X, _pointB.X), 0), (int)Math.Max(Math.Min(_pointA.Y, _pointB.Y), 0));
                 BottomRight = new Vector2i((int)Math.Min(Math.Max(_pointA.X, _pointB.X), size.X), (int)Math.Min(Math.Max(_pointA.Y, _pointB.Y), size.Y));
 
-                ImGui.SetCursorPosX(TopLeft.X);
-                ImGui.SetCursorPosY(TopLeft.Y);
-
                 Size = BottomRight - TopLeft;
 
                 if (Size.X >= 1 && Size.Y >= 1)
                 {
                     var color = ImGui.GetStyle().Colors[(int)ImGuiCol.TextSelectedBg];
+                    var windowPos = ImGui.GetWindowPos();
+                    var min = windowPos + new System.Numerics.Vector2(TopLeft.X, TopLeft.Y);
+                    var max = windowPos + new System.Numerics.Vector2(BottomRight.X, BottomRight.Y);
+                    var drawList = ImGui.GetWindowDrawList();
 
-                    color.W = 0.75f;
-                    ImGui.PushStyleColor(ImGuiCol.Border, color);
                     color.W = 0.25f;
-                    ImGui.PushStyleColor(ImGuiCol.FrameBg, color);
-                    ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1);
-                    ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 0);
-                    ImGui.BeginChild(ImGui.GetID("SelectionRect"), new System.Numerics.Vector2(Size.X, Size.Y), ImGuiChildFlags.FrameStyle);
-                    ImGui.EndChild();
-                    ImGui.PopStyleVar();
-                    ImGui.PopStyleVar();
-                    ImGui.PopStyleColor();
-                    ImGui.PopStyleColor();
+                    drawList.AddRectFilled(min, max, ImGui.GetColorU32(color));
+                    color.W = 0.75f;
+                    drawList.AddRect(min, max, ImGui.GetColorU32(color));
                 }
 
                 if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
