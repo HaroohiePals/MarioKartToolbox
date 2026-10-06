@@ -20,14 +20,11 @@ internal class MkdsMapDataValidationRule : IValidationRule<MkdsMapData>
         _ktpjValidationRule = new();
     private readonly MapDataCollectionValidationRule<MkdsMapData, MkdsCannonPoint, MkdsCannonPointValidationRule>
         _ktpcValidationRule = new();
-    private readonly MapDataCollectionValidationRule<MkdsMapData, MkdsCheckPointPath, 
-        ConnectedPathValidationRule<MkdsMapData, MkdsCheckPointPath, MkdsCheckPoint, MkdsCheckPointValidationRule>>
+    private readonly ConnectedPathCollectionValidationRule<MkdsMapData, MkdsCheckPointPath, MkdsCheckPoint, MkdsCheckPointValidationRule>
         _cpatValidationRule = new();
-    private readonly MapDataCollectionValidationRule<MkdsMapData, MkdsItemPath,
-        ConnectedPathValidationRule<MkdsMapData, MkdsItemPath, MkdsItemPoint, MkdsItemPointValidationRule>>
+    private readonly ConnectedPathCollectionValidationRule<MkdsMapData, MkdsItemPath, MkdsItemPoint, MkdsItemPointValidationRule>
         _ipatValidationRule = new();
-    private readonly MapDataCollectionValidationRule<MkdsMapData, MkdsEnemyPath,
-        ConnectedPathValidationRule<MkdsMapData, MkdsEnemyPath, MkdsEnemyPoint, MkdsEnemyPointValidationRule>>
+    private readonly ConnectedPathCollectionValidationRule<MkdsMapData, MkdsEnemyPath, MkdsEnemyPoint, MkdsEnemyPointValidationRule>
         _epatValidationRule = new();
     private readonly MapDataCollectionValidationRule<MkdsMapData, MkdsMapObject, MkdsMapObjectValidationRule>
         _mobjValidationRule;
