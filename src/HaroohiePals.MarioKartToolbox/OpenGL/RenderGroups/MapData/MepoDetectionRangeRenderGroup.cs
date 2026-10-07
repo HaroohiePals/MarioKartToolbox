@@ -21,7 +21,7 @@ sealed class MepoDetectionRangeRenderGroup(
     public Color Color { get; set; } = color;
     public bool ShowAll { get; set; }
 
-    private readonly MeshRenderer _renderer = rendererFactory.CreateSphereRenderer();
+    private readonly MeshRenderer _renderer = rendererFactory.CreateSphereRenderer(false);
 
     public override void Render(ViewportContext context)
     {
@@ -36,7 +36,7 @@ sealed class MepoDetectionRangeRenderGroup(
 
         _renderer.Points = visiblePoints
             .Select(x => new InstancedPoint((Vector3)x.Position, new(), 
-                new(MEPO_DETECTION_RANGE / 10f),
+                new(MEPO_DETECTION_RANGE),
                 Color, false, x, ViewportContext.InvalidPickingId, false, false))
             .ToArray();
         _renderer.Render(context);

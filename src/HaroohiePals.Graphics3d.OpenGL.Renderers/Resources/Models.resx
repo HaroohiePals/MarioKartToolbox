@@ -130,9 +130,6 @@
   <data name="QuadObj" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Models\quad.obj;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="SphereObj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Models\sphere.obj;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="TestTexture" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Models\test.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

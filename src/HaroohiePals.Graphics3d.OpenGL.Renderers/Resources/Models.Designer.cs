@@ -73,13 +73,6 @@ namespace HaroohiePals.Graphics3d.OpenGL.Renderers.Resources {
             }
         }
         
-        internal static byte[] SphereObj {
-            get {
-                object obj = ResourceManager.GetObject("SphereObj", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
         internal static byte[] TestTexture {
             get {
                 object obj = ResourceManager.GetObject("TestTexture", resourceCulture);

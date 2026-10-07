@@ -6,7 +6,7 @@ interface IRendererFactory
 {
     MeshRenderer CreateCircleRenderer();
     MeshRenderer CreateBoxRenderer();
-    MeshRenderer CreateSphereRenderer();
+    MeshRenderer CreateSphereRenderer(bool render2d);
     MeshRenderer CreateBoxAreaRenderer(bool render2d);
     MeshRenderer CreateCylinderAreaRenderer(bool render2d);
     MeshRenderer CreateKartRenderer(bool render2d);
