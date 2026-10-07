@@ -45,7 +45,8 @@ class RenderGroupVisibilityManager
         Areas,
         AreaShapes,
         Cameras,
-        CameraTargets
+        CameraTargets,
+        BattleEnemyPointDetectionRange
     }
 
     private readonly IApplicationSettingsService _applicationSettings;
@@ -55,6 +56,7 @@ class RenderGroupVisibilityManager
     private readonly string _preferencesKey;
     private bool _kclTranslucent = false;
     private bool _areaShapeShowAll = false;
+    private bool _mepoDetectionRangeShowAll = false;
     private bool _mobjEditMode = true;
 
     private bool _updateSettings = true;
@@ -101,6 +103,7 @@ class RenderGroupVisibilityManager
         AddVisibilitySetting(VisibleEntity.EnemyPoints, VisibilityType.Solid);
         if (scene is NitroKartRenderGroupSceneTopDown)
             AddVisibilitySetting(VisibleEntity.EnemyPointsRadius, VisibilityType.Solid);
+        AddVisibilitySetting(VisibleEntity.BattleEnemyPointDetectionRange, VisibilityType.Solid);
         AddVisibilitySetting(VisibleEntity.Areas, VisibilityType.Solid);
         AddVisibilitySetting(VisibleEntity.AreaShapes, VisibilityType.Solid);
         AddVisibilitySetting(VisibleEntity.Cameras, VisibilityType.Solid);
@@ -198,6 +201,11 @@ class RenderGroupVisibilityManager
                 case MepoRadiusRenderGroup:
                 case IpoiEpoiRadiusRenderGroup<MkdsEnemyPath, MkdsEnemyPoint>:
                     entity = VisibleEntity.EnemyPointsRadius;
+                    break;
+
+                case MepoDetectionRangeRenderGroup mepoDetectionRangeRenderGroup:
+                    entity = VisibleEntity.BattleEnemyPointDetectionRange;
+                    mepoDetectionRangeRenderGroup.ShowAll = _mepoDetectionRangeShowAll;
                     break;
 
                 case IpoiEpoiLineRenderGroup<MkdsItemPath, MkdsItemPoint>:
@@ -325,18 +333,22 @@ class RenderGroupVisibilityManager
                     ImGui.PopStyleColor();
             }
 
-            if (item == VisibleEntity.AreaShapes)
+            if (item is VisibleEntity.AreaShapes or VisibleEntity.BattleEnemyPointDetectionRange)
             {
+                ref bool showAll = ref item == VisibleEntity.AreaShapes
+                    ? ref _areaShapeShowAll
+                    : ref _mepoDetectionRangeShowAll;
+
                 // all
                 ImGui.SameLine();
                 ImGui.SetCursorPosX(controlWidth - btnSize * itemCount-- - (10f * scale));
-                bool wasAll = _areaShapeShowAll;
+                bool wasAll = showAll;
                 if (wasAll)
                     ImGui.PushStyleColor(ImGuiCol.Button, selectedColor);
                 ImGui.Button($"{FontAwesome6.ListCheck}##{item}", new(btnSize));
                 if (ImGui.IsItemClicked())
                 {
-                    _areaShapeShowAll = !_areaShapeShowAll;
+                    showAll = !showAll;
                     _updateSettings = true;
                 }
 

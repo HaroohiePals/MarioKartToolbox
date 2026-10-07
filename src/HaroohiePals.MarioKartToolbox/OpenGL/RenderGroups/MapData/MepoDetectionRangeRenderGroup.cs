@@ -1,4 +1,4 @@
-using HaroohiePals.Graphics3d.OpenGL.Renderers;
+﻿using HaroohiePals.Graphics3d.OpenGL.Renderers;
 using HaroohiePals.Gui.Viewport;
 using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.MarioKartToolbox.OpenGL.Renderers;
@@ -10,15 +10,16 @@ using System.Linq;
 
 namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData;
 
-sealed class MepoRangeRenderGroup(
+sealed class MepoDetectionRangeRenderGroup(
     MapDataCollection<MkdsMgEnemyPath> paths,
     Color color,
     IRendererFactory rendererFactory)
     : RenderGroup, IColoredRenderGroup, IDisposable
 {
-    public const float Range = 200f;
+    private const float MEPO_DETECTION_RANGE = 200f;
 
     public Color Color { get; set; } = color;
+    public bool ShowAll { get; set; }
 
     private readonly MeshRenderer _renderer = rendererFactory.CreateSphereRenderer();
 
@@ -26,11 +27,16 @@ sealed class MepoRangeRenderGroup(
     {
         if (!context.TranslucentPass)
             return;
+        
+        var visiblePoints = ShowAll
+            ? paths.SelectMany(path => path.Points)
+            : context.SceneObjectHolder.GetSelection()
+                .OfType<MkdsMgEnemyPoint>()
+                .Where(x => paths.Any(path => path.Points.Contains(x)));
 
-        _renderer.Points = context.SceneObjectHolder.GetSelection()
-            .OfType<MkdsMgEnemyPoint>()
-            .Where(x => paths.Any(path => path.Points.Contains(x)))
-            .Select(x => new InstancedPoint((Vector3)x.Position, new(), new(Range / 10f),
+        _renderer.Points = visiblePoints
+            .Select(x => new InstancedPoint((Vector3)x.Position, new(), 
+                new(MEPO_DETECTION_RANGE / 10f),
                 Color, false, x, ViewportContext.InvalidPickingId, false, false))
             .ToArray();
         _renderer.Render(context);

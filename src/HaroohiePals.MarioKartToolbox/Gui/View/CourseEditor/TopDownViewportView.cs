@@ -56,6 +56,8 @@ internal class TopDownViewportView : CourseViewportView
                 _renderGroupFactory.CreatePointRenderGroup(Context.Course.MapData.MgEnemyPaths, true));
             scene.RenderGroups.Add(
                 _renderGroupFactory.CreateRadiusRenderGroup(Context.Course.MapData.MgEnemyPaths));
+            scene.RenderGroups.Add(
+                _renderGroupFactory.CreateMepoRangeRenderGroup(Context.Course.MapData.MgEnemyPaths));
         }
 
         if (Context.Course.MapData.ItemPaths != null)

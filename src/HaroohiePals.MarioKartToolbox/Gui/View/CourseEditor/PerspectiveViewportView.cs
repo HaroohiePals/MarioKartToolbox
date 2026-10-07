@@ -17,8 +17,6 @@ internal class PerspectiveViewportView : CourseViewportView
     private readonly IApplicationSettingsService _applicationSettings;
     private readonly MapDataRenderGroupFactory _renderGroupFactory;
 
-    private CourseModelRenderGroup _perspectiveNsbmdGroup;
-
     public PerspectiveViewportView(ICourseEditorContext context, IApplicationSettingsService applicationSettings,
         string title = "Perspective") : base(title, context)
     {
@@ -26,9 +24,6 @@ internal class PerspectiveViewportView : CourseViewportView
         _renderGroupFactory = new MapDataRenderGroupFactory(_applicationSettings);
 
         _applicationSettings.ApplicationSettingsChanged += OnApplicationSettingsChanged;
-
-        if (Context.Course.MapData == null)
-            return;
 
         var scene = new NitroKartRenderGroupScenePerspective
         {
@@ -56,6 +51,8 @@ internal class PerspectiveViewportView : CourseViewportView
                 _renderGroupFactory.CreatePointRenderGroup(Context.Course.MapData.MgEnemyPaths, false));
             scene.RenderGroups.Add(
                 _renderGroupFactory.CreateLineRenderGroup(Context.Course.MapData.MgEnemyPaths, false));
+            scene.RenderGroups.Add(
+                _renderGroupFactory.CreateMepoRangeRenderGroup(Context.Course.MapData.MgEnemyPaths));
         }
 
         if (Context.Course.MapData.ItemPaths != null)
@@ -116,9 +113,9 @@ internal class PerspectiveViewportView : CourseViewportView
 
         scene.RenderGroups.Add(new PlaneGridRenderGroup());
 
-        _perspectiveNsbmdGroup = new CourseModelRenderGroup();
-        _perspectiveNsbmdGroup.Load(Context.Course);
-        scene.RenderGroups.Add(_perspectiveNsbmdGroup);
+        var perspectiveNsbmdGroup = new CourseModelRenderGroup();
+        perspectiveNsbmdGroup.Load(Context.Course);
+        scene.RenderGroups.Add(perspectiveNsbmdGroup);
         _scene = scene;
 
         AddOrUpdateKclPrismRenderGroup();
@@ -172,7 +169,7 @@ internal class PerspectiveViewportView : CourseViewportView
     {
         var perspectiveMObjGroup =
             (MkdsMObjRenderGroup)_scene.RenderGroups.FirstOrDefault(x => x is MkdsMObjRenderGroup);
-        perspectiveMObjGroup.EditMode = !perspectiveMObjGroup.EditMode;
+        perspectiveMObjGroup?.EditMode = !perspectiveMObjGroup.EditMode;
     }
 
     public void FrameSelection()
