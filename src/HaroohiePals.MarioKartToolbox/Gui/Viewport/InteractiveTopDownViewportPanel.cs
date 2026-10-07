@@ -98,7 +98,7 @@ class InteractiveTopDownViewportPanel : InteractiveViewportPanel
 
                 float frameHeight = btnSize + y * 2 + btnSize * fieldCount;
                 frameHeight = Math.Min(500 * scale, frameHeight);
-                float frameWidth = 300 * scale;
+                float frameWidth = 360 * scale;
                 if (ImGui.BeginChild(ImGui.GetID("TopTools"),
                         new Vector2(frameWidth, frameHeight), ImGuiChildFlags.FrameStyle))
                 {
