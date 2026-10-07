@@ -4,7 +4,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections;
 
-internal class MkdsAreaValidationRule : MkdsMapDataEntryValidationRule<MkdsArea>
+class MkdsAreaValidationRule : MkdsMapDataEntryValidationRule<MkdsArea>
 {
     public override string Name => "Area";
 

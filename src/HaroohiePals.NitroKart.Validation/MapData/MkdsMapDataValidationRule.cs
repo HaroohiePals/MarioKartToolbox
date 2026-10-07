@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace HaroohiePals.NitroKart.Validation.MapData;
 
-internal class MkdsMapDataValidationRule : IValidationRule<MkdsMapData>
+class MkdsMapDataValidationRule : IValidationRule<MkdsMapData>
 {
     public string Name => "Map Data";
 
@@ -26,8 +26,14 @@ internal class MkdsMapDataValidationRule : IValidationRule<MkdsMapData>
         _ipatValidationRule = new();
     private readonly ConnectedPathCollectionValidationRule<MkdsMapData, MkdsEnemyPath, MkdsEnemyPoint, MkdsEnemyPointValidationRule>
         _epatValidationRule = new();
+    private readonly MapDataCollectionValidationRule<MkdsMapData, MkdsMgEnemyPath, MkdsMgEnemyPathValidationRule>
+        _mepaValidationRule = new();
     private readonly MapDataCollectionValidationRule<MkdsMapData, MkdsMapObject, MkdsMapObjectValidationRule>
         _mobjValidationRule;
+    private readonly MkdsStartPointCollectionValidationRule
+        _ktpsCollectionValidationRule = new();
+    private readonly MapDataCollectionValidationRule<MkdsMapData, MkdsStartPoint, MkdsStartPointValidationRule>
+        _ktpsValidationRule = new();
 
     public MkdsMapDataValidationRule(IMkdsMapObjDatabase mobjDatabase)
     {
@@ -50,10 +56,17 @@ internal class MkdsMapDataValidationRule : IValidationRule<MkdsMapData>
             errors.AddRange(_ipatValidationRule.Validate((obj, obj.ItemPaths)));
         if (obj.EnemyPaths is not null)
             errors.AddRange(_epatValidationRule.Validate((obj, obj.EnemyPaths)));
+        if (obj.MgEnemyPaths is not null)
+            errors.AddRange(_mepaValidationRule.Validate((obj, obj.MgEnemyPaths)));
         if (obj.MapObjects is not null)
             errors.AddRange(_mobjValidationRule.Validate((obj, obj.MapObjects)));
         if (obj.RespawnPoints is not null)
             errors.AddRange(_ktpjValidationRule.Validate((obj, obj.RespawnPoints)));
+        if (obj.StartPoints is not null)
+        {
+            errors.AddRange(_ktpsCollectionValidationRule.Validate(obj));
+            errors.AddRange(_ktpsValidationRule.Validate((obj, obj.StartPoints)));
+        }
 
         return errors;
     }

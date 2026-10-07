@@ -4,7 +4,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections;
 
-internal class MkdsRespawnPointValidationRule : MkdsMapDataEntryValidationRule<MkdsRespawnPoint>
+class MkdsRespawnPointValidationRule : MkdsMapDataEntryValidationRule<MkdsRespawnPoint>
 {
     public override string Name => "Respawn";
 

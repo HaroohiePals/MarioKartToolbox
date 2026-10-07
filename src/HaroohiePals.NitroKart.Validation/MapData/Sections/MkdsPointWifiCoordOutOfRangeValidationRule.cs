@@ -3,7 +3,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections;
 
-internal class MkdsPointWifiCoordOutOfRangeValidationRule : IValidationRule<IPoint>
+class MkdsPointWifiCoordOutOfRangeValidationRule : IValidationRule<IPoint>
 {
     private readonly string _parentRuleName = string.Empty;
     public string Name => _parentRuleName;

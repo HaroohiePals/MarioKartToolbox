@@ -4,7 +4,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections;
 
-internal class MkdsEnemyPointValidationRule : MkdsMapDataEntryValidationRule<MkdsEnemyPoint>
+class MkdsEnemyPointValidationRule : MkdsMapDataEntryValidationRule<MkdsEnemyPoint>
 {
     public override string Name => "Enemy Point";
 

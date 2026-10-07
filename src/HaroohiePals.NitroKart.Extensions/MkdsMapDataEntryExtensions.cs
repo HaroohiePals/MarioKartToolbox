@@ -15,6 +15,7 @@ public static class MkdsMapDataEntryExtensions
         MkdsMapObject mobj => $"{mobj.ObjectId}",
         MkdsStartPoint => "Start Point",
         MkdsRespawnPoint => "Respawn Point",
+        MkdsMgEnemyPath => "Battle Enemy Path",
         _ => "Point"
     };
 

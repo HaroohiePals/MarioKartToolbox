@@ -5,7 +5,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections;
 
-internal class MkdsCameraValidationRule : MkdsMapDataEntryValidationRule<MkdsCamera>
+class MkdsCameraValidationRule : MkdsMapDataEntryValidationRule<MkdsCamera>
 {
     public override string Name => "Camera";
 

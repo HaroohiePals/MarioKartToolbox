@@ -4,7 +4,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections.MobjSettings;
 
-internal class Fireball2SettingsValidationRule : IMkdsMobjSettingsValidationRule<Fireball2Settings>
+class Fireball2SettingsValidationRule : IMkdsMobjSettingsValidationRule<Fireball2Settings>
 {
     public string Name => "Fireball2 Settings";
 

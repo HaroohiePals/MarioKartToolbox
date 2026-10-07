@@ -8,7 +8,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections;
 
-internal class MkdsMapObjectValidationRule : MkdsMapDataEntryValidationRule<MkdsMapObject>
+class MkdsMapObjectValidationRule : MkdsMapDataEntryValidationRule<MkdsMapObject>
 {
     public override string Name => "Map Object";
 

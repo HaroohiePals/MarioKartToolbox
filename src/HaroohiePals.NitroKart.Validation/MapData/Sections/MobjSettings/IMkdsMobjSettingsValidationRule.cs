@@ -4,7 +4,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections.MobjSettings;
 
-internal interface IMkdsMobjSettingsValidationRule<TSettings> : IValidationRule<(MkdsMapObject, TSettings)>
+interface IMkdsMobjSettingsValidationRule<TSettings> : IValidationRule<(MkdsMapObject, TSettings)>
     where TSettings : MkdsMobjSettings
 {
 }

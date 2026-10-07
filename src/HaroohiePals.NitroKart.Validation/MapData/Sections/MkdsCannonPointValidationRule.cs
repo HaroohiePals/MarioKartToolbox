@@ -4,7 +4,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections;
 
-internal class MkdsCannonPointValidationRule : MkdsMapDataEntryValidationRule<MkdsCannonPoint>
+class MkdsCannonPointValidationRule : MkdsMapDataEntryValidationRule<MkdsCannonPoint>
 {
     public override string Name => "CannonPoint";
 

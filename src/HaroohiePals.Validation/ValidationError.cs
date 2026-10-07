@@ -3,22 +3,18 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace HaroohiePals.Validation;
 
-public abstract class ValidationError
+public abstract class ValidationError(
+    IValidationRule rule,
+    ErrorLevel level,
+    string message,
+    object? source,
+    bool isFixable)
 {
-    public IValidationRule Rule { get; }
-    public ErrorLevel Level { get; }
-    public string Message { get; protected set; }
-    public object Source { get; }
-    public bool IsFixable { get; }
-
-    public ValidationError(IValidationRule rule, ErrorLevel level, string message, object source, bool isFixable)
-    {
-        Rule = rule;
-        Level = level;
-        Message = message;
-        Source = source;
-        IsFixable = isFixable;
-    }
+    public IValidationRule Rule { get; } = rule;
+    public ErrorLevel Level { get; } = level;
+    public string Message { get; protected init; } = message;
+    public object? Source { get; } = source;
+    public bool IsFixable { get; } = isFixable;
 
     protected virtual IAction Fix() => throw new UnfixableValidationErrorException();
 

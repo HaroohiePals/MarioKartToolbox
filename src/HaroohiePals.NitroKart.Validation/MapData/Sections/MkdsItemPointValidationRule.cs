@@ -4,7 +4,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections;
 
-internal class MkdsItemPointValidationRule : MkdsMapDataEntryValidationRule<MkdsItemPoint>
+class MkdsItemPointValidationRule : MkdsMapDataEntryValidationRule<MkdsItemPoint>
 {
     public override string Name => "Item Point";
 

@@ -4,7 +4,7 @@ using HaroohiePals.Validation;
 
 namespace HaroohiePals.NitroKart.Validation.MapData.Sections;
 
-internal class MkdsCheckPointValidationRule : MkdsMapDataEntryValidationRule<MkdsCheckPoint>
+class MkdsCheckPointValidationRule : MkdsMapDataEntryValidationRule<MkdsCheckPoint>
 {
     public override string Name => "Checkpoint";
 
