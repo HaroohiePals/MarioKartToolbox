@@ -5,6 +5,7 @@ using HaroohiePals.MarioKartToolbox.OpenGL.Renderers;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using OpenTK.Mathematics;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
@@ -28,18 +29,26 @@ sealed class MepoDetectionRangeRenderGroup(
         if (!context.TranslucentPass)
             return;
         
-        var visiblePoints = ShowAll
-            ? paths.SelectMany(path => path.Points)
-            : context.SceneObjectHolder.GetSelection()
-                .OfType<MkdsMgEnemyPoint>()
-                .Where(x => paths.Any(path => path.Points.Contains(x)));
-
-        _renderer.Points = visiblePoints
+        _renderer.Points = GetVisiblePoints(context)
             .Select(x => new InstancedPoint((Vector3)x.Position, new(), 
                 new(MEPO_DETECTION_RANGE),
                 Color, false, x, ViewportContext.InvalidPickingId, false, false))
             .ToArray();
         _renderer.Render(context);
+    }
+
+    private IEnumerable<MkdsMgEnemyPoint> GetVisiblePoints(ViewportContext context)
+    {
+        if (ShowAll)
+            return paths.SelectMany(path => path.Points);
+
+        var selection = context.SceneObjectHolder.GetSelection().ToList();
+        var points = new HashSet<MkdsMgEnemyPoint>();
+
+        points.UnionWith(selection.OfType<MkdsMgEnemyPath>().SelectMany(path => path.Points));
+        points.UnionWith(selection.OfType<MkdsMgEnemyPoint>());
+
+        return points;
     }
 
     public void Dispose()
