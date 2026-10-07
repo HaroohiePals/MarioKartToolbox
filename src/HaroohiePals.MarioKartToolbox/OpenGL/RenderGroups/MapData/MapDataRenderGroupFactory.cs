@@ -85,6 +85,9 @@ class MapDataRenderGroupFactory
         };
     }
 
+    public RenderGroup CreateMepoRangeRenderGroup(MapDataCollection<MkdsMgEnemyPath> collection)
+        => new MepoRangeRenderGroup(collection, GetMapDataColor<MkdsMgEnemyPoint>(), _rendererFactory);
+
     public RenderGroup CreateCameraTargetsRenderGroup(MapDataCollection<MkdsCamera> collection, bool render2d = false)
         => new CameraTargetsRenderGroup(collection, GetMapDataColor<MkdsCamera>(), render2d, _rendererFactory);
 
@@ -121,6 +124,7 @@ class MapDataRenderGroupFactory
                 IpoiEpoiLineRenderGroup<MkdsEnemyPath, MkdsEnemyPoint> => GetMapDataColor<MkdsEnemyPath>(),
                 MepoPointRenderGroup => GetMapDataColor<MkdsMgEnemyPoint>(),
                 MepoLineRenderGroup => GetMapDataColor<MkdsMgEnemyPath>(),
+                MepoRangeRenderGroup => GetMapDataColor<MkdsMgEnemyPoint>(),
                 IpoiEpoiPointRenderGroup<MkdsItemPath, MkdsItemPoint> => GetMapDataColor<MkdsItemPoint>(),
                 IpoiEpoiLineRenderGroup<MkdsItemPath, MkdsItemPoint> => GetMapDataColor<MkdsItemPath>(),
                 PathPointRenderGroup => GetMapDataColor<MkdsPathPoint>(),

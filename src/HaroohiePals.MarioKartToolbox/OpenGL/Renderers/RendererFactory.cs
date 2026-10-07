@@ -18,6 +18,9 @@ class RendererFactory : IRendererFactory
     public MeshRenderer CreateBoxRenderer()
         => new BoxRenderer(_applicationSettings.Settings.Viewport.IntelRenderWorkaround);
 
+    public MeshRenderer CreateSphereRenderer()
+        => new SphereRenderer();
+
     public MeshRenderer CreateBoxAreaRenderer(bool render2d)
     {
         return new MeshRenderer(Resources.Models.CubeBObj, null,
