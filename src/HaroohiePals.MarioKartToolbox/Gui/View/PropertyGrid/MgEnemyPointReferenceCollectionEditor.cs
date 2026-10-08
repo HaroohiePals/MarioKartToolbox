@@ -2,6 +2,7 @@
 using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.NitroKart.Actions;
 using HaroohiePals.NitroKart.Extensions;
+using HaroohiePals.NitroKart.MapData;
 using HaroohiePals.NitroKart.MapData.Intermediate;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using ImGuiNET;
@@ -11,17 +12,9 @@ using System.Reflection;
 
 namespace HaroohiePals.MarioKartToolbox.Gui.View.PropertyGrid;
 
-class MgEnemyPointReferenceCollectionEditor : IPropertyEditor
+class MgEnemyPointReferenceCollectionEditor(MkdsMapData mapData, MapDataCollection<MkdsMgEnemyPath> collection)
+    : IPropertyEditor
 {
-    protected MkdsMapData MapData;
-    protected MapDataCollection<MkdsMgEnemyPath> Collection;
-
-    public MgEnemyPointReferenceCollectionEditor(MkdsMapData mapData, MapDataCollection<MkdsMgEnemyPath> collection)
-    {
-        MapData = mapData;
-        Collection = collection;
-    }
-
     public bool IsEditorForProperty(PropertyInfo propertyInfo) 
         => propertyInfo.PropertyType == typeof(MapDataReferenceCollection<MkdsMgEnemyPoint>);
 
@@ -47,14 +40,14 @@ class MgEnemyPointReferenceCollectionEditor : IPropertyEditor
             var others = refCollection.Where(x => !x.Equals(item));
 
             //Change reference
-            string text = MapData.GetEntryDisplayName(item.Target);
+            string text = mapData.GetEntryDisplayName(item.Target);
 
             //filteredCollection = Collection.Where(x => !others.Any(y => y.Target.Equals(x)));
 
             bool updateAddOrClear = false;
             MkdsMgEnemyPoint targetValue = null;
 
-            switch (MapDataReferenceEditor.Draw($"{label}##[{i}]", item, text, Collection.Select(x => x.Points), filteredCollection, MapData, out newValue))
+            switch (MapDataReferenceEditor.Draw($"{label}##[{i}]", item, text, collection.Select(x => x.Points), filteredCollection, mapData, out newValue))
             {
                 case MapDataReferenceEditMode.Pick:
                     //todo
@@ -89,12 +82,12 @@ class MgEnemyPointReferenceCollectionEditor : IPropertyEditor
         // Add dropdown
 
         int count = refCollection.Count();
-        int collectionLimit = 8; //Only valid for MEPA
+        int collectionLimit = MkdsMapDataConsts.MAX_MEPA_LINKS_COUNT;
 
         if (count == collectionLimit)
             return result;
 
-        switch (MapDataReferenceEditor.Draw($"{label}##[{i}]", null, "Add...", Collection.Select(x => x.Points), filteredCollection, MapData, out newValue))
+        switch (MapDataReferenceEditor.Draw($"{label}##[{i}]", null, "Add...", collection.Select(x => x.Points), filteredCollection, mapData, out newValue))
         {
             case MapDataReferenceEditMode.UpdateAdd:
                 foreach (var obj in context.Property.SourceObjects)

@@ -3,6 +3,7 @@ using HaroohiePals.Gui.Viewport;
 using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.NitroKart.Actions;
 using HaroohiePals.NitroKart.Course;
+using HaroohiePals.NitroKart.MapData;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using ImGuiNET;
 using OpenTK.Mathematics;
@@ -17,6 +18,9 @@ class MgEnemyPathDrawTool(
     MapDataCollection<MkdsMgEnemyPath> paths)
     : MapDataCollectionDrawTool<MkdsMgEnemyPoint>(course, collection)
 {
+    private static readonly string MaxLinksErrorMessage = 
+        $"Path link limit reached ({MkdsMapDataConsts.MAX_MEPA_LINKS_COUNT})";
+
     private static MapDataReferenceCollection<MkdsMgEnemyPoint> GetEndpointLinks(MkdsMgEnemyPath path, int index)
         => index == 0 && path.Points.Count > 1 ? path.Previous : path.Next;
 
@@ -26,6 +30,9 @@ class MgEnemyPathDrawTool(
         if (links.All(x => x.Target != target))
             actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(links, null, target));
     }
+
+    private static bool CanLink(MapDataReferenceCollection<MkdsMgEnemyPoint> links, MkdsMgEnemyPoint target)
+        => links.Any(x => x.Target == target) || links.Count < MkdsMapDataConsts.MAX_MEPA_LINKS_COUNT;
 
     private bool TrySplit(MkdsMgEnemyPath path, int splitStartIndex, out List<IAction> actions,
         out MkdsMgEnemyPath newPath)
@@ -93,6 +100,12 @@ class MgEnemyPathDrawTool(
                 if (!TrySplit(path, index + 1, out var splitActions, out _))
                     return false;
                 actions.AddRange(splitActions);
+            }
+            else if (!CanLink(GetEndpointLinks(path, index), _entry))
+            {
+                ShowMessage(MaxLinksErrorMessage);
+                actions = [];
+                return false;
             }
 
             // Construct new path
@@ -168,6 +181,13 @@ class MgEnemyPathDrawTool(
                 }
             }
 
+            if ((fromIsEndpoint && !CanLink(fromLinks, pointTo)) || (toIsEndpoint && !CanLink(toLinks, pointFrom)))
+            {
+                ShowMessage(MaxLinksErrorMessage);
+                actions = [];
+                return false;
+            }
+
             AddLink(actions, fromLinks, pointTo);
             AddLink(actions, toLinks, pointFrom);
 
@@ -198,7 +218,7 @@ class MgEnemyPathDrawTool(
 
             _entry = targetPoint;
             actions.AddRange(connectActions);
-            _atomicActionBuilder.Do(new BatchAction(actions));
+            _atomicActionBuilder?.Do(new BatchAction(actions));
 
             return true;
 
