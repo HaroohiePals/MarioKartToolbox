@@ -21,6 +21,15 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
             _paths = paths;
         }
 
+        private static MapDataReferenceCollection<MkdsMgEnemyPoint> GetEndpointLinks(MkdsMgEnemyPath path, int index)
+            => index == 0 && path.Points.Count > 1 ? path.Previous : path.Next;
+
+        private static void AddLink(List<IAction> actions, MapDataReferenceCollection<MkdsMgEnemyPoint> links, MkdsMgEnemyPoint target)
+        {
+            if (!links.Any(x => x.Target == target))
+                actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(links, null, target));
+        }
+
         private bool TrySplit(MkdsMgEnemyPath path, int splitStartIndex, out List<IAction> actions, out MkdsMgEnemyPath newPath)
         {
             actions = new();
@@ -28,8 +37,11 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
 
             try
             {
-                if (splitStartIndex >= path.Points.Count)
+                if (splitStartIndex <= 0 || splitStartIndex >= path.Points.Count)
                     throw new System.IndexOutOfRangeException();
+
+                var lastKeptPoint = path.Points[splitStartIndex - 1];
+                var firstMovedPoint = path.Points[splitStartIndex];
 
                 // Construct new path
                 newPath = new MkdsMgEnemyPath();
@@ -47,12 +59,10 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
                     actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(path.Next, reference, null));
 
                 // Set next to new path
-                if (newPath.Points.Count > 0)
-                    actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(path.Next, null, newPath.Points[0]));
+                actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(path.Next, null, firstMovedPoint));
 
                 // Set new path's previous
-                if (path.Points.Count > 0)
-                    actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(newPath.Previous, null, path.Points[^1]));
+                actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(newPath.Previous, null, lastKeptPoint));
 
                 // Set new path's nexts
                 foreach (var nextPoint in nextPoints)
@@ -67,16 +77,23 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
             }
         }
 
-        private bool TryCreatePath(MkdsMgEnemyPath path, MkdsMgEnemyPoint splitPoint, out List<IAction> actions, out MkdsMgEnemyPath newPath)
+        private bool TryCreatePath(MkdsMgEnemyPoint splitPoint, out List<IAction> actions, out MkdsMgEnemyPath newPath)
         {
             actions = new();
             newPath = null;
 
             try
             {
-                // Split paths
-                if (TrySplit(path, _collection.IndexOf(splitPoint) + 1, out var splitActions, out var splitPath))
+                var path = _paths.First(x => x.Points.Contains(splitPoint));
+                int index = path.Points.IndexOf(splitPoint);
+
+                // Split paths if branching from a middle point, so that it becomes the last point
+                if (index > 0 && index < path.Points.Count - 1)
+                {
+                    if (!TrySplit(path, index + 1, out var splitActions, out _))
+                        return false;
                     actions.AddRange(splitActions);
+                }
 
                 // Construct new path
                 newPath = new MkdsMgEnemyPath();
@@ -84,12 +101,9 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
                 // Insert new path in the collection
                 actions.Add(new InsertMkdsMapDataCollectionItemsAction<MkdsMgEnemyPath>(_course.MapData, newPath, _paths, _paths.Count));
 
-                // Link previous with path
-                if (path.Points.Count > 0)
-                    actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(newPath.Previous, null, path.Points[^1]));
-                actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(path.Next, null, _entry));
-                if (newPath.Points.Count > 0)
-                    actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(path.Next, null, newPath.Points[0]));
+                // Link the split point with the new path's first point (the entry about to be added)
+                AddLink(actions, newPath.Previous, splitPoint);
+                AddLink(actions, GetEndpointLinks(path, index), _entry);
 
                 return true;
             }
@@ -100,32 +114,60 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
             }
         }
 
-        private bool TryConnect(MkdsMgEnemyPath path, MkdsMgEnemyPoint pointFrom, MkdsMgEnemyPoint pointTo, out List<IAction> actions)
+        private bool TryConnect(MkdsMgEnemyPoint pointFrom, MkdsMgEnemyPoint pointTo, out List<IAction> actions)
         {
             actions = new();
 
             try
             {
-                var connectPath = _paths.FirstOrDefault(x => x.Points.Contains(pointTo));
-                var newPath = connectPath;
+                var fromPath = _paths.First(x => x.Points.Contains(pointFrom));
+                var toPath = _paths.First(x => x.Points.Contains(pointTo));
 
-                int index = connectPath.Points.IndexOf(pointTo);
+                int fromIndex = fromPath.Points.IndexOf(pointFrom);
+                int toIndex = toPath.Points.IndexOf(pointTo);
 
-                //todo: Handle same path splits
+                bool fromIsEndpoint = fromIndex == 0 || fromIndex == fromPath.Points.Count - 1;
+                bool toIsEndpoint = toIndex == 0 || toIndex == toPath.Points.Count - 1;
 
-                // Different path, split target path only if the target index > 0
-                if (index > 0 && TrySplit(connectPath, index, out var splitActions, out newPath))
-                    actions.AddRange(splitActions);
+                MapDataReferenceCollection<MkdsMgEnemyPoint> fromLinks;
+                MapDataReferenceCollection<MkdsMgEnemyPoint> toLinks;
 
-                // Link previous
-                if (!newPath.Previous.Any(x => x.Target == pointFrom))
-                    actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(newPath.Previous, null, pointFrom));
-                if (path.Points.Count > 0 && !newPath.Previous.Any(x => x.Target == path.Points[^1]))
-                    actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(newPath.Previous, null, path.Points[^1]));
+                if (fromPath == toPath)
+                {
+                    // Same path, only allow linking its endpoints together (loop)
+                    if (pointFrom == pointTo || !fromIsEndpoint || !toIsEndpoint)
+                        return false;
 
-                // Link next
-                if (newPath.Points.Count > 0 && !path.Next.Any(x => x.Target == newPath.Points[0]))
-                    actions.Add(new SetReferenceCollectionItemAction<MkdsMgEnemyPoint>(path.Next, null, newPath.Points[0]));
+                    fromLinks = GetEndpointLinks(fromPath, fromIndex);
+                    toLinks = GetEndpointLinks(toPath, toIndex);
+                }
+                else
+                {
+                    // Links can only start from endpoints, split middle points so that
+                    // the source becomes a last point and the target becomes a start point
+                    if (fromIsEndpoint)
+                        fromLinks = GetEndpointLinks(fromPath, fromIndex);
+                    else
+                    {
+                        if (!TrySplit(fromPath, fromIndex + 1, out var splitActions, out _))
+                            return false;
+                        actions.AddRange(splitActions);
+                        fromLinks = fromPath.Next;
+                    }
+
+                    if (toIsEndpoint)
+                        toLinks = GetEndpointLinks(toPath, toIndex);
+                    else
+                    {
+                        if (!TrySplit(toPath, toIndex, out var splitActions, out var newPath))
+                            return false;
+                        actions.AddRange(splitActions);
+                        toLinks = newPath.Previous;
+                    }
+                }
+
+                AddLink(actions, fromLinks, pointTo);
+                AddLink(actions, toLinks, pointFrom);
 
                 return true;
             }
@@ -139,7 +181,6 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
         protected override bool MouseDown(ViewportContext context, Vector3d rayStart, Vector3d rayDir)
         {
             bool keyShift = ImGui.GetIO().KeyShift;
-            var path = _paths.FirstOrDefault(x => x.Points == _collection);
             var actions = new List<IAction>();
 
             var lastSelected = context.SceneObjectHolder.GetSelection().LastOrDefault();
@@ -148,7 +189,7 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
             {
                 if (keyShift && context.HoverObject.Object is MkdsMgEnemyPoint targetPoint && lastSelected is MkdsMgEnemyPoint lastSelectedPoint)
                 {
-                    if (!TryConnect(path, lastSelectedPoint, targetPoint, out var connectActions))
+                    if (!TryConnect(lastSelectedPoint, targetPoint, out var connectActions))
                         return false;
 
                     _entry = targetPoint;
@@ -166,7 +207,7 @@ namespace HaroohiePals.MarioKartToolbox.Gui.Viewport
 
             if (keyShift && lastSelected is MkdsMgEnemyPoint p)
             {
-                if (!TryCreatePath(path, p, out var splitActions, out var newPath))
+                if (!TryCreatePath(p, out var splitActions, out var newPath))
                     return false;
 
                 actions.AddRange(splitActions);
