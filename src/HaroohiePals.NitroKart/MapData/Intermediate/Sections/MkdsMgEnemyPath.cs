@@ -2,6 +2,7 @@
 using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.NitroKart.MapData.Binary;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Xml.Serialization;
 
@@ -12,8 +13,10 @@ public sealed class MkdsMgEnemyPath : IMapDataEntry
 {
     public MapDataCollection<MkdsMgEnemyPoint> Points { get; } = new();
 
+    [DisplayName("Endpoint Links")]
     public MapDataReferenceCollection<MkdsMgEnemyPoint> Next { get; set; } = new();
 
+    [DisplayName("Startpoint Links")]
     public MapDataReferenceCollection<MkdsMgEnemyPoint> Previous { get; set; } = new();
 
     public MkdsMgEnemyPath() { }
