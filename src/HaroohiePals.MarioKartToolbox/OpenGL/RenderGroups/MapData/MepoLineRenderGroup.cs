@@ -4,70 +4,63 @@ using HaroohiePals.MarioKart.MapData;
 using HaroohiePals.NitroKart.MapData.Intermediate.Sections;
 using OpenTK.Mathematics;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
-namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData
+namespace HaroohiePals.MarioKartToolbox.OpenGL.RenderGroups.MapData;
+
+public class MepoLineRenderGroup(MapDataCollection<MkdsMgEnemyPath> paths, Color color, bool render2d = false)
+    : RenderGroup, IColoredRenderGroup, IDisposable
 {
-    public class MepoLineRenderGroup : RenderGroup, IColoredRenderGroup, IDisposable
+    private readonly LineRenderer _lineRenderer = new();
+
+    public Color Color { get; set; } = color;
+
+    public override void Render(ViewportContext context)
     {
-        private readonly MapDataCollection<MkdsMgEnemyPath> _paths;
+        if (context.TranslucentPass)
+            return;
 
-        private readonly LineRenderer _lineRenderer;
-        private bool _render2d = false;
+        _lineRenderer.Thickness = 2;
+        _lineRenderer.Loop = false;
+        _lineRenderer.Color = Color;
+        _lineRenderer.Render2d = render2d;
+        _lineRenderer.PickingId = ViewportContext.InvalidPickingId;
 
-        public Color Color { get; set; }
-
-        public MepoLineRenderGroup(MapDataCollection<MkdsMgEnemyPath> paths, Color color, bool render2d = false)
+        foreach (var path in paths)
         {
-            Color = color;
-            _paths = paths;
-            _lineRenderer = new();
-            _render2d = render2d;
-        }
+            if (path.Points.Count == 0)
+                continue;
 
-        public override void Render(ViewportContext context)
-        {
-            if (context.TranslucentPass)
-                return;
+            List<Vector3> points = [];
 
-            _lineRenderer.Thickness = 2;
-            _lineRenderer.Loop = false;
-            _lineRenderer.Color = Color;
-            _lineRenderer.Render2d = _render2d;
-
-            for (int i = 0; i < _paths.Count; i++)
+            var start = (Vector3)path.Points[0].Position;
+            foreach (var prev in path.Previous.Where(prev => prev?.Target != null))
             {
-                var path = _paths[i];
-
-                if (path.Points.Count == 0)
-                    continue;
-
-                var points = new Vector3[path.Points.Count];
-                for (int j = 0; j < path.Points.Count; j++)
-                    points[j] = (Vector3)path.Points[j].Position;
-                _lineRenderer.Points = points;
-                _lineRenderer.PickingId = ViewportContext.InvalidPickingId; //ViewportContext.GetPickingId(PickingGroupId, i);
-                _lineRenderer.Render(context.ViewMatrix, context.ProjectionMatrix, context.TranslucentPass, context.ViewportSize);
-
-                points = new Vector3[2];
-                points[0] = (Vector3)path.Points[^1].Position;
-                _lineRenderer.PickingId = ViewportContext.InvalidPickingId;
-                foreach (var next in path.Next)
-                {
-                    if (next == null || next.Target == null)
-                        continue;
-                    points[1] = (Vector3)next.Target.Position;
-                    _lineRenderer.Points = points;
-                    _lineRenderer.Render(context.ViewMatrix, context.ProjectionMatrix, context.TranslucentPass, context.ViewportSize);
-                }
+                points.Add(start);
+                points.Add((Vector3)prev.Target.Position);
             }
-        }
 
-        public override object GetObject(int index) => _paths[index];
+            points.AddRange(path.Points.Select(point => (Vector3)point.Position));
 
-        public void Dispose()
-        {
-            _lineRenderer.Dispose();
+            var last = points[^1];
+            foreach (var next in path.Next.Where(next => next?.Target != null))
+            {
+                points.Add((Vector3)next.Target.Position);
+                points.Add(last);
+            }
+
+            _lineRenderer.Points = points.ToArray();
+            _lineRenderer.Render(context.ViewMatrix, context.ProjectionMatrix, context.TranslucentPass,
+                context.ViewportSize);
         }
+    }
+
+    public override object GetObject(int index) => paths[index];
+
+    public void Dispose()
+    {
+        _lineRenderer.Dispose();
     }
 }
