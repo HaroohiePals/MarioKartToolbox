@@ -56,6 +56,7 @@ class ViewportCameraToolInfo
                     {
                         case ConnectedPathDrawTool<MkdsEnemyPath, MkdsEnemyPoint>:
                         case ConnectedPathDrawTool<MkdsItemPath, MkdsItemPoint>:
+                        case MgEnemyPathDrawTool:
                         case CheckPointPathDrawTool:
                             info += !ImGui.GetIO().KeyShift ? " | [Shift]: Start or connect a split path"
                                 : " | Creating or connecting split path";
