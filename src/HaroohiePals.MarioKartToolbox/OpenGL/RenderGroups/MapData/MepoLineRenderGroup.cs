@@ -28,12 +28,9 @@ public class MepoLineRenderGroup(MapDataCollection<MkdsMgEnemyPath> paths, Color
         _lineRenderer.Render2d = render2d;
         _lineRenderer.PickingId = ViewportContext.InvalidPickingId;
 
-        foreach (var path in paths)
+        foreach (var path in paths.Where(p => p.Points.Count > 0))
         {
-            if (path.Points.Count == 0)
-                continue;
-
-            List<Vector3> points = [];
+            var points = new List<Vector3>();
 
             var start = (Vector3)path.Points[0].Position;
             foreach (var prev in path.Previous.Where(prev => prev?.Target != null))
@@ -44,7 +41,7 @@ public class MepoLineRenderGroup(MapDataCollection<MkdsMgEnemyPath> paths, Color
 
             points.AddRange(path.Points.Select(point => (Vector3)point.Position));
 
-            var last = points[^1];
+            var last = (Vector3)path.Points[^1].Position;
             foreach (var next in path.Next.Where(next => next?.Target != null))
             {
                 points.Add((Vector3)next.Target.Position);
