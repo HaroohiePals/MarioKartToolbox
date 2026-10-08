@@ -1,4 +1,5 @@
 ﻿using HaroohiePals.Actions;
+using ImGuiNET;
 using OpenTK.Mathematics;
 
 namespace HaroohiePals.Gui.Viewport;
@@ -23,9 +24,24 @@ public class ViewportContext
 
     public PickingResult PickingResult { get; set; }
 
-    private Dictionary<PickingResult, uint> _pickingResultPickingIdMap = new();
-    private Dictionary<uint, PickingResult> _pickingIdPickingResultMap = new();
+    private readonly Dictionary<PickingResult, uint> _pickingResultPickingIdMap = new();
+    private readonly Dictionary<uint, PickingResult> _pickingIdPickingResultMap = new();
     private uint _lastPickingId = InvalidPickingId + 1;
+
+    private string _message;
+    private double _messageExpiry;
+
+    public void ShowMessage(string message, double seconds = 2.5)
+    {
+        _message = message;
+        _messageExpiry = ImGui.GetTime() + seconds;
+    }
+
+    public bool TryGetMessage(out string message)
+    {
+        message = !string.IsNullOrEmpty(_message) && ImGui.GetTime() < _messageExpiry ? _message : null;
+        return message != null;
+    }
 
     public bool IsSelected(object obj, int subIndex = -1)
         => SceneObjectHolder.IsSubIndexSelected(obj, subIndex);

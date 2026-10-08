@@ -79,6 +79,8 @@ abstract class InteractiveViewportPanel : ViewportPanel
             HandlePickingResult();
         _sideToolbar.Draw(Context, _gizmo);
         _helpInfo.Draw(Context, _gizmo, _renderGroupScene is RenderGroupSceneTopDown);
+        if (ImGui.IsWindowHovered() && Context.TryGetMessage(out string message))
+            ImGui.SetTooltip(message);
         RenderTopToolbar();
     }
 
